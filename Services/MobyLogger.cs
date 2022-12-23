@@ -2,12 +2,13 @@
 
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
 public interface IMobyLogger
 {
+    public void SetGuild(SocketGuild guild);
+
     public void SetMinimalLogLevel(LogLevel logLevel);
 
     public bool IsEnabled(LogLevel logLevel);
@@ -31,18 +32,15 @@ public interface IMobyLogger
 
 public sealed class MobyLogger : IMobyLogger
 {
-    private readonly DiscordSocketClient _client;
-    private readonly IConfiguration _config;
-    private readonly SocketTextChannel _channel;
+    private SocketTextChannel? _channel;
     private LogLevel _minimumLogLevel;
 
-    public MobyLogger(DiscordSocketClient client, IConfiguration config)
+    public MobyLogger()
     {
-        _client = client;
-        _config = config;
-        _channel = _client.GetGuild(ulong.Parse(_config["serverid"])).GetTextChannel(Moby.LogsChannelId);
         _minimumLogLevel = LogLevel.Trace;
     }
+
+    public void SetGuild(SocketGuild guild) => _channel = guild.GetTextChannel(Moby.LogsChannelId);
 
     public void SetMinimalLogLevel(LogLevel logLevel) => _minimumLogLevel = logLevel;
 
@@ -52,9 +50,12 @@ public sealed class MobyLogger : IMobyLogger
     {
         if (!IsEnabled(logLevel)) return;
 
-        string logMessage = $"{Moby.LogLevels[logLevel].Item2} **{logLevel}:** {message}";
+        string logMessage = $"{Moby.LogLevels[logLevel].Item2} **{logLevel}**: {message}";
 
-        if (exception is null) await _channel.SendMessageAsync(logMessage);
+        if (exception is null)
+        {
+            if (_channel is not null) await _channel.SendMessageAsync(logMessage, embed: MobyEmbeds.GetLog(logLevel, null));
+        }
         else
         {
             var sb = new StringBuilder();
@@ -114,13 +115,23 @@ public sealed class MobyLogger : IMobyLogger
                 sb.AppendLine(exception.StackTrace);
             }
 
-            await _channel.SendFileAsync(new FileAttachment(sb.ToString().ToStream(), "exception-file.txt"),
-                logMessage, embed: MobyEmbeds.GetLog(logLevel, exception));
+            if (_channel is not null)
+            {
+                using (var stream = sb.ToString().ToStream())
+                {
+                    await _channel.SendFileAsync(
+                        new FileAttachment(stream, "exception-file.txt"),
+                        logMessage, embed: MobyEmbeds.GetLog(logLevel, exception));
+                }
+            }
         }
     }
 
     public async Task LogImportantAsync(string message)
-        => await _channel.SendMessageAsync($"{new Emoji("❗")} **Important:** {message}");
+    {
+        if (_channel is not null)
+            await _channel.SendMessageAsync($"{new Emoji("❗")} **Important**: {message}", embed: MobyEmbeds.GetLog(LogLevel.Trace, null));
+    }
 
     public async Task LogTraceAsync(string message)
         => await LogAsync(LogLevel.Trace, null, message);

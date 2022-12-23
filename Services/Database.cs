@@ -20,17 +20,17 @@ public interface IDatabase
 
     public Task SetRepeatAsync(ulong guildId, bool repeat);
 
-    public IAsyncEnumerable<string> GetPlaylistTracksAsync(DatabasePlaylist databasePlaylist);
+    public IAsyncEnumerable<string> GetPlaylistTracksAsync(int trackId);
 
-    public ValueTask<DatabasePlaylist> GetPlaylistInfoAsync(ulong guildId, string name);
+    public ValueTask<int> GetPlaylistTrackIdAsync(ulong guildId, string name);
 
-    public IAsyncEnumerable<DatabasePlaylist> GetAllPlaylistsInfoAsync(ulong guildId);
+    public IAsyncEnumerable<int> GetAllPlaylistsTrackIdsAsync(ulong guildId);
 
-    public Task AddPlaylistAsync(ulong guildId, string name, IEnumerable<string> trackUrls);
+    public Task AddPlaylistAsync(ulong guildId, string name);
 
     public ValueTask<bool> TryAddTrackToPlaylistAsync(ulong guildId, string name, string trackUrl);
 
-    public ValueTask<bool> TryRemoveTrackFromPlaylistAsync(DatabasePlaylist databasePlaylist, int playlistPosition);
+    public ValueTask<bool> TryRemoveTrackFromPlaylistAsync(int trackId, int playlistPosition);
 
     public ValueTask<bool> TryRemovePlaylistAsync(ulong guildId, string name);
 
@@ -60,19 +60,19 @@ public sealed class Database : IDatabase
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(GetPrefixAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(GetPrefixAsync)}** for Guild Id: {guildId}");
 
         try
         {
             var prefix = await new MySqlCommand($"SELECT Guild_Prefix FROM guilds WHERE Guild_Id = {guildId}", _connection).ExecuteScalarAsync();
 
-            await _logger.LogDebugAsync($"Returned Prefix: {prefix} for Guild: {guildId}");
+            await _logger.LogDebugAsync($"Returned Prefix: {prefix} for Guild Id: {guildId}");
 
             return prefix is null or "" ? null : Prefix.Create(prefix.ToString()!);
         }
         catch (Exception ex)
         {
-            await _logger.LogCriticalAsync(ex, $"Failed to get Prefix for Guild: {guildId}");
+            await _logger.LogCriticalAsync(ex, $"Failed to get Prefix for Guild Id: {guildId}");
 
             return null;
         }
@@ -82,17 +82,17 @@ public sealed class Database : IDatabase
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(SetPrefixAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(SetPrefixAsync)}** for Guild Id: {guildId} and Prefix: {prefix.Value}");
 
         try
         {
             await new MySqlCommand($"UPDATE guilds SET Guild_Prefix = '{prefix}' WHERE Guild_Id = {guildId}", _connection).ExecuteNonQueryAsync();
 
-            await _logger.LogDebugAsync($"Updated Prefix for Guild: {guildId} to {prefix}");
+            await _logger.LogDebugAsync($"Updated Prefix for Guild Id: {guildId} to {prefix}");
         }
         catch (Exception ex)
         {
-            await _logger.LogCriticalAsync(ex, $"Failed to set Prefix for Guild: {guildId} to {prefix}");
+            await _logger.LogCriticalAsync(ex, $"Failed to set Prefix for Guild Id: {guildId} to {prefix}");
         }
     }
 
@@ -100,17 +100,17 @@ public sealed class Database : IDatabase
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(AddGuildAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(AddGuildAsync)}** for Guild Id: {guildId}");
 
         try
         {
             await new MySqlCommand($"INSERT INTO guilds(Guild_Id, Guild_Prefix, Guild_Repeat) VALUES('{guildId}', '', '0')", _connection).ExecuteNonQueryAsync();
 
-            await _logger.LogDebugAsync($"Added Guild: {guildId} to database");
+            await _logger.LogDebugAsync($"Added Guild with Guild Id: {guildId} to database");
         }
         catch (Exception ex)
         {
-            await _logger.LogCriticalAsync(ex, $"Failed to add Guild: {guildId} to database");
+            await _logger.LogCriticalAsync(ex, $"Failed to add Guild with Guild Id: {guildId} to database");
         }
     }
 
@@ -118,7 +118,7 @@ public sealed class Database : IDatabase
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(RemoveGuildAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(RemoveGuildAsync)}** for Guild Id: {guildId}");
 
         try
         {
@@ -129,11 +129,11 @@ public sealed class Database : IDatabase
             await new MySqlCommand($"DELETE FROM playlists WHERE Guild_Id = {id}", _connection).ExecuteNonQueryAsync();
             await new MySqlCommand($"DELETE FROM tracks WHERE Track_Id = {id}", _connection).ExecuteNonQueryAsync();
 
-            await _logger.LogDebugAsync($"Removed Guild: {guildId} from all database tables");
+            await _logger.LogDebugAsync($"Removed Guild with Guild Id: {guildId} from all database tables");
         }
         catch (Exception ex)
         {
-            await _logger.LogCriticalAsync(ex, $"Failed to remove Guild: {guildId} from all database tables");
+            await _logger.LogCriticalAsync(ex, $"Failed to remove Guild with Guild Id: {guildId} from all database tables");
         }
     }
 
@@ -141,19 +141,19 @@ public sealed class Database : IDatabase
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(GetRepeatAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(GetRepeatAsync)}** for Guild Id: {guildId}");
 
         try
         {
-            var repeat = await new MySqlCommand($"SELECT Guild_Repeat FROM guilds WHERE Guild_Id = {guildId}", _connection).ExecuteScalarAsync());
+            var repeat = await new MySqlCommand($"SELECT Guild_Repeat FROM guilds WHERE Guild_Id = {guildId}", _connection).ExecuteScalarAsync();
 
-            await _logger.LogDebugAsync($"Returned Repeat: {repeat} for Guild: {guildId}");
+            await _logger.LogDebugAsync($"Returned Repeat: {repeat} for Guild Id: {guildId}");
 
             return Convert.ToBoolean(repeat);
         }
         catch (Exception ex)
         {
-            await _logger.LogCriticalAsync(ex, $"Failed to get Repeat for Guild: {guildId}");
+            await _logger.LogCriticalAsync(ex, $"Failed to get Repeat for Guild Id: {guildId}");
 
             return false;
         }
@@ -163,17 +163,17 @@ public sealed class Database : IDatabase
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(SetRepeatAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(SetRepeatAsync)}** for Guild Id: {guildId} and Repeat: {repeat}");
 
         try
         {
             await new MySqlCommand($"UPDATE guilds SET Guild_Repeat = {repeat} WHERE Guild_Id = {guildId}", _connection).ExecuteNonQueryAsync();
 
-            await _logger.LogDebugAsync($"Updated Repeat for Guild: {guildId} to {repeat}");
+            await _logger.LogDebugAsync($"Updated Repeat for Guild Id: {guildId} to {repeat}");
         }
         catch (Exception ex)
         {
-            await _logger.LogCriticalAsync(ex, $"Failed to set Repeat for Guild: {guildId} to {repeat}");
+            await _logger.LogCriticalAsync(ex, $"Failed to set Repeat for Guild Id: {guildId} to {repeat}");
         }
     }
 
@@ -181,7 +181,7 @@ public sealed class Database : IDatabase
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(GetPlaylistTracksAsync)} for Track Id: {trackId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(GetPlaylistTracksAsync)}** for Track Id: {trackId}");
 
         MySqlDataReader reader;
         try
@@ -206,97 +206,246 @@ public sealed class Database : IDatabase
         await _logger.LogDebugAsync($"Returned Tracks for Track Id: {trackId}");
     }
 
-    public async ValueTask<DatabasePlaylist> GetPlaylistInfoAsync(ulong guildId, string name)
+    /// <returns>-1 if the playlist does not exist, else the track number</returns>
+    public async ValueTask<int> GetPlaylistTrackIdAsync(ulong guildId, string name)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(GetPlaylistInfoAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(GetPlaylistTrackIdAsync)}** for Guild Id: {guildId} and Name: {name}");
 
         try
         {
-            
+            var trackId = await new MySqlCommand($"SELECT ID FROM playlists WHERE Guild_Id = {guildId} AND Name = '{name}'", _connection).ExecuteScalarAsync();
+
+            if (trackId is null)
+            {
+                await _logger.LogDebugAsync($"Playlist Track Id for Guild Id: {guildId} and Name: {name} does not exist");
+
+                return -1;
+            }
+
+            await _logger.LogDebugAsync($"Returned Playlist Track Id for Guild Id: {guildId} and Name: {name}");
+
+            return Convert.ToInt32(trackId);
         }
         catch (Exception ex)
         {
-            
+            await _logger.LogCriticalAsync(ex, $"Failed to get Playlist Track Id for Guild Id: {guildId} and Name: {name}");
+
+            return -1;
         }
     }
 
-    public async IAsyncEnumerable<DatabasePlaylist> GetAllPlaylistsInfoAsync(ulong guildId)
+    public async IAsyncEnumerable<int> GetAllPlaylistsTrackIdsAsync(ulong guildId)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(GetAllPlaylistsInfoAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(GetAllPlaylistsTrackIdsAsync)}** for Guild Id: {guildId}");
 
+        MySqlDataReader reader;
+        try
+        {
+            reader = await new MySqlCommand($"SELECT ID FROM tracks WHERE Guild_Id = {guildId}", _connection).ExecuteReaderAsync();
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to get Playlist Track Ids for Guild Id: {guildId}");
 
+            yield break;
+        }
+
+        using (reader)
+        {
+            while (await reader.ReadAsync())
+            {
+                yield return reader.GetInt32(0);
+            }
+        }
+
+        await _logger.LogDebugAsync($"Returned Playlist Track Ids for Guild Id: {guildId}");
     }
 
-    public async Task AddPlaylistAsync(ulong guildId, string name, IEnumerable<string> trackUrls)
+    public async Task AddPlaylistAsync(ulong guildId, string name)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(AddPlaylistAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(AddPlaylistAsync)}** for Guild Id: {guildId} and Name: {name}");
 
+        try
+        {
+            await new MySqlCommand($"INSERT INTO playlists(Name, Guild_Id) VALUES('{name}', '{guildId}')", _connection).ExecuteNonQueryAsync();
 
+            await _logger.LogDebugAsync($"Added Playlist for Guild Id: {guildId} with Name {name}");
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to add Playlist for Guild Id: {guildId} with Name: {name}");
+        }
     }
 
     public async ValueTask<bool> TryAddTrackToPlaylistAsync(ulong guildId, string name, string trackUrl)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(TryAddTrackToPlaylistAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(TryAddTrackToPlaylistAsync)}** for Guild Id: {guildId} and Name: {name} and Track Url {trackUrl}");
 
+        try
+        {
+            var trackId = await GetPlaylistTrackIdAsync(guildId, name);
 
+            if (trackId == -1) throw new Exception($"Couldn't get Playlist");
+
+            var playlistPosition = Convert.ToInt32(await new MySqlCommand($"SELECT MAX(Playlist_Position) FROM tracks WHERE Track_Id = {trackId}", _connection).ExecuteScalarAsync() ?? -1);
+
+            if (playlistPosition == -1) throw new Exception($"Couldn't get Playlist Position for Track Id: {trackId}");
+
+            await new MySqlCommand($"INSERT INTO tracks(Track_Id, Url, Playlist_Position) VALUES({trackId}, '{trackUrl}', {playlistPosition + 1})", _connection).ExecuteNonQueryAsync();
+
+            await _logger.LogDebugAsync($"Added Track to Playlist for Guild Id: {guildId} with Name {name} and Track Url: {trackUrl}");
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to add Track to Playlist for Guild Id: {guildId} with Name {name} and Track Url: {trackUrl}");
+
+            return false;
+        }
     }
 
-    public async ValueTask<bool> TryRemoveTrackFromPlaylistAsync(DatabasePlaylist databasePlaylist, int playlistPosition)
+    public async ValueTask<bool> TryRemoveTrackFromPlaylistAsync(int trackId, int playlistPosition)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(TryRemoveTrackFromPlaylistAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(TryRemoveTrackFromPlaylistAsync)}** for Guild Id: {trackId} and Playlist Position: {playlistPosition}");
 
+        try
+        {
+            var succeeded = await new MySqlCommand($"DELETE FROM tracks WHERE Track_Id = {trackId} AND Playlist_Position = {playlistPosition}", _connection).ExecuteNonQueryAsync();
 
+            if (succeeded != 1) throw new Exception($"Couldn't remove Track with Track Id: {trackId} and Playlist Position: {playlistPosition}");
+
+            using (var reader = await new MySqlCommand($"SELECT Playlist_Position FROM tracks WHERE Track_Id = {trackId} AND Playlist_Position > {playlistPosition}", _connection).ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    await new MySqlCommand($"UPDATE tracks SET Playlist_Position = {reader.GetInt32(3) - 1} WHERE Track_Id = {trackId} AND Playlist_Position = {reader.GetInt32(3)}", _connection).ExecuteNonQueryAsync();
+                }
+            }
+
+            await _logger.LogDebugAsync($"Removed Track from Playlist for Track Id: {trackId} and Playlist Position: {playlistPosition}");
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to remove Track from Playlist for Track Id: {trackId} and Playlist Position: {playlistPosition}");
+
+            return false;
+        }
     }
 
     public async ValueTask<bool> TryRemovePlaylistAsync(ulong guildId, string name)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(TryRemovePlaylistAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(TryRemovePlaylistAsync)}** for Guild Id: {guildId} and Name: {name}");
 
+        try
+        {
+            var trackId = await GetPlaylistTrackIdAsync(guildId, name);
 
+            if (trackId == -1) throw new Exception($"Couldn't get Playlist");
+
+            var succeeded = await new MySqlCommand($"DELETE FROM playlists WHERE ID = {trackId}", _connection).ExecuteNonQueryAsync();
+
+            if (succeeded != 1) throw new Exception($"Couldn't remove Playlist with Track Id: {trackId}");
+
+            succeeded = await new MySqlCommand($"DELETE FROM tracks WHERE Track_Id = {trackId}", _connection).ExecuteNonQueryAsync();
+
+            if (succeeded == 0) throw new Exception($"Couldn't remove Playlist Tracks with Track Id: {trackId}");
+
+            await _logger.LogDebugAsync($"Removed Playlist for Guild Id: {guildId} with Name {name}");
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to remove Playlist for Guild Id: {guildId} with Name: {name}");
+
+            return false;
+        }
     }
 
     public async Task RemoveAllPlaylistsAsync(ulong guildId)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(RemoveAllPlaylistsAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(RemoveAllPlaylistsAsync)}** for Guild Id: {guildId}");
 
+        try
+        {
+            using (var reader = await new MySqlCommand($"SELECT ID FROM playlists WHERE Guild_Id = {guildId}", _connection).ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    await new MySqlCommand($"DELETE FROM tracks WHERE Track_Id = {reader.GetInt32(0)}", _connection).ExecuteNonQueryAsync();
+                }
+            }
 
+            await new MySqlCommand($"DELETE FROM playlists WHERE Guild_Id = {guildId}", _connection).ExecuteNonQueryAsync();
+
+            await _logger.LogDebugAsync($"Removed Playlists for Guild Id: {guildId}");
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to remove Playlists for Guild Id: {guildId}");
+        }
     }
 
     public async ValueTask<DatabaseGuildInfo> GetGuildInfoAsync(ulong guildId)
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(GetGuildInfoAsync)} for Guild: {guildId}");
+        await _logger.LogDebugAsync($"Executes **{nameof(GetGuildInfoAsync)}** for Guild Id: {guildId}");
 
+        using (var reader = await new MySqlCommand($"SELECT * FROM guilds WHERE Guild_Id = {guildId}", _connection).ExecuteReaderAsync())
+        {
+            if (await reader.ReadAsync())
+            {
+                await _logger.LogDebugAsync($"Returned Guild Info for Guild Id: {guildId}");
 
+                return new DatabaseGuildInfo(reader.GetInt32(0), guildId, Prefix.Create(reader.GetString(2)), reader.GetBoolean(3));
+            }
+            else
+            {
+                await _logger.LogDebugAsync($"Couldn't find Guild Info for Guild Id: {guildId}");
+
+                return DatabaseGuildInfo.Empty();
+            }
+        }
     }
 
     public async IAsyncEnumerable<ulong> GetAllGuildsAsync()
     {
         await ConnectAsync();
 
-        await _logger.LogDebugAsync($"Executes {nameof(GetAllGuildsAsync)}");
+        await _logger.LogDebugAsync($"Executes **{nameof(GetAllGuildsAsync)}**");
 
+        using (var reader = await new MySqlCommand($"SELECT Guild_Id FROM guilds", _connection).ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                yield return (ulong)reader.GetInt64(0);
+            }
 
+            await _logger.LogDebugAsync($"Returned all Guilds from database");
+        }
     }
 
     public async ValueTask<TimeSpan> PingAsync()
     {
-        await _logger.LogDebugAsync($"Executes {nameof(PingAsync)}");
+        await _logger.LogDebugAsync($"Executes **{nameof(PingAsync)}**");
 
         var sw = Stopwatch.StartNew();
 

@@ -37,15 +37,24 @@ public sealed class CommandHandler : DiscordClientService
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        _client.Ready += async () => await _mobyLogger.LogImportantAsync("Ready Setup is now executing");
-        _client.Ready += SetStatusAsync;
-        _client.Ready += ConnectToLavalinkAsync;
+        _client.Ready += OnClientReadyAsync;
 
         await Client.WaitForReadyAsync(cancellationToken);
         await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 
         await _mobyLogger.LogImportantAsync("Ready Setup finished");
         await _mobyLogger.LogImportantAsync("Now Up and Running");
+    }
+
+    private async Task OnClientReadyAsync()
+    {
+        _mobyLogger.SetGuild(_client.GetGuild(ulong.Parse(_config["serverid"])));
+
+        await _mobyLogger.LogImportantAsync("Ready Setup is now executing");
+
+        await SetStatusAsync();
+
+        await ConnectToLavaNodeAsync();
     }
 
     private async Task SetStatusAsync()
@@ -56,7 +65,7 @@ public sealed class CommandHandler : DiscordClientService
         await _client.SetGameAsync("whale noises", null, ActivityType.Listening);
     }
 
-    private async Task ConnectToLavalinkAsync()
+    private async Task ConnectToLavaNodeAsync()
     {
         if (!_lavaNode.IsConnected)
         {
