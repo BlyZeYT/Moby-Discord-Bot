@@ -3,7 +3,6 @@
 using Discord;
 using Discord.Addons.Hosting;
 using Discord.Addons.Hosting.Util;
-using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -12,18 +11,19 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Victoria.Node;
+using Discord.Interactions;
 
 public sealed class CommandHandler : DiscordClientService
 {
     private readonly IServiceProvider _provider;
     private readonly DiscordSocketClient _client;
-    private readonly CommandService _service;
+    private readonly InteractionService _service;
     private readonly IConfiguration _config;
     private readonly ILogger _logger;
     private readonly IMobyLogger _mobyLogger;
     private readonly LavaNode _lavaNode;
 
-    public CommandHandler(IServiceProvider provider, DiscordSocketClient client, CommandService service,
+    public CommandHandler(IServiceProvider provider, DiscordSocketClient client, InteractionService service,
         IConfiguration config, ILogger<DiscordClientService> logger, IMobyLogger mobyLogger, LavaNode lavaNode) : base(client, logger)
     {
         _provider = provider;

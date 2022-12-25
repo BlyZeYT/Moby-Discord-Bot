@@ -2,7 +2,7 @@
 
 using Discord;
 using Discord.Addons.Hosting;
-using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using global::Moby.Services;
 using Microsoft.Extensions.Configuration;
@@ -43,9 +43,8 @@ sealed class Startup
 
                 config.Token = context.Configuration["token"];
             })
-            .UseCommandService((_, config) => config = new CommandServiceConfig
+            .UseInteractionService((_, config) => config = new InteractionServiceConfig()
             {
-                CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async,
                 LogLevel = LogSeverity.Error
             })
