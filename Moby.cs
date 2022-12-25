@@ -30,4 +30,13 @@ public static class Moby
             { LogLevel.Critical, new Tuple<Color, Emoji>(new Color(171, 12, 76), new Emoji("☢️")) }
         };
     }
+
+    public static bool IsDebug()
+    {
+#if DEBUG
+        return true;
+#else
+        return false;
+#endif
+    }
 }

@@ -5,10 +5,5 @@ using global::Moby.Services;
 
 public sealed class MusicModule : MobyModuleBase
 {
-    private readonly IMobyLogger _logger;
-
-    public MusicModule(IMobyLogger logger) : base(logger)
-    {
-        _logger = logger;
-    }
+    public MusicModule(ConsoleLogger logger) : base(logger) { }
 }

@@ -23,7 +23,7 @@ public interface IMobyLogger
 
     public Task LogInformationAsync(string message);
 
-    public Task LogWarningAsync(Exception? exception, string message);
+    public Task LogWarningAsync(string message, Exception? exception = null);
 
     public Task LogErrorAsync(Exception? exception, string message);
 
@@ -142,7 +142,7 @@ public sealed class MobyLogger : IMobyLogger
     public async Task LogInformationAsync(string message)
         => await LogAsync(LogLevel.Information, null, message);
 
-    public async Task LogWarningAsync(Exception? exception, string message)
+    public async Task LogWarningAsync(string message, Exception? exception = null)
         => await LogAsync(LogLevel.Warning, exception, message);
 
     public async Task LogErrorAsync(Exception? exception, string message)

@@ -1,5 +1,7 @@
 ﻿namespace Moby;
 
+using Discord;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 public static class Extensions

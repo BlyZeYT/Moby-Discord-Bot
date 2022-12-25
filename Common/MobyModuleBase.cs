@@ -4,26 +4,28 @@ using Discord.Interactions;
 using global::Moby.Services;
 using System.Threading.Tasks;
 
-public abstract class MobyModuleBase : InteractionModuleBase
+public abstract class MobyModuleBase : InteractionModuleBase<SocketInteractionContext>
 {
-    private readonly IMobyLogger _logger;
+    private readonly ConsoleLogger _console;
 
-    public MobyModuleBase(IMobyLogger logger)
+    public MobyModuleBase(ConsoleLogger console)
     {
-        _logger = logger;
+        _console = console;
     }
 
     public override async Task BeforeExecuteAsync(ICommandInfo command)
     {
+        _console.LogDebug($"Now executing: {command.Name} - {command.Module.Name}");
+
         await base.BeforeExecuteAsync(command);
 
-        await _logger.LogInformationAsync("Before command execution");
+        using IDisposable typing = Context.Channel.EnterTypingState();
     }
 
     public override async Task AfterExecuteAsync(ICommandInfo command)
     {
         await base.AfterExecuteAsync(command);
 
-        await _logger.LogInformationAsync("After command execution");
+        _console.LogDebug($"Executing completed: {command.Name} - {command.Module.Name}");
     }
 }
