@@ -40,8 +40,9 @@ sealed class Program
                 LogLevel = LogSeverity.Debug
             }))
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-            .AddTransient<ConsoleLogger>()
+            .AddSingleton<ConsoleLogger>()
             .AddSingleton<InteractionHandler>()
+            .AddSingleton<MusicHandler>()
             .AddSingleton<IDatabase, Database>()
             .AddSingleton<IMobyLogger, MobyLogger>()
             .AddLavaNode(x =>
@@ -68,6 +69,7 @@ sealed class Program
         _lavaNode = provider.GetRequiredService<LavaNode>();
 
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
+        await provider.GetRequiredService<MusicHandler>().InitializeAsync();
 
         _client.Log += _ => provider.GetRequiredService<ConsoleLogger>().Log(_);
         _service.Log += _ => provider.GetRequiredService<ConsoleLogger>().Log(_);
