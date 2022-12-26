@@ -17,9 +17,10 @@ public abstract class MobyModuleBase : InteractionModuleBase<SocketInteractionCo
     {
         _console.LogDebug($"Now executing: {command.Name} - {command.Module.Name}");
 
-        await base.BeforeExecuteAsync(command);
-
-        using IDisposable typing = Context.Channel.EnterTypingState();
+        using (IDisposable typing = Context.Channel.EnterTypingState())
+        {
+            await base.BeforeExecuteAsync(command);
+        }
     }
 
     public override async Task AfterExecuteAsync(ICommandInfo command)

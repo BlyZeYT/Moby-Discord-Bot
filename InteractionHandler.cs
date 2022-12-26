@@ -4,58 +4,73 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Discord;
 using System.Reflection;
+using global::Moby.Services;
 
 public sealed class InteractionHandler
 {
     private readonly DiscordSocketClient _client;
-    private readonly InteractionService _commands;
-    private readonly IServiceProvider _services;
+    private readonly InteractionService _service;
+    private readonly IServiceProvider _provider;
+    private readonly ConsoleLogger _console;
+    private readonly IMobyLogger _logger;
 
-    public InteractionHandler(DiscordSocketClient client, InteractionService commands, IServiceProvider services)
+    public InteractionHandler(DiscordSocketClient client, InteractionService service, IServiceProvider provider, ConsoleLogger console, IMobyLogger logger)
     {
         _client = client;
-        _commands = commands;
-        _services = services;
+        _service = service;
+        _provider = provider;
+        _console = console;
+        _logger = logger;
     }
 
     public async Task InitializeAsync()
     {
-        await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+        await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 
         _client.InteractionCreated += HandleInteraction;
 
-        _commands.SlashCommandExecuted += SlashCommandExecuted;
-        _commands.ContextCommandExecuted += ContextCommandExecuted;
-        _commands.ComponentCommandExecuted += ComponentCommandExecuted;
+        _service.SlashCommandExecuted += SlashCommandExecuted;
+        _service.ContextCommandExecuted += ContextCommandExecuted;
+        _service.ComponentCommandExecuted += ComponentCommandExecuted;
     }
 
-    private Task ComponentCommandExecuted(ComponentCommandInfo arg1, IInteractionContext arg2, IResult arg3)
+    private async Task ComponentCommandExecuted(ComponentCommandInfo info, IInteractionContext context, IResult result)
     {
-        return Task.CompletedTask;
+        if (context.Channel.GetChannelType() is ChannelType.DM) return;
+
+        _console.LogDebug($"Component command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 
-    private Task ContextCommandExecuted(ContextCommandInfo arg1, IInteractionContext arg2, IResult arg3)
+    private async Task ContextCommandExecuted(ContextCommandInfo info, IInteractionContext context, IResult result)
     {
-        return Task.CompletedTask;
+        if (context.Channel.GetChannelType() is ChannelType.DM) return;
+
+        _console.LogDebug($"Context command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 
-    private Task SlashCommandExecuted(SlashCommandInfo arg1, IInteractionContext arg2, IResult arg3)
+    private async Task SlashCommandExecuted(SlashCommandInfo info, IInteractionContext context, IResult result)
     {
-        return Task.CompletedTask;
+        if (context.Channel.GetChannelType() is ChannelType.DM) return;
+
+        _console.LogDebug($"Slash command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 
     private async Task HandleInteraction(SocketInteraction interaction)
     {
+        if (interaction.Channel.GetChannelType() is ChannelType.DM) return;
+
+        _console.LogDebug($"Handling interaction: {interaction.GuildId}");
+
         try
         {
             var context = new SocketInteractionContext(_client, interaction);
-            await _commands.ExecuteCommandAsync(context, _services);
+            await _service.ExecuteCommandAsync(context, _provider);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            _console.LogError("Error when handling an interaction", ex);
 
-            if (interaction.Type == InteractionType.ApplicationCommand)
+            if (interaction.Type is InteractionType.ApplicationCommand)
                 await interaction.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
         }
     }
