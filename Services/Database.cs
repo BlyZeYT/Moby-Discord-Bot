@@ -8,10 +8,6 @@ using System.Diagnostics;
 
 public interface IDatabase
 {
-    public ValueTask<Prefix?> GetPrefixAsync(ulong guildId);
-
-    public Task SetPrefixAsync(ulong guildId, Prefix prefix);
-
     public Task AddGuildAsync(ulong guildId);
 
     public Task RemoveGuildAsync(ulong guildId);
@@ -54,46 +50,6 @@ public sealed class Database : IDatabase
         _config = config;
         _logger = logger;
         _connection = new MySqlConnection(_config["database"]);
-    }
-
-    public async ValueTask<Prefix?> GetPrefixAsync(ulong guildId)
-    {
-        await ConnectAsync();
-
-        await _logger.LogDebugAsync($"Executes **{nameof(GetPrefixAsync)}** for Guild Id: {guildId}");
-
-        try
-        {
-            var prefix = await new MySqlCommand($"SELECT Guild_Prefix FROM guilds WHERE Guild_Id = {guildId}", _connection).ExecuteScalarAsync();
-
-            await _logger.LogDebugAsync($"Returned Prefix: {prefix} for Guild Id: {guildId}");
-
-            return prefix is null or "" ? null : Prefix.Create(prefix.ToString()!);
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogCriticalAsync(ex, $"Failed to get Prefix for Guild Id: {guildId}");
-
-            return null;
-        }
-    }
-
-    public async Task SetPrefixAsync(ulong guildId, Prefix prefix)
-    {
-        await ConnectAsync();
-
-        await _logger.LogDebugAsync($"Executes **{nameof(SetPrefixAsync)}** for Guild Id: {guildId} and Prefix: {prefix.Value}");
-
-        try
-        {
-            await new MySqlCommand($"UPDATE guilds SET Guild_Prefix = '{prefix}' WHERE Guild_Id = {guildId}", _connection).ExecuteNonQueryAsync();
-
-            await _logger.LogDebugAsync($"Updated Prefix for Guild Id: {guildId} to {prefix}");
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogCriticalAsync(ex, $"Failed to set Prefix for Guild Id: {guildId} to {prefix}");
-        }
     }
 
     public async Task AddGuildAsync(ulong guildId)
@@ -415,7 +371,7 @@ public sealed class Database : IDatabase
             {
                 await _logger.LogDebugAsync($"Returned Guild Info for Guild Id: {guildId}");
 
-                return new DatabaseGuildInfo(reader.GetInt32(0), guildId, Prefix.Create(reader.GetString(2)), reader.GetBoolean(3));
+                return new DatabaseGuildInfo(reader.GetInt32(0), guildId, reader.GetBoolean(2));
             }
             else
             {

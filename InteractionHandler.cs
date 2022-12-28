@@ -27,39 +27,39 @@ public sealed class InteractionHandler
     {
         await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 
-        _client.InteractionCreated += HandleInteraction;
+        _client.InteractionCreated += HandleInteractionAsync;
 
-        _service.SlashCommandExecuted += SlashCommandExecuted;
-        _service.ContextCommandExecuted += ContextCommandExecuted;
-        _service.ComponentCommandExecuted += ComponentCommandExecuted;
+        _service.SlashCommandExecuted += SlashCommandExecutedAsync;
+        _service.ContextCommandExecuted += ContextCommandExecutedAsync;
+        _service.ComponentCommandExecuted += ComponentCommandExecutedAsync;
     }
 
-    private async Task ComponentCommandExecuted(ComponentCommandInfo info, IInteractionContext context, IResult result)
+    private async Task ComponentCommandExecutedAsync(ComponentCommandInfo info, IInteractionContext context, IResult result)
     {
         if (context.Channel.GetChannelType() is ChannelType.DM) return;
 
         _console.LogDebug($"Component command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 
-    private async Task ContextCommandExecuted(ContextCommandInfo info, IInteractionContext context, IResult result)
+    private async Task ContextCommandExecutedAsync(ContextCommandInfo info, IInteractionContext context, IResult result)
     {
         if (context.Channel.GetChannelType() is ChannelType.DM) return;
 
         _console.LogDebug($"Context command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 
-    private async Task SlashCommandExecuted(SlashCommandInfo info, IInteractionContext context, IResult result)
+    private async Task SlashCommandExecutedAsync(SlashCommandInfo info, IInteractionContext context, IResult result)
     {
         if (context.Channel.GetChannelType() is ChannelType.DM) return;
 
         _console.LogDebug($"Slash command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 
-    private async Task HandleInteraction(SocketInteraction interaction)
+    private async Task HandleInteractionAsync(SocketInteraction interaction)
     {
         if (interaction.Channel.GetChannelType() is ChannelType.DM) return;
 
-        _console.LogDebug($"Handling interaction: {interaction.GuildId}");
+        _console.LogDebug($"Handling interaction in Guild: {interaction.GuildId}");
 
         try
         {

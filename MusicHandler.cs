@@ -28,42 +28,42 @@ public sealed class MusicHandler
 
     public Task InitializeAsync()
     {
-        _lavaNode.OnStatsReceived += OnStatsReceived;
-        _lavaNode.OnTrackStart += OnTrackStart;
-        _lavaNode.OnTrackStuck += OnTrackStuck;
-        _lavaNode.OnTrackException += OnTrackException;
-        _lavaNode.OnTrackEnd += OnTrackEnd;
-        _lavaNode.OnWebSocketClosed += OnWebSocketClosed;
+        _lavaNode.OnStatsReceived += OnStatsReceivedAsync;
+        _lavaNode.OnTrackStart += OnTrackStartAsync;
+        _lavaNode.OnTrackStuck += OnTrackStuckAsync;
+        _lavaNode.OnTrackException += OnTrackExceptionAsync;
+        _lavaNode.OnTrackEnd += OnTrackEndAsync;
+        _lavaNode.OnWebSocketClosed += OnWebSocketClosedAsync;
 
         return Task.CompletedTask;
     }
 
-    private async Task OnStatsReceived(StatsEventArg arg)
+    private async Task OnStatsReceivedAsync(StatsEventArg arg)
     {
 
     }
 
-    private async Task OnTrackStart(TrackStartEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
+    private async Task OnTrackStartAsync(TrackStartEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
     {
 
     }
 
-    private async Task OnTrackStuck(TrackStuckEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
+    private async Task OnTrackStuckAsync(TrackStuckEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
     {
 
     }
 
-    private async Task OnTrackException(TrackExceptionEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
+    private async Task OnTrackExceptionAsync(TrackExceptionEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
     {
 
     }
 
-    private async Task OnTrackEnd(TrackEndEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
+    private async Task OnTrackEndAsync(TrackEndEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
     {
 
     }
 
-    private async Task OnWebSocketClosed(WebSocketClosedEventArg arg)
+    private async Task OnWebSocketClosedAsync(WebSocketClosedEventArg arg)
     {
 
     }

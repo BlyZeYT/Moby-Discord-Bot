@@ -7,6 +7,7 @@ public static class Moby
 {
     public const string LogoNormalUrl = "https://i.imgur.com/Za1cXgs.png";
     public const string LogoRoundUrl = "https://i.imgur.com/0OuzsfG.png";
+    public const string ImageNotFound = "https://i.imgur.com/excUKal.png";
 
     public const ulong LogsChannelId = 1053392480034357432;
     public const ulong OwnerCommandsChannelId = 1053399251138396190;

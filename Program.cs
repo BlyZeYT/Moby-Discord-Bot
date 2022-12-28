@@ -45,6 +45,7 @@ sealed class Program
             .AddSingleton<MusicHandler>()
             .AddSingleton<IDatabase, Database>()
             .AddSingleton<IMobyLogger, MobyLogger>()
+            .AddSingleton<IHttpService, HttpService>()
             .AddLavaNode(x =>
             {
                 x.SelfDeaf = true;
@@ -71,8 +72,8 @@ sealed class Program
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
         await provider.GetRequiredService<MusicHandler>().InitializeAsync();
 
-        _client.Log += _ => provider.GetRequiredService<ConsoleLogger>().Log(_);
-        _service.Log += _ => provider.GetRequiredService<ConsoleLogger>().Log(_);
+        _client.Log += msg => provider.GetRequiredService<ConsoleLogger>().Log(msg);
+        _service.Log += msg => provider.GetRequiredService<ConsoleLogger>().Log(msg);
 
         _client.Ready += OnReadyAsync;
 
