@@ -5,20 +5,23 @@ using Discord.WebSocket;
 using Discord;
 using System.Reflection;
 using global::Moby.Services;
+using Microsoft.Extensions.Configuration;
 
 public sealed class InteractionHandler
 {
     private readonly DiscordSocketClient _client;
     private readonly InteractionService _service;
     private readonly IServiceProvider _provider;
+    private readonly IConfiguration _config;
     private readonly ConsoleLogger _console;
     private readonly IMobyLogger _logger;
 
-    public InteractionHandler(DiscordSocketClient client, InteractionService service, IServiceProvider provider, ConsoleLogger console, IMobyLogger logger)
+    public InteractionHandler(DiscordSocketClient client, InteractionService service, IServiceProvider provider, IConfiguration config, ConsoleLogger console, IMobyLogger logger)
     {
         _client = client;
         _service = service;
         _provider = provider;
+        _config = config;
         _console = console;
         _logger = logger;
     }
@@ -29,36 +32,14 @@ public sealed class InteractionHandler
 
         _client.InteractionCreated += HandleInteractionAsync;
 
+        _client.SelectMenuExecuted += SelectMenuExecutedAsync;
+        _client.ModalSubmitted += ModalSubmittedAsync;
+
         _service.SlashCommandExecuted += SlashCommandExecutedAsync;
-        _service.ContextCommandExecuted += ContextCommandExecutedAsync;
-        _service.ComponentCommandExecuted += ComponentCommandExecutedAsync;
-    }
-
-    private async Task ComponentCommandExecutedAsync(ComponentCommandInfo info, IInteractionContext context, IResult result)
-    {
-        if (context.Channel.GetChannelType() is ChannelType.DM) return;
-
-        _console.LogDebug($"Component command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
-    }
-
-    private async Task ContextCommandExecutedAsync(ContextCommandInfo info, IInteractionContext context, IResult result)
-    {
-        if (context.Channel.GetChannelType() is ChannelType.DM) return;
-
-        _console.LogDebug($"Context command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
-    }
-
-    private async Task SlashCommandExecutedAsync(SlashCommandInfo info, IInteractionContext context, IResult result)
-    {
-        if (context.Channel.GetChannelType() is ChannelType.DM) return;
-
-        _console.LogDebug($"Slash command executed: {info.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 
     private async Task HandleInteractionAsync(SocketInteraction interaction)
     {
-        if (interaction.Channel.GetChannelType() is ChannelType.DM) return;
-
         _console.LogDebug($"Handling interaction in Guild: {interaction.GuildId}");
 
         try
@@ -73,5 +54,89 @@ public sealed class InteractionHandler
             if (interaction.Type is InteractionType.ApplicationCommand)
                 await interaction.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
         }
+    }
+
+    private async Task SelectMenuExecutedAsync(SocketMessageComponent msgc)
+    {
+        _console.LogDebug($"Select Menu executed for: {msgc.GuildId} with Custom Id: {msgc.Data.CustomId}");
+
+        var value = msgc.Data.Values.First();
+
+        switch (msgc.Data.CustomId)
+        {
+            case Moby.ContactMenuCId:
+
+                switch (value)
+                {
+                    case Moby.ContactMenuIdeaCId: await msgc.RespondWithModalAsync(MobyUtil.GetIdeaModal()); break;
+
+                    case Moby.ContactMenuFeedbackCId: await msgc.RespondWithModalAsync(MobyUtil.GetFeedbackModal()); break;
+
+                    case Moby.ContactMenuBugCId: await msgc.RespondWithModalAsync(MobyUtil.GetBugModal()); break;
+                }
+
+                break;
+        }
+    }
+
+    private async Task ModalSubmittedAsync(SocketModal modal)
+    {
+        _console.LogDebug($"Select Menu executed for: {modal.GuildId} with Custom Id: {modal.Data.CustomId}");
+
+        var embed = modal.Data.CustomId switch
+        {
+            Moby.IdeaModalCId => MobyUtil.GetIdeaModalEmbed(modal.Data.Components.ToArray()),
+            Moby.FeedbackModalCId => MobyUtil.GetFeedbackModalEmbed(modal.Data.Components.ToArray()),
+            Moby.BugModalCId => MobyUtil.GetBugModalEmbed(modal.Data.Components.ToArray()),
+            _ => null
+        };
+
+        if (embed is null)
+        {
+            _console.LogError("Couldn't get the correct embed for a modal", null);
+
+            await _logger.LogErrorAsync(null, "Couldn't get the correct embed for a modal");
+
+            await modal.RespondAsync("Something went wrong when sending your message :(", ephemeral: true);
+
+            return;
+        }
+
+        await _client.GetGuild(Convert.ToUInt64(_config["serverid"])).GetTextChannel(Moby.ContactChannelId).SendMessageAsync(embed: embed);
+
+        await modal.RespondAsync("Your message was sent successfully to my creator\nThanks for helping him to make me better :)", ephemeral: true);
+    }
+
+    private async Task SlashCommandExecutedAsync(SlashCommandInfo info, IInteractionContext context, IResult result)
+    {
+        if (!result.IsSuccess)
+        {
+            switch (result.Error)
+            {
+                case InteractionCommandError.UnknownCommand:
+                    await context.Interaction.RespondAsync("Unknown command", ephemeral: true);
+                    break;
+
+                case InteractionCommandError.BadArgs:
+                    await context.Interaction.RespondAsync("Invalid number or argument", ephemeral: true);
+                    break;
+
+                case InteractionCommandError.Exception:
+                    await context.Interaction.RespondAsync("Command exception: " + result.ErrorReason, ephemeral: true);
+                    break;
+
+                case InteractionCommandError.Unsuccessful:
+                    await context.Interaction.RespondAsync("Command could not be executed", ephemeral: true);
+                    break;
+
+                case InteractionCommandError.UnmetPrecondition:
+                    await context.Interaction.RespondAsync("Unmet Precondition: " + result.ErrorReason, ephemeral: true);
+                    break;
+            }
+
+            await _logger.LogWarningAsync($"Something went wrong on executing a Slash Command: {result.ErrorReason}");
+        }
+
+        _console.LogDebug($"Slash command executed: {info?.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");
     }
 }

@@ -9,6 +9,29 @@ public static class Moby
     public const string LogoRoundUrl = "https://i.imgur.com/0OuzsfG.png";
     public const string ImageNotFound = "https://i.imgur.com/excUKal.png";
 
+    public const string ContactMenuCId = "contact-menu";
+
+    public const string ContactMenuFeedbackCId = "contact-menu-feedback";
+    public const string ContactMenuIdeaCId = "contact-menu-idea";
+    public const string ContactMenuBugCId = "contact-menu-bug";
+
+    public const string FeedbackModalCId = "contact-feedback-modal";
+    public const string FeedbackModalTopicCId = "contact-feedback-modal-topic";
+    public const string FeedbackModalDescriptionCId = "contact-feedback-modal-description";
+    public const string FeedbackModalContactCId = "contact-feedback-modal-contact";
+
+    public const string IdeaModalCId = "contact-idea-modal";
+    public const string IdeaModalTopicCId = "contact-idea-modal-topic";
+    public const string IdeaModalDescriptionCId = "contact-idea-modal-description";
+    public const string IdeaModalContactCId = "contact-idea-modal-contact";
+
+    public const string BugModalCId = "contact-bug-modal";
+    public const string BugModalCommandCId = "contact-feedback-modal-command";
+    public const string BugModalReproductionCId = "contact-feedback-modal-reproduction";
+    public const string BugModalDescriptionCId = "contact-feedback-modal-description";
+    public const string BugModalContactCId = "contact-feedback-modal-contact";
+
+    public const ulong ContactChannelId = 1057784058517667881;
     public const ulong LogsChannelId = 1053392480034357432;
     public const ulong OwnerCommandsChannelId = 1053399251138396190;
     public const ulong RuntimeCommandsChannelId = 1053399158876283003;

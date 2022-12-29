@@ -54,7 +54,7 @@ public sealed class MobyLogger : IMobyLogger
 
         if (exception is null)
         {
-            if (_channel is not null) await _channel.SendMessageAsync(logMessage, embed: MobyEmbeds.GetLog(logLevel, null));
+            if (_channel is not null) await _channel.SendMessageAsync(logMessage, embed: MobyUtil.GetLogEmbed(logLevel, null));
         }
         else
         {
@@ -121,7 +121,7 @@ public sealed class MobyLogger : IMobyLogger
                 {
                     await _channel.SendFileAsync(
                         new FileAttachment(stream, "exception-file.txt"),
-                        logMessage, embed: MobyEmbeds.GetLog(logLevel, exception));
+                        logMessage, embed: MobyUtil.GetLogEmbed(logLevel, exception));
                 }
             }
         }
@@ -130,7 +130,7 @@ public sealed class MobyLogger : IMobyLogger
     public async Task LogImportantAsync(string message)
     {
         if (_channel is not null)
-            await _channel.SendMessageAsync($"{new Emoji("❗")} **Important**: {message}", embed: MobyEmbeds.GetLog(LogLevel.Trace, null));
+            await _channel.SendMessageAsync($"{new Emoji("❗")} **Important**: {message}", embed: MobyUtil.GetLogEmbed(LogLevel.Trace, null));
     }
 
     public async Task LogTraceAsync(string message)
