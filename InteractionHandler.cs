@@ -81,13 +81,13 @@ public sealed class InteractionHandler
 
     private async Task ModalSubmittedAsync(SocketModal modal)
     {
-        _console.LogDebug($"Select Menu executed for: {modal.GuildId} with Custom Id: {modal.Data.CustomId}");
+        _console.LogDebug($"Modal submitted for: {modal.GuildId} with Custom Id: {modal.Data.CustomId}");
 
         var embed = modal.Data.CustomId switch
         {
-            Moby.IdeaModalCId => MobyUtil.GetIdeaModalEmbed(modal.Data.Components.ToArray()),
-            Moby.FeedbackModalCId => MobyUtil.GetFeedbackModalEmbed(modal.Data.Components.ToArray()),
-            Moby.BugModalCId => MobyUtil.GetBugModalEmbed(modal.Data.Components.ToArray()),
+            Moby.IdeaModalCId => MobyUtil.GetIdeaModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
+            Moby.FeedbackModalCId => MobyUtil.GetFeedbackModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
+            Moby.BugModalCId => MobyUtil.GetBugModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
             _ => null
         };
 

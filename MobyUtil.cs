@@ -5,6 +5,8 @@ using Discord.WebSocket;
 using global::Moby.Common;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Runtime.InteropServices;
+using System.Text;
 
 public static class MobyUtil
 {
@@ -25,6 +27,31 @@ public static class MobyUtil
         }
 
         return builder.Build();
+    }
+
+    public static Embed GetBotStatsEmbed(IUser bot, int latency)
+    {
+        var general = new StringBuilder($"```\n- Uptime > {Stats.Uptime.Days} days & {Stats.Uptime.Hours} hours\n");
+        general.AppendLine($"- Latency > {latency} ms");
+        general.AppendLine($"- Playing Players > {Stats.Players}");
+        general.AppendLine($"- Frames Sent > {Stats.FramesSent}");
+        general.Append("```");
+
+        var system = new StringBuilder($"```\n- OS > {RuntimeInformation.OSDescription.RemoveAfter(25, ' ')}\n");
+        system.AppendLine("- CPU > Broadcom BCM2711");
+        system.AppendLine($"- CPU Cores > {Environment.ProcessorCount}");
+        system.AppendLine($"- CPU Speed > 1,5 GHz");
+        system.AppendLine($"- CPU Usage > {Math.Round(Stats.CpuLoad, 2, MidpointRounding.ToEven)} %");
+        system.AppendLine("- Memory > 8 GB LPDDR4 SDRAM");
+        system.AppendLine("- Memory Speed > 3200 MHz");
+        system.AppendLine($"- Memory Usage > {Stats.AllocatedMemory * 0.00000095367431640625} MB");
+        system.Append("```");
+
+        return new MobyEmbedBuilder()
+            .WithAuthor($"{bot.Username} - Statistics", bot.GetAvatarUrl(size: 2048) ?? bot.GetDefaultAvatarUrl())
+            .AddField("General", general.ToString())
+            .AddField("System", system.ToString())
+            .Build();
     }
 
     public static Embed GetServerInfoEmbed(SocketGuild guild)
@@ -106,10 +133,11 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetFeedbackModalEmbed(SocketMessageComponentData[] data)
+    public static Embed GetFeedbackModalEmbed(SocketMessageComponentData[] data, ulong guildId)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle("Provided Feedback 📝")
+            .WithTitle("Provided Feedback \\📝")
+            .AddField("Guild Id", guildId)
             .AddField("Topic", data.First(x => x.CustomId == Moby.FeedbackModalTopicCId).Value)
             .AddField("Description", data.First(x => x.CustomId == Moby.FeedbackModalDescriptionCId).Value);
 
@@ -134,10 +162,11 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetIdeaModalEmbed(SocketMessageComponentData[] data)
+    public static Embed GetIdeaModalEmbed(SocketMessageComponentData[] data, ulong guildId)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle("Submitted idea 💡")
+            .WithTitle("Submitted idea \\💡")
+            .AddField("Guild Id", guildId)
             .AddField("Topic", data.First(x => x.CustomId == Moby.IdeaModalTopicCId).Value)
             .AddField("Description", data.First(x => x.CustomId == Moby.IdeaModalDescriptionCId).Value);
 
@@ -163,10 +192,11 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetBugModalEmbed(SocketMessageComponentData[] data)
+    public static Embed GetBugModalEmbed(SocketMessageComponentData[] data, ulong guildId)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle("Bug Report 🐞")
+            .WithTitle("Bug Report \\🐞")
+            .AddField("Guild Id", guildId)
             .AddField("Command", data.First(x => x.CustomId == Moby.BugModalCommandCId).Value)
             .AddField("Steps to reproduce", data.First(x => x.CustomId == Moby.BugModalReproductionCId).Value)
             .AddField("Description", data.First(x => x.CustomId == Moby.BugModalDescriptionCId).Value);

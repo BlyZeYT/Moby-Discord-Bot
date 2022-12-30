@@ -2,6 +2,7 @@
 
 using Discord.Interactions;
 using Discord.WebSocket;
+using global::Moby.Common;
 using global::Moby.Services;
 using Victoria.Node;
 using Victoria.Node.EventArgs;
@@ -38,14 +39,12 @@ public sealed class MusicHandler
         return Task.CompletedTask;
     }
 
-    private async Task OnStatsReceivedAsync(StatsEventArg arg)
-    {
-
-    }
+    private async Task OnStatsReceivedAsync(StatsEventArg stats)
+        => await Stats.UpdateAsync(stats.Cpu.SystemLoad, stats.Memory.Allocated, stats.Frames.Sent, stats.Players, stats.Uptime);
 
     private async Task OnTrackStartAsync(TrackStartEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
     {
-
+        
     }
 
     private async Task OnTrackStuckAsync(TrackStuckEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)

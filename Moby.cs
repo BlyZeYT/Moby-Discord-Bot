@@ -2,6 +2,7 @@
 
 using Discord;
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 
 public static class Moby
 {
@@ -31,10 +32,11 @@ public static class Moby
     public const string BugModalDescriptionCId = "contact-feedback-modal-description";
     public const string BugModalContactCId = "contact-feedback-modal-contact";
 
-    public const ulong ContactChannelId = 1057784058517667881;
     public const ulong LogsChannelId = 1053392480034357432;
     public const ulong OwnerCommandsChannelId = 1053399251138396190;
     public const ulong RuntimeCommandsChannelId = 1053399158876283003;
+    public const ulong InformationChannelId = 1058214987170058312;
+    public const ulong ContactChannelId = 1057784058517667881;
 
     public static Color Color { get; }
 

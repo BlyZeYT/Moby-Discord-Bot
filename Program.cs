@@ -17,6 +17,7 @@ sealed class Program
     private DiscordSocketClient _client = null!;
     private IConfiguration _config = null!;
     private InteractionService _service = null!;
+    private IDatabase _database = null!;
     private IMobyLogger _logger = null!;
     private LavaNode _lavaNode = null!;
 
@@ -66,6 +67,7 @@ sealed class Program
         _client = provider.GetRequiredService<DiscordSocketClient>();
         _config = provider.GetRequiredService<IConfigurationRoot>();
         _service = provider.GetRequiredService<InteractionService>();
+        _database = provider.GetRequiredService<IDatabase>();
         _logger = provider.GetRequiredService<IMobyLogger>();
         _lavaNode = provider.GetRequiredService<LavaNode>();
 
@@ -76,6 +78,9 @@ sealed class Program
         _service.Log += msg => provider.GetRequiredService<ConsoleLogger>().Log(msg);
 
         _client.Ready += OnReadyAsync;
+
+        _client.JoinedGuild += JoinedGuildAsync;
+        _client.LeftGuild += LeftGuildAsync;
 
         await _client.LoginAsync(TokenType.Bot, _config["token"]);
         await _client.StartAsync();
@@ -109,7 +114,7 @@ sealed class Program
 
     private async Task SetGameAsync()
     {
-        await _client.SetGameAsync("whale noises", null, ActivityType.Listening);
+        await _client.SetGameAsync("🐳 noises", null, ActivityType.Listening);
 
         await _logger.LogTraceAsync("Set Bot game"); 
     }
@@ -132,5 +137,23 @@ sealed class Program
                 await _logger.LogCriticalAsync(ex, "Something went wrong connecting to LavaNode");
             }
         }
+    }
+
+    private async Task JoinedGuildAsync(SocketGuild guild)
+    {
+        await _database.AddGuildAsync(guild.Id);
+
+        await _client.GetGuild(Convert.ToUInt64(_config["serverid"]))
+            .GetTextChannel(Moby.InformationChannelId)
+            .SendMessageAsync("**Joined a server** 🥳", embed: MobyUtil.GetServerInfoEmbed(guild));
+    }
+
+    private async Task LeftGuildAsync(SocketGuild guild)
+    {
+        await _database.RemoveGuildAsync(guild.Id);
+
+        await _client.GetGuild(Convert.ToUInt64(_config["serverid"]))
+            .GetTextChannel(Moby.InformationChannelId)
+            .SendMessageAsync("**Lefted a server** 😢", embed: MobyUtil.GetServerInfoEmbed(guild));
     }
 }

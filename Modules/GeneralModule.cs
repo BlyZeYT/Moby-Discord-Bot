@@ -26,10 +26,15 @@ public sealed class GeneralModule : MobyModuleBase
 
     }
 
-    [SlashCommand("contact", "Contact my creator to submit ideas, give feedback or report bugs")]
+    [SlashCommand("contact", "Contact my creator to give feedback, submit ideas or report bugs")]
     [RequireContext(ContextType.Guild)]
     public async Task ContactAsync()
         => await RespondAsync(ephemeral: true, components: MobyUtil.GetContactComponent());
+
+    [SlashCommand("botstats", "Get information about my system")]
+    [RequireContext(ContextType.Guild)]
+    public async Task BotStatsAsync()
+        => await RespondAsync(ephemeral: true, embed: MobyUtil.GetBotStatsEmbed(_client.CurrentUser, _client.Latency));
 
     [SlashCommand("serverinfo", "Get information about the server")]
     [RequireContext(ContextType.Guild)]
