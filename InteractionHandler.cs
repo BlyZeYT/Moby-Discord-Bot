@@ -6,6 +6,7 @@ using Discord;
 using System.Reflection;
 using global::Moby.Services;
 using Microsoft.Extensions.Configuration;
+using System;
 
 public sealed class InteractionHandler
 {
@@ -83,28 +84,54 @@ public sealed class InteractionHandler
     {
         _console.LogDebug($"Modal submitted for: {modal.GuildId} with Custom Id: {modal.Data.CustomId}");
 
-        var embed = modal.Data.CustomId switch
+        await modal.DeferAsync(ephemeral: true);
+
+        Embed? embed;
+
+        switch (modal.Data.CustomId)
         {
-            Moby.IdeaModalCId => MobyUtil.GetIdeaModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
-            Moby.FeedbackModalCId => MobyUtil.GetFeedbackModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
-            Moby.BugModalCId => MobyUtil.GetBugModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
-            _ => null
-        };
+            case Moby.AnnouncementModalCId:
 
-        if (embed is null)
-        {
-            _console.LogError("Couldn't get the correct embed for a modal", null);
+                embed = MobyUtil.GetAnnouncementEmbed(_client.CurrentUser, modal.Data.Components.ToArray());
 
-            await _logger.LogErrorAsync(null, "Couldn't get the correct embed for a modal");
+                int successfullySent = 0;
 
-            await modal.RespondAsync("Something went wrong when sending your message :(", ephemeral: true);
+                foreach (var guild in _client.Guilds)
+                {
+                    successfullySent += await guild.TrySendAnnouncement(embed) ? 1 : 0;
+                }
 
-            return;
+                await modal.FollowupAsync($"Announcement was sent successfully to **{successfullySent}** servers out of **{_client.Guilds.Count}**", ephemeral: true);
+
+                break;
+
+            default:
+
+                embed = modal.Data.CustomId switch
+                {
+                    Moby.IdeaModalCId => MobyUtil.GetIdeaModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
+                    Moby.FeedbackModalCId => MobyUtil.GetFeedbackModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
+                    Moby.BugModalCId => MobyUtil.GetBugModalEmbed(modal.Data.Components.ToArray(), modal.GuildId ?? 0),
+                    _ => null
+                };
+
+                if (embed is null)
+                {
+                    _console.LogError("Couldn't get the correct embed for a modal", null);
+
+                    await _logger.LogErrorAsync(null, "Couldn't get the correct embed for a modal");
+
+                    await modal.FollowupAsync("Something went wrong when sending your message :(", ephemeral: true);
+
+                    return;
+                }
+
+                await _client.GetGuild(Convert.ToUInt64(_config["serverid"])).GetTextChannel(Moby.ContactChannelId).SendMessageAsync(embed: embed);
+
+                await modal.FollowupAsync("Your message was sent successfully to my creator\nThanks for helping him to make me better :)", ephemeral: true);
+
+                break;
         }
-
-        await _client.GetGuild(Convert.ToUInt64(_config["serverid"])).GetTextChannel(Moby.ContactChannelId).SendMessageAsync(embed: embed);
-
-        await modal.RespondAsync("Your message was sent successfully to my creator\nThanks for helping him to make me better :)", ephemeral: true);
     }
 
     private async Task SlashCommandExecutedAsync(SlashCommandInfo info, IInteractionContext context, IResult result)

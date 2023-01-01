@@ -99,7 +99,7 @@ sealed class Program
         await SetGameAsync();
         await ConnectToLavaNodeAsync();
 
-        if (Moby.IsDebug()) await _service.RegisterCommandsToGuildAsync(ulong.Parse(_config["serverid"]!), true);
+        if (Moby.IsDebug()) await _service.RegisterCommandsToGuildAsync(Convert.ToUInt64(_config["serverid"]), true);
         else await _service.RegisterCommandsGloballyAsync(true);
 
         await _logger.LogImportantAsync("Bot Startup completed");

@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using global::Moby.Common;
 using global::Moby.Services;
 
+[RequireContext(ContextType.Guild)]
 public sealed class GeneralModule : MobyModuleBase
 {
     private readonly DiscordSocketClient _client;
@@ -20,69 +21,64 @@ public sealed class GeneralModule : MobyModuleBase
     }
 
     [SlashCommand("help", "Get help for all my functions")]
-    [RequireContext(ContextType.Guild)]
     public async Task HelpAsync()
     {
 
     }
 
     [SlashCommand("contact", "Contact my creator to give feedback, submit ideas or report bugs")]
-    [RequireContext(ContextType.Guild)]
     public async Task ContactAsync()
         => await RespondAsync(ephemeral: true, components: MobyUtil.GetContactComponent());
 
     [SlashCommand("botstats", "Get information about my system")]
-    [RequireContext(ContextType.Guild)]
     public async Task BotStatsAsync()
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetBotStatsEmbed(_client.CurrentUser, _client.Latency));
 
     [SlashCommand("serverinfo", "Get information about the server")]
-    [RequireContext(ContextType.Guild)]
     public async Task ServerInfoAsync()
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetServerInfoEmbed(Context.Guild));
 
     [SlashCommand("userinfo", "Get information about a user")]
-    [RequireContext(ContextType.Guild)]
     public async Task UserInfoAsync([Summary("mention", "Mention a user")] SocketGuildUser? user = null)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user ?? (SocketGuildUser)Context.User));
 
     [UserCommand("userinfo")]
-    [RequireContext(ContextType.Guild)]
     public async Task ContextUserInfoAsync(SocketGuildUser user)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user));
 
     [SlashCommand("botinfo", "Get information about me")]
-    [RequireContext(ContextType.Guild)]
     public async Task BotInfoAsync()
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetBotInfoEmbed(Context.Guild.CurrentUser, _client.Guilds.Count));
 
     [SlashCommand("reddit", "Get a post from Reddit")]
-    [RequireContext(ContextType.Guild)]
     public async Task RedditAsync([Summary("subreddit", "Enter a subreddit")] string subreddit)
     {
+        await DeferAsync(ephemeral: true);
+
         var post = await _http.GetRedditPostAsync(subreddit);
 
         if (post.IsNsfw && !((ITextChannel)Context.Channel).IsNsfw)
         {
-            await RespondAsync("This post contained Nsfw content but this isn't a Nsfw channel.", ephemeral: true);
+            await FollowupAsync("This post contained Nsfw content but this isn't a Nsfw channel.", ephemeral: true);
             return;
         }
 
-        await RespondAsync(ephemeral: true, embed: MobyUtil.GetRedditPostEmbed(post));
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRedditPostEmbed(post));
     }
 
     [SlashCommand("meme", "Get a random meme from reddit")]
-    [RequireContext(ContextType.Guild)]
     public async Task MemeAsync()
     {
+        await DeferAsync(ephemeral: true);
+
         var post = await _http.GetMemeAsync();
 
         if (post.IsNsfw && !((ITextChannel)Context.Channel).IsNsfw)
         {
-            await RespondAsync("This post contained Nsfw content but this isn't a Nsfw channel.", ephemeral: true);
+            await FollowupAsync("This post contained Nsfw content but this isn't a Nsfw channel.", ephemeral: true);
             return;
         }
 
-        await RespondAsync(ephemeral: true, embed: MobyUtil.GetRedditPostEmbed(post));
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRedditPostEmbed(post));
     }
 }

@@ -210,4 +210,23 @@ public static class MobyUtil
 
         return builder.Build();
     }
+
+    public static Embed GetAnnouncementEmbed(IUser bot, SocketMessageComponentData[] data)
+    {
+        return new MobyEmbedBuilder()
+            .WithAuthor($"{bot.Username} - Announcement", bot.GetAvatarUrl(size: 2048) ?? bot.GetDefaultAvatarUrl())
+            .WithTitle(data.First(x => x.CustomId == Moby.AnnouncementModalTitleCId).Value)
+            .WithDescription(data.First(x => x.CustomId == Moby.AnnouncementModalMessageCId).Value)
+            .Build();
+    }
+
+    public static Modal GetAnnouncementModal()
+    {
+        return new ModalBuilder()
+            .WithTitle("Announcement")
+            .WithCustomId(Moby.AnnouncementModalCId)
+            .AddTextInput("Title", Moby.AnnouncementModalTitleCId, TextInputStyle.Short, "Enter the titel for the announcement", null, 30, true, "🐳")
+            .AddTextInput("Message", Moby.AnnouncementModalMessageCId, TextInputStyle.Paragraph, "Enter the message for the announcement", null, null, true)
+            .Build();
+    }
 }

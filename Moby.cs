@@ -32,6 +32,10 @@ public static class Moby
     public const string BugModalDescriptionCId = "contact-feedback-modal-description";
     public const string BugModalContactCId = "contact-feedback-modal-contact";
 
+    public const string AnnouncementModalCId = "announcement-modal";
+    public const string AnnouncementModalTitleCId = "announcement-modal-title";
+    public const string AnnouncementModalMessageCId = "announcement-modal-message";
+
     public const ulong LogsChannelId = 1053392480034357432;
     public const ulong OwnerCommandsChannelId = 1053399251138396190;
     public const ulong RuntimeCommandsChannelId = 1053399158876283003;

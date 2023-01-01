@@ -1,5 +1,7 @@
 ﻿namespace Moby;
 
+using Discord;
+using Discord.WebSocket;
 using System.Text;
 
 public static class Extensions
@@ -16,5 +18,20 @@ public static class Extensions
         {
             yield return i;
         }
+    }
+
+    public static async ValueTask<bool> TrySendAnnouncement(this SocketGuild guild, Embed announcement)
+    {
+        foreach (var channel in guild.TextChannels)
+        {
+            if (guild.CurrentUser.GetPermissions(channel).SendMessages)
+            {
+                await channel.SendMessageAsync(embed: announcement);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }
