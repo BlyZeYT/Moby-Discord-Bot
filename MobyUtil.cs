@@ -225,7 +225,7 @@ public static class MobyUtil
         return new ModalBuilder()
             .WithTitle("Announcement")
             .WithCustomId(Moby.AnnouncementModalCId)
-            .AddTextInput("Title", Moby.AnnouncementModalTitleCId, TextInputStyle.Short, "Enter the titel for the announcement", null, 30, true, "🐳")
+            .AddTextInput("Title", Moby.AnnouncementModalTitleCId, TextInputStyle.Short, "Enter the titel for the announcement", null, 30, true, "\\🐳")
             .AddTextInput("Message", Moby.AnnouncementModalMessageCId, TextInputStyle.Paragraph, "Enter the message for the announcement", null, null, true)
             .Build();
     }

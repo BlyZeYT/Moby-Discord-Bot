@@ -36,11 +36,11 @@ public static class Moby
     public const string AnnouncementModalTitleCId = "announcement-modal-title";
     public const string AnnouncementModalMessageCId = "announcement-modal-message";
 
-    public const ulong LogsChannelId = 1053392480034357432;
-    public const ulong OwnerCommandsChannelId = 1053399251138396190;
-    public const ulong RuntimeCommandsChannelId = 1053399158876283003;
     public const ulong InformationChannelId = 1058214987170058312;
     public const ulong ContactChannelId = 1057784058517667881;
+    public const ulong LogsChannelId = 1053392480034357432;
+    public const ulong OwnerCommandsChannelId = 1053399251138396190;
+    public const ulong RuntimeCommandsChannelId = 1059255114847752282;
 
     public static Color Color { get; }
 

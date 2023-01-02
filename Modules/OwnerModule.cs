@@ -39,7 +39,7 @@ public sealed class OwnerModule : MobyModuleBase
 
             return;
         }
-        
+
         await FollowupAsync($"The connection was established in {ping.TotalMilliseconds} ms", ephemeral: true);
     }
 

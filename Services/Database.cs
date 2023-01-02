@@ -375,7 +375,7 @@ public sealed class Database : IDatabase
             }
             else
             {
-                await _logger.LogDebugAsync($"Couldn't find Guild Info for Guild Id: {guildId}");
+                await _logger.LogWarningAsync($"Couldn't find Guild Info for Guild Id: {guildId}");
 
                 return DatabaseGuildInfo.Empty();
             }

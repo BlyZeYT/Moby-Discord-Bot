@@ -35,7 +35,7 @@ public sealed class InteractionHandler
 
         _client.SelectMenuExecuted += SelectMenuExecutedAsync;
         _client.ModalSubmitted += ModalSubmittedAsync;
-
+        
         _service.SlashCommandExecuted += SlashCommandExecutedAsync;
     }
 

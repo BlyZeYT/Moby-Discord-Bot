@@ -81,4 +81,8 @@ public sealed class GeneralModule : MobyModuleBase
 
         await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRedditPostEmbed(post));
     }
+
+    [SlashCommand("coinflip", "Flip a coin")]
+    public async Task CoinflipAsync()
+        => await RespondAsync($"You flipped {(Random.Shared.Next(0, 2) == 0 ? "Tails" : "Heads")}", ephemeral: true);
 }
