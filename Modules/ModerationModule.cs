@@ -46,9 +46,9 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("invite", "Invite a user to the server")]
     [RequireUserPermission(GuildPermission.CreateInstantInvite)]
     [RequireBotPermission(GuildPermission.CreateInstantInvite)]
-    public async Task InviteAsync([Summary("userid", "Enter the id of the user that should get an invite")] string userid,
-        [Summary("message", "Enter a custom invitation message")] string? message = null,
-        [Summary("url", "Enter a custom invitation link")] string? url = null)
+    public async Task InviteAsync([Summary("userid", "Enter the id of the user that should get an invite")] [MinLength(10)] [MaxLength(30)] string userid,
+        [Summary("message", "Enter a custom invitation message")] [MinLength(1)] [MaxLength(2500)] string? message = null,
+        [Summary("url", "Enter a custom invitation link")] [MinLength(10)] [MaxLength(100)] string? url = null)
     {
         if (!ulong.TryParse(userid, out var id))
         {
@@ -160,7 +160,7 @@ public sealed class ModerationModule : MobyModuleBase
     [RequireUserPermission(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.KickMembers)]
     public async Task KickAsync([Summary("user", "Mention a user that should get kicked")] SocketGuildUser user,
-        [Summary("reason", "Enter a reason why the user is kicked")] string? reason = null)
+        [Summary("reason", "Enter a reason why the user is kicked")] [MinLength(1)] [MaxLength(250)] string? reason = null)
     {
         await DeferAsync(ephemeral: true);
 
@@ -187,7 +187,7 @@ public sealed class ModerationModule : MobyModuleBase
     [RequireUserPermission(GuildPermission.BanMembers)]
     [RequireBotPermission(GuildPermission.BanMembers)]
     public async Task BanAsync([Summary("user", "Mention a user that should get banned")] SocketGuildUser user,
-        [Summary("reason", "Enter a reason why the user is banned")] string? reason = null,
+        [Summary("reason", "Enter a reason why the user is banned")] [MinLength(1)] [MaxLength(250)] string? reason = null,
         [Summary("prunedays", "Enter the days from which the message history should be deleted")] [MinValue(0)] [MaxValue(7)] int prunedays = 0)
     {
         await DeferAsync(ephemeral: true);
@@ -219,8 +219,8 @@ public sealed class ModerationModule : MobyModuleBase
 
     [SlashCommand("pardon", "Unban a user from the server")]
     [RequireUserPermission(GuildPermission.BanMembers)]
-    [RequireBotPermission(GuildPermission.BanMembers)]
-    public async Task PardonAsync([Summary("userid", "Enter the id of the user that should get unbanned")] string userid)
+    [RequireBotPermission(GuildPermission.BanMembers)] 
+    public async Task PardonAsync([Summary("userid", "Enter the id of the user that should get unbanned")] [MinLength(10)] [MaxLength(30)] string userid)
     {
         if (!ulong.TryParse(userid, out var id))
         {

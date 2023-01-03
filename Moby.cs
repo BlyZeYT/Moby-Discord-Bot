@@ -43,6 +43,8 @@ public static class Moby
     public const ulong OwnerCommandsChannelId = 1053399251138396190;
     public const ulong RuntimeCommandsChannelId = 1059255114847752282;
 
+    public const string OnlyMobyGuildModule = "only-moby-guild-module";
+
     public static Color Color { get; }
 
     public static IDictionary<LogLevel, Tuple<Color, Emoji>> LogLevels { get; }
@@ -53,7 +55,7 @@ public static class Moby
 
         LogLevels = new Dictionary<LogLevel, Tuple<Color, Emoji>>()
         {
-            { LogLevel.Trace, new Tuple<Color, Emoji>(new Color(240, 240, 240), new Emoji("👁️")) },
+            { LogLevel.Trace, new Tuple<Color, Emoji>(new Color(240, 240, 240), new Emoji("👀")) },
             { LogLevel.Debug, new Tuple<Color, Emoji>(new Color(200, 200, 200), new Emoji("🕸️")) },
             { LogLevel.Information, new Tuple<Color, Emoji>(Color, new Emoji("ℹ️")) },
             { LogLevel.Warning, new Tuple<Color, Emoji>(new Color(255, 229, 33), new Emoji("⚠️")) },

@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Channels;
 
 public static class MobyUtil
 {
@@ -255,7 +254,7 @@ public static class MobyUtil
         return new MobyEmbedBuilder()
             .WithTitle($"**{sender.Username} invites you to {guild.Name}**")
             .WithThumbnailUrl(guild.IconUrl ?? Moby.ImageNotFound)
-            .WithDescription($"**Members:** {guild.MemberCount}\n**Created at:** {guild.CreatedAt:dd/MM/yyyy}{(string.IsNullOrWhiteSpace(message) ? "" : $"\n\n{message}")}")
+            .WithDescription($"**Members:** {guild.MemberCount}\n**Created at:** {guild.CreatedAt:d}{(string.IsNullOrWhiteSpace(message) ? "" : $"\n\n{message}")}")
             .Build();
     }
 
@@ -265,12 +264,17 @@ public static class MobyUtil
 
         foreach (var ban in banlist)
         {
-            sb.AppendLine($"**{ban.User.Username} #{ban.User.Discriminator}**");
-            sb.AppendLine("Id: " + ban.User.Id);
-            sb.AppendLine("Reason: "+ ban.Reason);
-            sb.AppendLine();
+            var username = ban.User.Username;
+            var discriminator = ban.User.Discriminator;
+            var userId = ban.User.Id.ToString();
+            var reason = ban.Reason;
 
-            if (EmbedBuilder.MaxDescriptionLength - 200 >= sb.Length) break;
+            if (EmbedBuilder.MaxDescriptionLength >= sb.Length + username.Length + discriminator.Length + userId.Length + reason.Length + 25) break;
+
+            sb.AppendLine($"**{username} #{discriminator}**");
+            sb.AppendLine("Id: " + userId);
+            sb.AppendLine("Reason: "+ reason);
+            sb.AppendLine();
         }
 
         return new MobyEmbedBuilder()

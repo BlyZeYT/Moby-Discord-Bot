@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Reflection;
 using Victoria;
 using Victoria.Node;
 
@@ -100,7 +101,12 @@ sealed class Program
         await ConnectToLavaNodeAsync();
 
         if (Moby.IsDebug()) await _service.RegisterCommandsToGuildAsync(Convert.ToUInt64(_config["serverid"]), true);
-        else await _service.RegisterCommandsGloballyAsync(true);
+        else
+        {
+            await _service.AddModulesToGuildAsync(Convert.ToUInt64(_config["serverid"]), true, _service.Modules.Where(x => x.Name == Moby.OnlyMobyGuildModule).ToArray());
+
+            await _service.AddModulesGloballyAsync(true, _service.Modules.Where(x => x.Name != Moby.OnlyMobyGuildModule).ToArray());
+        }
 
         await _logger.LogImportantAsync("Bot Startup completed");
     }

@@ -51,7 +51,7 @@ public sealed class GeneralModule : MobyModuleBase
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetBotInfoEmbed(Context.Guild.CurrentUser, _client.Guilds.Count));
 
     [SlashCommand("reddit", "Get a post from Reddit")]
-    public async Task RedditAsync([Summary("subreddit", "Enter a subreddit from where the post should be fetched")] string subreddit)
+    public async Task RedditAsync([Summary("subreddit", "Enter a subreddit from where the post should be fetched")] [MinLength(1)][MaxLength(100)] string subreddit)
     {
         await DeferAsync(ephemeral: true);
 

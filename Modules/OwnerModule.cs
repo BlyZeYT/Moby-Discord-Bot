@@ -9,6 +9,7 @@ using System;
 
 [RequireOwner]
 [RequireContext(ContextType.Guild)]
+[Discord.Commands.Name(Moby.OnlyMobyGuildModule)]
 public sealed class OwnerModule : MobyModuleBase
 {
     private readonly DiscordSocketClient _client;
@@ -20,8 +21,8 @@ public sealed class OwnerModule : MobyModuleBase
         _database = database;
     }
 
-    [SlashCommand("checkdatabaseconnection", "Fetches the current connection delay to the Bot database")]
-    public async Task CheckDatabaseConnectionAsync()
+    [SlashCommand("pingdatabase", "Fetches the current connection delay to the Bot database")]
+    public async Task PingDatabaseAsync()
     {
         if (Context.Channel.Id is not Moby.OwnerCommandsChannelId)
         {
@@ -45,7 +46,8 @@ public sealed class OwnerModule : MobyModuleBase
     }
 
     [SlashCommand("getserver", "Fetches a server by the provided Server Id")]
-    public async Task GetServerAsync([Summary("serverid", "Enter a server id")] string serverid, [Summary("fromdatabase", "True if the server should be fetched from the database")] bool fromdatabase = false)
+    public async Task GetServerAsync([Summary("serverid", "Enter a server id")] [MinLength(10)] [MaxLength(30)] string serverid,
+        [Summary("fromdatabase", "True if the server should be fetched from the database")] bool fromdatabase = false)
     {
         if (Context.Channel.Id is not Moby.OwnerCommandsChannelId)
         {
@@ -124,6 +126,9 @@ public sealed class OwnerModule : MobyModuleBase
             }
         }
 
-        await FollowupAsync(embeds: embeds.ToArray(), ephemeral: true);
+        foreach (var chunk in embeds.Chunk(10))
+        {
+            await FollowupAsync(embeds: chunk, ephemeral: true);
+        }
     }
 }

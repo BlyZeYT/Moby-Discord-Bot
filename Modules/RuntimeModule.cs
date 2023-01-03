@@ -7,6 +7,7 @@ using global::Moby.Services;
 
 [RequireOwner]
 [RequireContext(ContextType.Guild)]
+[Discord.Commands.Name(Moby.OnlyMobyGuildModule)]
 public sealed class RuntimeModule : MobyModuleBase
 {
     private readonly DiscordSocketClient _client;
@@ -32,7 +33,7 @@ public sealed class RuntimeModule : MobyModuleBase
     }
 
     [SlashCommand("addserver", "Add a server manually to the database")]
-    public async Task AddServerAsync([Summary("serverid", "Enter a server id")] string serverid)
+    public async Task AddServerAsync([Summary("serverid", "Enter a server id")] [MinLength(10)] [MaxLength(30)] string serverid)
     {
         if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
         {
@@ -58,7 +59,7 @@ public sealed class RuntimeModule : MobyModuleBase
     }
 
     [SlashCommand("removeserver", "Remove a server manually from the database")]
-    public async Task RemoveServerAsync([Summary("serverid", "Enter a server id")] string serverid)
+    public async Task RemoveServerAsync([Summary("serverid", "Enter a server id")] [MinLength(10)] [MaxLength(30)] string serverid)
     {
         if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
         {
@@ -91,7 +92,7 @@ public sealed class RuntimeModule : MobyModuleBase
     }
 
     [SlashCommand("resetserver", "Reset the data of a server on the database")]
-    public async Task ResetServerAsync([Summary("serverid", "Enter a server id")] string serverid)
+    public async Task ResetServerAsync([Summary("serverid", "Enter a server id")] [MinLength(10)] [MaxLength(30)] string serverid)
     {
         if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
         {

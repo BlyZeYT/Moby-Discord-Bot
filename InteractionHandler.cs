@@ -34,6 +34,7 @@ public sealed class InteractionHandler
         _client.InteractionCreated += HandleInteractionAsync;
 
         _client.SelectMenuExecuted += SelectMenuExecutedAsync;
+        _client.ButtonExecuted += ButtonExecutedAsync;
         _client.ModalSubmitted += ModalSubmittedAsync;
         
         _service.SlashCommandExecuted += SlashCommandExecutedAsync;
@@ -75,6 +76,24 @@ public sealed class InteractionHandler
 
                     case Moby.ContactMenuBugCId: await msgc.RespondWithModalAsync(MobyUtil.GetBugModal()); break;
                 }
+
+                await msgc.DeleteOriginalResponseAsync();
+
+                break;
+        }
+    }
+
+    private async Task ButtonExecutedAsync(SocketMessageComponent msgc)
+    {
+        _console.LogDebug($"Button executed for: {msgc.GuildId} with Custom Id: {msgc.Data.CustomId}");
+
+        switch (msgc.Data.CustomId)
+        {
+            case Moby.DenyInvitationButtonCId:
+
+                await msgc.Message.DeleteAsync();
+
+                await msgc.DeferAsync(ephemeral: true);
 
                 break;
         }

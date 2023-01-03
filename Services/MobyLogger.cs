@@ -50,7 +50,7 @@ public sealed class MobyLogger : IMobyLogger
     {
         if (!IsEnabled(logLevel)) return;
 
-        string logMessage = $"{Moby.LogLevels[logLevel].Item2} **{logLevel}**: {message}";
+        string logMessage = $"\\{Moby.LogLevels[logLevel].Item2} **{logLevel}**: {message}";
 
         if (exception is null)
         {
@@ -130,7 +130,7 @@ public sealed class MobyLogger : IMobyLogger
     public async Task LogImportantAsync(string message)
     {
         if (_channel is not null)
-            await _channel.SendMessageAsync($"{new Emoji("❗")} **Important**: {message}", embed: MobyUtil.GetLogEmbed(LogLevel.Trace, null));
+            await _channel.SendMessageAsync($"\\❗ **Important**: {message}", embed: MobyUtil.GetLogEmbed(LogLevel.Trace, null));
     }
 
     public async Task LogTraceAsync(string message)
