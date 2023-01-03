@@ -38,8 +38,8 @@ public sealed class GeneralModule : MobyModuleBase
     public async Task ServerInfoAsync()
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetServerInfoEmbed(Context.Guild));
 
-    [SlashCommand("userinfo", "Get information about a user")]
-    public async Task UserInfoAsync([Summary("mention", "Mention a user")] SocketGuildUser? user = null)
+    [SlashCommand("userinfo", "Get information about the mentioned user or yourself")]
+    public async Task UserInfoAsync([Summary("mention", "Mention the user you want information about")] SocketGuildUser? user = null)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user ?? (SocketGuildUser)Context.User));
 
     [UserCommand("userinfo")]
@@ -51,7 +51,7 @@ public sealed class GeneralModule : MobyModuleBase
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetBotInfoEmbed(Context.Guild.CurrentUser, _client.Guilds.Count));
 
     [SlashCommand("reddit", "Get a post from Reddit")]
-    public async Task RedditAsync([Summary("subreddit", "Enter a subreddit")] string subreddit)
+    public async Task RedditAsync([Summary("subreddit", "Enter a subreddit from where the post should be fetched")] string subreddit)
     {
         await DeferAsync(ephemeral: true);
 
@@ -84,5 +84,5 @@ public sealed class GeneralModule : MobyModuleBase
 
     [SlashCommand("coinflip", "Flip a coin")]
     public async Task CoinflipAsync()
-        => await RespondAsync($"You flipped {(Random.Shared.Next(0, 2) == 0 ? "Tails" : "Heads")}", ephemeral: true);
+        => await RespondAsync($"You flipped {(Random.Shared.Next(0, 2) == 0 ? "Tails" : "Heads")} \\🪙", ephemeral: true);
 }

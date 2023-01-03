@@ -1,12 +1,14 @@
 ﻿namespace Moby;
 
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using global::Moby.Common;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Channels;
 
 public static class MobyUtil
 {
@@ -227,6 +229,53 @@ public static class MobyUtil
             .WithCustomId(Moby.AnnouncementModalCId)
             .AddTextInput("Title", Moby.AnnouncementModalTitleCId, TextInputStyle.Short, "Enter the titel for the announcement", null, 30, true, "\\🐳")
             .AddTextInput("Message", Moby.AnnouncementModalMessageCId, TextInputStyle.Paragraph, "Enter the message for the announcement", null, null, true)
+            .Build();
+    }
+
+    public static Embed GetServerDataEmbed(DatabaseGuildInfo guildInfo)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("Server data")
+            .AddField("Id", guildInfo.Id)
+            .AddField("GuildId", guildInfo.GuildId)
+            .AddField("IsRepeatOn", guildInfo.IsRepeatOn)
+            .Build();
+    }
+
+    public static MessageComponent GetInvitationComponent(string invitationUrl)
+    {
+        return new ComponentBuilder()
+            .WithButton("Join Server", null, ButtonStyle.Link, new Emoji("✅"), invitationUrl)
+            .WithButton("Deny invitation", Moby.DenyInvitationButtonCId, ButtonStyle.Danger)
+            .Build();
+    }
+
+    public static Embed GetInvitationEmbed(IUser sender, SocketGuild guild, string? message)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle($"**{sender.Username} invites you to {guild.Name}**")
+            .WithThumbnailUrl(guild.IconUrl ?? Moby.ImageNotFound)
+            .WithDescription($"**Members:** {guild.MemberCount}\n**Created at:** {guild.CreatedAt:dd/MM/yyyy}{(string.IsNullOrWhiteSpace(message) ? "" : $"\n\n{message}")}")
+            .Build();
+    }
+
+    public static Embed GetBanlistEmbed(IEnumerable<RestBan> banlist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var ban in banlist)
+        {
+            sb.AppendLine($"**{ban.User.Username} #{ban.User.Discriminator}**");
+            sb.AppendLine("Id: " + ban.User.Id);
+            sb.AppendLine("Reason: "+ ban.Reason);
+            sb.AppendLine();
+
+            if (EmbedBuilder.MaxDescriptionLength - 200 >= sb.Length) break;
+        }
+
+        return new MobyEmbedBuilder()
+            .WithTitle("Banlist \\⛔")
+            .WithDescription(sb.Length == 0 ? "No users are currently banned \\💚" : sb.ToString())
             .Build();
     }
 }

@@ -34,7 +34,7 @@ public interface IDatabase
 
     public ValueTask<DatabaseGuildInfo> GetGuildInfoAsync(ulong guildId);
 
-    public IAsyncEnumerable<ulong> GetAllGuildsAsync();
+    public IAsyncEnumerable<DatabaseGuildInfo> GetAllGuildsAsync();
 
     public ValueTask<TimeSpan> PingAsync();
 }
@@ -382,7 +382,7 @@ public sealed class Database : IDatabase
         }
     }
 
-    public async IAsyncEnumerable<ulong> GetAllGuildsAsync()
+    public async IAsyncEnumerable<DatabaseGuildInfo> GetAllGuildsAsync()
     {
         await ConnectAsync();
 
@@ -392,7 +392,7 @@ public sealed class Database : IDatabase
         {
             while (await reader.ReadAsync())
             {
-                yield return (ulong)reader.GetInt64(0);
+                yield return new DatabaseGuildInfo(reader.GetInt32(0), reader.GetUInt64(1), reader.GetBoolean(2));
             }
 
             await _logger.LogDebugAsync($"Returned all Guilds from database");

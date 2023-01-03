@@ -5,6 +5,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using global::Moby.Common;
 using global::Moby.Services;
+using System;
 
 [RequireOwner]
 [RequireContext(ContextType.Guild)]
@@ -44,7 +45,7 @@ public sealed class OwnerModule : MobyModuleBase
     }
 
     [SlashCommand("getserver", "Fetches a server by the provided Server Id")]
-    public async Task GetServerAsync([Summary("serverid", "Enter a server id")] string serverid)
+    public async Task GetServerAsync([Summary("serverid", "Enter a server id")] string serverid, [Summary("fromdatabase", "True if the server should be fetched from the database")] bool fromdatabase = false)
     {
         if (Context.Channel.Id is not Moby.OwnerCommandsChannelId)
         {
@@ -53,22 +54,49 @@ public sealed class OwnerModule : MobyModuleBase
             return;
         }
 
-        await DeferAsync(ephemeral: true);
-
-        var guild = _client.GetGuild(Convert.ToUInt64(serverid));
-
-        if (guild is null)
+        if (!ulong.TryParse(serverid, out var id))
         {
-            await FollowupAsync("Couldn't fetch a Server with the Id: " + serverid, ephemeral: true);
+            await RespondAsync("Can't find a server with the Id: " + serverid, ephemeral: true);
 
             return;
         }
 
-        await FollowupAsync(embed: MobyUtil.GetServerInfoEmbed(guild), ephemeral: true);
+        await DeferAsync(ephemeral: true);
+
+        Embed embed;
+
+        if (fromdatabase)
+        {
+            var guild = await _database.GetGuildInfoAsync(id);
+
+            if (guild.IsEmpty())
+            {
+                await FollowupAsync("Couldn't fetch a Server with the Id: " + id, ephemeral: true);
+
+                return;
+            }
+
+            embed = MobyUtil.GetServerDataEmbed(guild);
+        }
+        else
+        {
+            var guild = _client.GetGuild(id);
+
+            if (guild is null)
+            {
+                await FollowupAsync("Couldn't fetch a Server with the Id: " + id, ephemeral: true);
+
+                return;
+            }
+
+            embed = MobyUtil.GetServerInfoEmbed(guild);
+        }
+
+        await FollowupAsync(embed: embed, ephemeral: true);
     }
 
-    [SlashCommand("getalldatabaseserver", "Fetches all Servers that are currently on the database")]
-    public async Task GetAllDatabaseServerAsync()
+    [SlashCommand("getallserver", "Fetches all Servers where I'm currently on")]
+    public async Task GetAllDatabaseServerAsync([Summary("fromdatabase", "True if the server should be fetched from the database")] bool fromdatabase = false)
     {
         if (Context.Channel.Id is not Moby.OwnerCommandsChannelId)
         {
@@ -80,13 +108,20 @@ public sealed class OwnerModule : MobyModuleBase
         await DeferAsync(ephemeral: true);
 
         var embeds = new List<Embed>();
-        SocketGuild? guild;
 
-        await foreach (var guildId in _database.GetAllGuildsAsync())
+        if (fromdatabase)
         {
-            guild = _client.GetGuild(guildId);
-
-            if (guild is not null) embeds.Add(MobyUtil.GetServerInfoEmbed(guild));
+            await foreach (var guild in _database.GetAllGuildsAsync())
+            {
+                if (!guild.IsEmpty()) embeds.Add(MobyUtil.GetServerDataEmbed(guild));
+            }
+        }
+        else
+        {
+            foreach (var guild in _client.Guilds)
+            {
+                if (guild is not null) embeds.Add(MobyUtil.GetServerInfoEmbed(guild));
+            }
         }
 
         await FollowupAsync(embeds: embeds.ToArray(), ephemeral: true);

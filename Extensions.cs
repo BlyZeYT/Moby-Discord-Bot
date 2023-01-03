@@ -34,4 +34,17 @@ public static class Extensions
 
         return false;
     }
+
+    public static SocketTextChannel? GetFirstTextChannel(this SocketGuild guild)
+    {
+        foreach (var channel in guild.TextChannels)
+        {
+            if (guild.CurrentUser.GetPermissions(channel).SendMessages)
+            {
+                return channel;
+            }
+        }
+
+        return null;
+    }
 }

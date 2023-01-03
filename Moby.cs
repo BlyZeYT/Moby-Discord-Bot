@@ -2,7 +2,6 @@
 
 using Discord;
 using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
 
 public static class Moby
 {
@@ -35,6 +34,8 @@ public static class Moby
     public const string AnnouncementModalCId = "announcement-modal";
     public const string AnnouncementModalTitleCId = "announcement-modal-title";
     public const string AnnouncementModalMessageCId = "announcement-modal-message";
+
+    public const string DenyInvitationButtonCId = "invitation-deny";
 
     public const ulong InformationChannelId = 1058214987170058312;
     public const ulong ContactChannelId = 1057784058517667881;
