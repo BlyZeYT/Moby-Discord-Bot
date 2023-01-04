@@ -7,6 +7,7 @@ using global::Moby.Common;
 using global::Moby.Services;
 
 [RequireContext(ContextType.Guild)]
+[Discord.Commands.Name("General")]
 public sealed class GeneralModule : MobyModuleBase
 {
     private readonly DiscordSocketClient _client;
@@ -23,7 +24,13 @@ public sealed class GeneralModule : MobyModuleBase
     [SlashCommand("help", "Get help for all my functions")]
     public async Task HelpAsync()
     {
-
+        foreach (var module in _service.Modules.Where(x => x.Name != Moby.OnlyMobyGuildModule).OrderBy(x => x.Name))
+        {
+            foreach (var command in module.SlashCommands.OrderBy(x => x.Name))
+            {
+                
+            }
+        }
     }
 
     [SlashCommand("contact", "Contact my creator to give feedback, submit ideas or report bugs")]
@@ -39,12 +46,20 @@ public sealed class GeneralModule : MobyModuleBase
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetServerInfoEmbed(Context.Guild));
 
     [SlashCommand("userinfo", "Get information about the mentioned user or yourself")]
-    public async Task UserInfoAsync([Summary("mention", "Mention the user you want information about")] SocketGuildUser? user = null)
+    public async Task UserInfoAsync([Summary("user", "Mention the user you want information about")] SocketGuildUser? user = null)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user ?? (SocketGuildUser)Context.User));
 
     [UserCommand("userinfo")]
     public async Task ContextUserInfoAsync(SocketGuildUser user)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user));
+
+    [UserCommand("get-avatar")]
+    public async Task ContextGetAvatarAsync(SocketGuildUser user)
+        => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserAvatarEmbed(user));
+
+    [MessageCommand("messageinfo")]
+    public async Task ContextMessageInfoAsync(IMessage message)
+        => await RespondAsync(ephemeral: true, embed: MobyUtil.GetMessageInfoEmbed(message));
 
     [SlashCommand("botinfo", "Get information about me")]
     public async Task BotInfoAsync()

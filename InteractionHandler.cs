@@ -161,6 +161,8 @@ public sealed class InteractionHandler
             {
                 case InteractionCommandError.UnknownCommand:
                     await context.Interaction.RespondAsync("Unknown command", ephemeral: true);
+
+                    await _logger.LogWarningAsync($"Something went wrong on executing a Slash Command: {result.ErrorReason}");
                     break;
 
                 case InteractionCommandError.BadArgs:
@@ -169,18 +171,20 @@ public sealed class InteractionHandler
 
                 case InteractionCommandError.Exception:
                     await context.Interaction.RespondAsync("Command exception: " + result.ErrorReason, ephemeral: true);
+
+                    await _logger.LogWarningAsync($"Something went wrong on executing a Slash Command: {result.ErrorReason}");
                     break;
 
                 case InteractionCommandError.Unsuccessful:
                     await context.Interaction.RespondAsync("Command could not be executed", ephemeral: true);
+
+                    await _logger.LogWarningAsync($"Something went wrong on executing a Slash Command: {result.ErrorReason}");
                     break;
 
                 case InteractionCommandError.UnmetPrecondition:
                     await context.Interaction.RespondAsync("Unmet Precondition: " + result.ErrorReason, ephemeral: true);
                     break;
             }
-
-            await _logger.LogWarningAsync($"Something went wrong on executing a Slash Command: {result.ErrorReason}");
         }
 
         _console.LogDebug($"Slash command executed: {info?.Name} for {context.Guild.Name} {(result.IsSuccess ? "succeeded" : "failed")} {(result.IsSuccess ? "" : $" - Error: {result.ErrorReason}")}");

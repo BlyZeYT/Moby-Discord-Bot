@@ -282,4 +282,61 @@ public static class MobyUtil
             .WithDescription(sb.Length == 0 ? "No users are currently banned \\💚" : sb.ToString())
             .Build();
     }
+
+    public static Embed GetMessageInfoEmbed(IMessage message)
+    {
+        var sb = new StringBuilder($"**Id:** {message.Id}\n");
+
+        sb.AppendLine("**Source:** " + message.Source);
+        sb.AppendLine("**Author:** " + message.Author.Mention);
+        sb.AppendLine("**Sent:** " + message.Timestamp.ToString("G"));
+        sb.AppendLine("**Last edited:** " + (message.EditedTimestamp.HasValue ? message.EditedTimestamp.Value.ToString("G") : "-"));
+        sb.AppendLine("**Pinned:** " + (message.IsPinned ? "Yes" : "No"));
+        sb.AppendLine("**Text-To-Speech:** " + (message.IsTTS ? "Yes" : "No"));
+        sb.AppendLine("**Jump-Url:** " + message.GetJumpUrl());
+        sb.AppendLine("**Flags:** " + message.Flags);
+
+        if (message.Reference?.GuildId.IsSpecified ?? false) sb.AppendLine("**Reference Guild Id:** " + message.Reference.GuildId.Value);
+        if (message.Reference?.ChannelId is not null or 0) sb.AppendLine("**Reference Channel Id:** " + message.Reference.ChannelId);
+        if (message.Reference?.MessageId.IsSpecified ?? false) sb.AppendLine("**Reference Message Id:** " + message.Reference.MessageId.Value);
+
+        if (sb.Length > EmbedBuilder.MaxDescriptionLength) sb.Length = EmbedBuilder.MaxDescriptionLength;
+
+        return new MobyEmbedBuilder()
+            .WithDescription(sb.ToString())
+            .Build();
+    }
+
+    public static Embed GetUserAvatarEmbed(IUser user)
+    {
+        var sb = new StringBuilder();
+
+        var iterations = user.AvatarId.StartsWith("a_") ? 4 : 3;
+
+        for (int i = 1; i <= iterations; i++)
+        {
+            sb.Append($"**{(ImageFormat)i}:** ");
+
+            int counter = 0;
+            foreach (var avatar in user.GetAllAvatarResolutions((ImageFormat)i))
+            {
+                sb.Append($"[{avatar.Size}]({avatar.Url}) | ");
+
+                counter++;
+            }
+
+            if (counter == 0) sb.Append('-');
+            else sb.Length -= 3;
+
+            sb.Append('\n');
+        }
+
+        sb.Length--;
+
+        return new MobyEmbedBuilder()
+            .WithTitle(user.Username + "'s Avatar")
+            .WithDescription(sb.ToString())
+            .WithImageUrl(user.GetAvatarUrl(size: 256) ?? user.GetDefaultAvatarUrl())
+            .Build();
+    }
 }

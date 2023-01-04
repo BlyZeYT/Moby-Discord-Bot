@@ -8,6 +8,8 @@ public interface IHttpService
     public ValueTask<RedditPost> GetMemeAsync();
 
     public ValueTask<RedditPost> GetRedditPostAsync(string subreddit);
+
+    public ValueTask<bool> IsUrlEmpty(string url);
 }
 
 public sealed class HttpService : IHttpService
@@ -61,5 +63,19 @@ public sealed class HttpService : IHttpService
             $"{post["num_comments"]}",
             $"{post["ups"]}",
             post["over_18"]?.ToString() is "True");
+    }
+
+    public async ValueTask<bool> IsUrlEmpty(string url)
+    {
+        try
+        {
+            var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+
+            return !response.IsSuccessStatusCode;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

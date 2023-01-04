@@ -1,6 +1,7 @@
 ﻿namespace Moby.Services;
 
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using System.Text;
@@ -13,7 +14,7 @@ public interface IMobyLogger
 
     public bool IsEnabled(LogLevel logLevel);
 
-    public Task LogAsync(LogLevel logLevel, Exception? exception, string message);
+    public ValueTask<RestUserMessage?> LogAsync(LogLevel logLevel, Exception? exception, string message);
 
     public Task LogImportantAsync(string message);
 
@@ -46,15 +47,15 @@ public sealed class MobyLogger : IMobyLogger
 
     public bool IsEnabled(LogLevel logLevel) => logLevel >= _minimumLogLevel;
 
-    public async Task LogAsync(LogLevel logLevel, Exception? exception, string message)
+    public async ValueTask<RestUserMessage?> LogAsync(LogLevel logLevel, Exception? exception, string message)
     {
-        if (!IsEnabled(logLevel)) return;
+        if (!IsEnabled(logLevel)) return null;
 
         string logMessage = $"\\{Moby.LogLevels[logLevel].Item2} **{logLevel}**: {message}";
 
         if (exception is null)
         {
-            if (_channel is not null) await _channel.SendMessageAsync(logMessage, embed: MobyUtil.GetLogEmbed(logLevel, null));
+            if (_channel is not null) return await _channel.SendMessageAsync(logMessage, embed: MobyUtil.GetLogEmbed(logLevel, null));
         }
         else
         {
@@ -119,12 +120,14 @@ public sealed class MobyLogger : IMobyLogger
             {
                 using (var stream = sb.ToString().ToStream())
                 {
-                    await _channel.SendFileAsync(
+                    return await _channel.SendFileAsync(
                         new FileAttachment(stream, "exception-file.txt"),
                         logMessage, embed: MobyUtil.GetLogEmbed(logLevel, exception));
                 }
             }
         }
+
+        return null;
     }
 
     public async Task LogImportantAsync(string message)
@@ -146,8 +149,20 @@ public sealed class MobyLogger : IMobyLogger
         => await LogAsync(LogLevel.Warning, exception, message);
 
     public async Task LogErrorAsync(Exception? exception, string message)
-        => await LogAsync(LogLevel.Error, exception, message);
+    {
+        var msg = await LogAsync(LogLevel.Error, exception, message);
+
+        if (msg is null) return;
+
+        await msg.PinAsync();
+    }
 
     public async Task LogCriticalAsync(Exception? exception, string message)
-        => await LogAsync(LogLevel.Critical, exception, message);
+    {
+        var msg = await LogAsync(LogLevel.Critical, exception, message);
+
+        if (msg is null) return;
+
+        await msg.PinAsync();
+    }
 }

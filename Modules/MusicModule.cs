@@ -6,6 +6,7 @@ using global::Moby.Services;
 using Victoria.Node;
 
 [RequireContext(ContextType.Guild)]
+[Discord.Commands.Name("Music")]
 public sealed class MusicModule : MobyModuleBase
 {
     private readonly LavaNode _lava;

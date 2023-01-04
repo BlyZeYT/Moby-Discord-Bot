@@ -8,6 +8,7 @@ using global::Moby.Common;
 using global::Moby.Services;
 
 [RequireContext(ContextType.Guild)]
+[Discord.Commands.Name("Moderation")]
 public sealed class ModerationModule : MobyModuleBase
 {
     private readonly DiscordSocketClient _client;
@@ -88,7 +89,7 @@ public sealed class ModerationModule : MobyModuleBase
         }
     }
 
-    [SlashCommand("grantrole", "Grant the mentioned user a role")]
+    [SlashCommand("grant-role", "Grant the mentioned user a role")]
     [RequireUserPermission(GuildPermission.ManageRoles)]
     [RequireBotPermission(GuildPermission.ManageRoles)]
     public async Task GrantRoleAsync([Summary("user", "Mention a user that should get the role")] SocketGuildUser user,
@@ -122,7 +123,7 @@ public sealed class ModerationModule : MobyModuleBase
         await FollowupAsync($"Granted {user.Mention} the role {(role.IsMentionable ? role.Mention : role.Name)} {role.Emoji}", ephemeral: true);
     }
 
-    [SlashCommand("removerole", "Remove a role from the mentioned user")]
+    [SlashCommand("remove-role", "Remove a role from the mentioned user")]
     [RequireUserPermission(GuildPermission.ManageRoles)]
     [RequireBotPermission(GuildPermission.ManageRoles)]
     public async Task RemoveRoleAsync([Summary("user", "Mention a user from whom the role should be removed")] SocketGuildUser user,

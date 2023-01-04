@@ -2,6 +2,7 @@
 
 using Discord;
 using Discord.WebSocket;
+using global::Moby.Common;
 using System.Text;
 
 public static class Extensions
@@ -46,5 +47,19 @@ public static class Extensions
         }
 
         return null;
+    }
+
+    public static IEnumerable<Avatar> GetAllAvatarResolutions(this IUser user, ImageFormat imageFormat)
+    {
+        string? url;
+
+        for (ushort size = 16; size <= 2048; size *= 2)
+        {
+            url = user.GetAvatarUrl(imageFormat, size);
+
+            if (url is null) continue;
+
+            yield return new Avatar(url, size, imageFormat);
+        }
     }
 }
