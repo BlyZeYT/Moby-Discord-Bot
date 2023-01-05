@@ -49,15 +49,19 @@ public sealed class GeneralModule : MobyModuleBase
     public async Task UserInfoAsync([Summary("user", "Mention the user you want information about")] SocketGuildUser? user = null)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user ?? (SocketGuildUser)Context.User));
 
-    [UserCommand("userinfo")]
+    [SlashCommand("avatar", "Get the avatar of the mentioned user or yourself")]
+    public async Task AvatarAsync([Summary("user", "Mention the user you want the avatar from")] SocketGuildUser? user = null)
+        => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserAvatarEmbed(user ?? Context.User));
+
+    [UserCommand("Get User Info")]
     public async Task ContextUserInfoAsync(SocketGuildUser user)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user));
 
-    [UserCommand("get-avatar")]
+    [UserCommand("Get Avatar")]
     public async Task ContextGetAvatarAsync(SocketGuildUser user)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetUserAvatarEmbed(user));
 
-    [MessageCommand("messageinfo")]
+    [MessageCommand("Get Message Info")]
     public async Task ContextMessageInfoAsync(IMessage message)
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetMessageInfoEmbed(message));
 
@@ -66,7 +70,7 @@ public sealed class GeneralModule : MobyModuleBase
         => await RespondAsync(ephemeral: true, embed: MobyUtil.GetBotInfoEmbed(Context.Guild.CurrentUser, _client.Guilds.Count));
 
     [SlashCommand("reddit", "Get a post from Reddit")]
-    public async Task RedditAsync([Summary("subreddit", "Enter a subreddit from where the post should be fetched")] [MinLength(1)][MaxLength(100)] string subreddit)
+    public async Task RedditAsync([Summary("subreddit", "Enter a subreddit from where the post should be fetched")] [MinLength(1)] [MaxLength(100)] string subreddit)
     {
         await DeferAsync(ephemeral: true);
 
@@ -100,4 +104,10 @@ public sealed class GeneralModule : MobyModuleBase
     [SlashCommand("coinflip", "Flip a coin")]
     public async Task CoinflipAsync()
         => await RespondAsync($"You flipped {(Random.Shared.Next(0, 2) == 0 ? "Tails" : "Heads")} \\🪙", ephemeral: true);
+
+    [SlashCommand("chuck-norris", "Get a random Chuck Norris joke")]
+    public async Task ChuckNorrisAsync()
+    {
+
+    }
 }

@@ -44,6 +44,21 @@ public sealed class ModerationModule : MobyModuleBase
         await FollowupAsync($"Deleted {count--} messages \\✉️", ephemeral: true);
     }
 
+    [SlashCommand("unpin", "Unpin all messages in the mentioned channel")]
+    [RequireUserPermission(GuildPermission.ManageMessages)]
+    [RequireBotPermission(GuildPermission.ManageMessages)]
+    public async Task UnpinAsync([Summary("channel", "Mention the channel where all messages should get unpinned")] ITextChannel channel)
+    {
+        await DeferAsync(ephemeral: true);
+
+        foreach (var message in await channel.GetPinnedMessagesAsync())
+        {
+            await ((IUserMessage)message).UnpinAsync();
+        }
+
+        await FollowupAsync($"Unpinned all messages in {channel.Mention}", ephemeral: true);
+    }
+
     [SlashCommand("invite", "Invite a user to the server")]
     [RequireUserPermission(GuildPermission.CreateInstantInvite)]
     [RequireBotPermission(GuildPermission.CreateInstantInvite)]
