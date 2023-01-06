@@ -41,7 +41,7 @@ public sealed class ModerationModule : MobyModuleBase
 
         await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
 
-        await FollowupAsync($"Deleted {count--} messages \\✉️", ephemeral: true);
+        await FollowupAsync($"Deleted {count} messages \\✉️", ephemeral: true);
     }
 
     [SlashCommand("unpin", "Unpin all messages in the mentioned channel")]

@@ -29,7 +29,7 @@ public sealed class RuntimeModule : MobyModuleBase
 
             return;
         }
-
+        
         await RespondWithModalAsync(MobyUtil.GetAnnouncementModal());
     }
 

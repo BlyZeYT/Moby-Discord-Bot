@@ -1,5 +1,6 @@
 ﻿namespace Moby.Services;
 
+using ChuckNorrisApi;
 using global::Moby.Common;
 using Newtonsoft.Json.Linq;
 
@@ -8,6 +9,8 @@ public interface IHttpService
     public ValueTask<RedditPost> GetMemeAsync();
 
     public ValueTask<RedditPost> GetRedditPostAsync(string subreddit);
+
+    public ValueTask<ChuckNorrisJoke> GetChuckNorrisJokeAsync(NorrisJokeCategory category);
 
     public ValueTask<bool> IsUrlEmpty(string url);
 }
@@ -65,6 +68,23 @@ public sealed class HttpService : IHttpService
             post["over_18"]?.ToString() is "True");
     }
 
+    public async ValueTask<ChuckNorrisJoke> GetChuckNorrisJokeAsync(NorrisJokeCategory category)
+    {
+        try
+        {
+            dynamic json = JObject.Parse(await _client.GetStringAsync($"https://api.chucknorris.io/jokes/random{GetEndpoint(category)}"));
+
+            _console.LogDebug("Reddit Post was returned successfully");
+
+            return new ChuckNorrisJoke(json.value.ToString(), category is NorrisJokeCategory.Excplicit);
+        }
+        catch (Exception ex)
+        {
+            _console.LogError("Something went wrong, attempting to get a Chuck Norris Meme", ex);
+            return ChuckNorrisJoke.Empty();
+        }
+    }
+
     public async ValueTask<bool> IsUrlEmpty(string url)
     {
         try
@@ -77,5 +97,29 @@ public sealed class HttpService : IHttpService
         {
             return false;
         }
+    }
+
+    private static string GetEndpoint(NorrisJokeCategory category)
+    {
+        return category switch
+        {
+            NorrisJokeCategory.Animal => "?category=animal",
+            NorrisJokeCategory.Career => "?category=career",
+            NorrisJokeCategory.Celebrity => "?category=celebrity",
+            NorrisJokeCategory.Dev => "?category=dev",
+            NorrisJokeCategory.Excplicit => "?category=explicit",
+            NorrisJokeCategory.Fashion => "?category=fashion",
+            NorrisJokeCategory.Food => "?category=food",
+            NorrisJokeCategory.History => "?category=history",
+            NorrisJokeCategory.Money => "?category=money",
+            NorrisJokeCategory.Movie => "?category=movie",
+            NorrisJokeCategory.Music => "?category=music",
+            NorrisJokeCategory.Political => "?category=political",
+            NorrisJokeCategory.Religion => "?category=religion",
+            NorrisJokeCategory.Science => "?category=science",
+            NorrisJokeCategory.Sport => "?category=sport",
+            NorrisJokeCategory.Travel => "?category=travel",
+            _ => "",
+        };
     }
 }

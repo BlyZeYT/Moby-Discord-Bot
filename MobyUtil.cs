@@ -339,4 +339,34 @@ public static class MobyUtil
             .WithImageUrl(user.GetAvatarUrl(size: 256) ?? user.GetDefaultAvatarUrl())
             .Build();
     }
+
+    public static Embed GetDiceRollsEmbed(params int[] rolls)
+    {
+        var builder = new MobyEmbedBuilder()
+            .WithTitle("**\\🎲 Dice rolls**");
+
+        for (int i = 0; i < rolls.Length; i++)
+        {
+            builder.AddField($"\\🎲 Dice #{i + 1}", $"```\nRolled a {rolls[i]}\n```", i % 4 != 0);
+        }
+
+        if (rolls.Length > 1) builder.AddField($"**\\🎲 Total**", $"```\n{rolls.Sum()}\n```");
+
+        return builder.Build();
+    }
+
+    public static Embed GetCoinflipEmbed(bool isHeads)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("\\🪙 Coinflip")
+            .WithDescription($"You flipped **{(isHeads ? "Heads" : "Tails")}**")
+            .Build();
+    }
+
+    public static MessageComponent GetCoinflipComponent()
+    {
+        return new ComponentBuilder()
+            .WithButton("Flip again", Moby.CoinflipAgainCId, ButtonStyle.Primary, new Emoji("🪙"))
+            .Build();
+    }
 }

@@ -37,6 +37,8 @@ public static class Moby
 
     public const string DenyInvitationButtonCId = "invitation-deny";
 
+    public const string CoinflipAgainCId = "flip-a-coin-again";
+
     public const ulong InformationChannelId = 1058214987170058312;
     public const ulong ContactChannelId = 1057784058517667881;
     public const ulong LogsChannelId = 1053392480034357432;
@@ -48,6 +50,8 @@ public static class Moby
     public static Color Color { get; }
 
     public static IDictionary<LogLevel, Tuple<Color, Emoji>> LogLevels { get; }
+
+    public static Random Random { get; }
 
     static Moby()
     {
@@ -62,6 +66,8 @@ public static class Moby
             { LogLevel.Error, new Tuple<Color, Emoji>(new Color(212, 0, 0), new Emoji("⛔")) },
             { LogLevel.Critical, new Tuple<Color, Emoji>(new Color(171, 12, 76), new Emoji("☢️")) }
         };
+
+        Random = Random.Shared;
     }
 
     public static bool IsDebug()

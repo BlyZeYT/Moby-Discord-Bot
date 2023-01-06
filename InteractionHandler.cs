@@ -96,6 +96,12 @@ public sealed class InteractionHandler
                 await msgc.DeferAsync(ephemeral: true);
 
                 break;
+
+            case Moby.CoinflipAgainCId:
+
+                await msgc.UpdateAsync(x => x.Embed = MobyUtil.GetCoinflipEmbed(Random.Shared.Next(0, 2) == 0));
+                
+                break;
         }
     }
 
