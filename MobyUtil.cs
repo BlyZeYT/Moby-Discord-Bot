@@ -21,7 +21,8 @@ public static class MobyUtil
         }
         else
         {
-            builder.WithTitle(exception.Message)
+            builder
+                .WithTitle($"**{exception.Message}**")
                 .AddField("Exception type", exception.GetType().FullName ?? "Unknown")
                 .AddField("Source", exception.Source ?? "Unknown")
                 .WithCurrentTimestamp();
@@ -58,7 +59,7 @@ public static class MobyUtil
     public static Embed GetServerInfoEmbed(SocketGuild guild)
     {
         return new MobyEmbedBuilder()
-            .WithTitle($"Information about {guild.Name}")
+            .WithTitle($"**Information about {guild.Name}**")
             .WithThumbnailUrl(guild.IconUrl ?? Moby.ImageNotFound)
             .AddField("Created at", guild.CreatedAt.ToString("d"))
             .AddField("Member Count", guild.MemberCount)
@@ -70,7 +71,7 @@ public static class MobyUtil
     public static Embed GetUserInfoEmbed(SocketGuildUser user)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle($"Information about {user.Username}")
+            .WithTitle($"**Information about {user.Username}**")
             .WithThumbnailUrl(user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl())
             .AddField("Created Account at", user.CreatedAt.ToString("d"));
 
@@ -84,7 +85,7 @@ public static class MobyUtil
     public static Embed GetBotInfoEmbed(SocketGuildUser bot, int serverCount)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle("Information about me")
+            .WithTitle("**\\🐳 Information about me**")
             .WithThumbnailUrl(bot.GetAvatarUrl(size: 2048) ?? bot.GetDefaultAvatarUrl())
             .AddField("Created at", bot.CreatedAt.ToString("d"));
 
@@ -100,7 +101,7 @@ public static class MobyUtil
     public static Embed GetRedditPostEmbed(RedditPost post)
     {
         return new MobyEmbedBuilder()
-            .WithTitle(post.Title)
+            .WithTitle($"**{post.Title}**")
             .WithImageUrl(post.ImageUrl)
             .WithUrl($"https://reddit.com{post.Permalink}")
             .WithFooter($"🗨 {post.CommentsCount} ⬆️ {post.UpvotesCount}")
@@ -137,7 +138,7 @@ public static class MobyUtil
     public static Embed GetFeedbackModalEmbed(SocketMessageComponentData[] data, ulong guildId)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle("Provided Feedback \\📝")
+            .WithTitle("**\\📝 Provided Feedback**")
             .AddField("Guild Id", guildId)
             .AddField("Topic", data.First(x => x.CustomId == Moby.FeedbackModalTopicCId).Value)
             .AddField("Description", data.First(x => x.CustomId == Moby.FeedbackModalDescriptionCId).Value);
@@ -166,7 +167,7 @@ public static class MobyUtil
     public static Embed GetIdeaModalEmbed(SocketMessageComponentData[] data, ulong guildId)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle("Submitted idea \\💡")
+            .WithTitle("**\\💡 Submitted idea**")
             .AddField("Guild Id", guildId)
             .AddField("Topic", data.First(x => x.CustomId == Moby.IdeaModalTopicCId).Value)
             .AddField("Description", data.First(x => x.CustomId == Moby.IdeaModalDescriptionCId).Value);
@@ -196,7 +197,7 @@ public static class MobyUtil
     public static Embed GetBugModalEmbed(SocketMessageComponentData[] data, ulong guildId)
     {
         var builder = new MobyEmbedBuilder()
-            .WithTitle("Bug Report \\🐞")
+            .WithTitle("**\\🐞Bug Report**")
             .AddField("Guild Id", guildId)
             .AddField("Command", data.First(x => x.CustomId == Moby.BugModalCommandCId).Value)
             .AddField("Steps to reproduce", data.First(x => x.CustomId == Moby.BugModalReproductionCId).Value)
@@ -216,7 +217,7 @@ public static class MobyUtil
     {
         return new MobyEmbedBuilder()
             .WithAuthor($"{bot.Username} - Announcement", bot.GetAvatarUrl(size: 2048) ?? bot.GetDefaultAvatarUrl())
-            .WithTitle(data.First(x => x.CustomId == Moby.AnnouncementModalTitleCId).Value)
+            .WithTitle($"**{data.First(x => x.CustomId == Moby.AnnouncementModalTitleCId).Value}**")
             .WithDescription(data.First(x => x.CustomId == Moby.AnnouncementModalMessageCId).Value)
             .Build();
     }
@@ -234,7 +235,7 @@ public static class MobyUtil
     public static Embed GetServerDataEmbed(DatabaseGuildInfo guildInfo)
     {
         return new MobyEmbedBuilder()
-            .WithTitle("Server data")
+            .WithTitle("**Server data**")
             .AddField("Id", guildInfo.Id)
             .AddField("GuildId", guildInfo.GuildId)
             .AddField("IsRepeatOn", guildInfo.IsRepeatOn)
@@ -278,7 +279,7 @@ public static class MobyUtil
         }
 
         return new MobyEmbedBuilder()
-            .WithTitle("Banlist \\⛔")
+            .WithTitle("**\\⛔ Banlist**")
             .WithDescription(sb.Length == 0 ? "No users are currently banned \\💚" : sb.ToString())
             .Build();
     }
@@ -334,7 +335,7 @@ public static class MobyUtil
         sb.Length--;
 
         return new MobyEmbedBuilder()
-            .WithTitle(user.Username + "'s Avatar")
+            .WithTitle($"**{user.Username}'s Avatar**")
             .WithDescription(sb.ToString())
             .WithImageUrl(user.GetAvatarUrl(size: 256) ?? user.GetDefaultAvatarUrl())
             .Build();
@@ -358,7 +359,7 @@ public static class MobyUtil
     public static Embed GetCoinflipEmbed(bool isHeads)
     {
         return new MobyEmbedBuilder()
-            .WithTitle("\\🪙 Coinflip")
+            .WithTitle("**\\🪙 Coinflip**")
             .WithDescription($"You flipped **{(isHeads ? "Heads" : "Tails")}**")
             .Build();
     }
@@ -368,5 +369,82 @@ public static class MobyUtil
         return new ComponentBuilder()
             .WithButton("Flip again", Moby.CoinflipAgainCId, ButtonStyle.Primary, new Emoji("🪙"))
             .Build();
+    }
+
+    public static Embed GetTopServerListEmbed(IEnumerable<SocketGuild> guilds)
+    {
+        var builder = new MobyEmbedBuilder()
+            .WithTitle("**\\🏆 Top 10 servers**");
+
+        var sb = new StringBuilder();
+
+        int iteration = 0;
+        foreach (var guild in guilds.OrderByDescending(x => x.MemberCount))
+        {
+            iteration++;
+
+            if (iteration == 11) break;
+
+            if (iteration == 1) sb.Append("\\🥇 ");
+            if (iteration == 2) sb.Append("\\🥈 ");
+            if (iteration == 3) sb.Append("\\🥉 ");
+
+            if (iteration > 3) sb.Append($"**{iteration}.** ");
+
+            sb.AppendLine($"**Member:** {guild.MemberCount} - **Name:** {guild.Name}");
+        }
+
+        sb.Length--;
+
+        return builder
+            .WithDescription(sb.ToString())
+            .WithCurrentTimestamp()
+            .Build();
+    }
+
+    public static Embed GetColorEmbed(Color color)
+    {
+        var hsv = color.ToHsv();
+        var hsl = color.ToHsl();
+        var cmyk = color.ToCmyk();
+        var ycbcr = color.ToYCbCr();
+
+        return new EmbedBuilder()
+            .WithColor(color)
+            .WithTitle("**\\🌈 Color**")
+            .AddField("HEX", color.ToHex())
+            .AddField("RGB", $"{color.R}, {color.G}, {color.B}")
+            .AddField("HSV", $"{hsv.Item1.GetFormatted()}°, {hsv.Item2.GetFormatted()}%, {hsv.Item3.GetFormatted()}%")
+            .AddField("HSL", $"{hsl.Item1.GetFormatted()}°, {hsl.Item2.GetFormatted()}%, {hsl.Item3.GetFormatted()}%")
+            .AddField("CMYK", $"{cmyk.Item1.GetFormatted()}%, {cmyk.Item2.GetFormatted()}%, {cmyk.Item3.GetFormatted()}%, {cmyk.Item4.GetFormatted()}%")
+            .AddField("YCbCr", $"{ycbcr.Item1.GetFormatted()}, {ycbcr.Item2.GetFormatted()}, {ycbcr.Item3.GetFormatted()}")
+            .Build();
+    }
+
+    public static Embed GetRandomColorEmbed()
+    {
+        Span<byte> rgb = new byte[3];
+
+        Random.Shared.NextBytes(rgb);
+
+        return GetColorEmbed(new Color(rgb[0], rgb[1], rgb[2]));
+    }
+
+    public static IEnumerable<Embed> GetRandomColorEmbeds(int amount)
+    {
+        var rgb = new byte[3 * amount];
+
+        Random.Shared.NextBytes(rgb);
+
+        Color color;
+        for (int i = 0; i < rgb.Length; i += 3)
+        {
+            color = new Color(rgb[i], rgb[i + 1], rgb[i + 2]);
+
+            yield return new EmbedBuilder()
+                .WithColor(color)
+                .WithDescription($"**HEX:** {color.ToHex()} - **RGB:** {color.R}, {color.G}, {color.B}")
+                .Build();
+        }
     }
 }

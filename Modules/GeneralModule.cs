@@ -149,7 +149,7 @@ public sealed class GeneralModule : MobyModuleBase
     }
 
     [SlashCommand("chuck", "Get a random Chuck Norris joke")]
-    public async Task ChuckNorrisAsync([Summary("category", "Choose the category of the joke")]NorrisJokeCategory category = NorrisJokeCategory.None)
+    public async Task ChuckNorrisAsync([Summary("category", "Choose the category of the joke")] NorrisJokeCategory category = NorrisJokeCategory.None)
     {
         await DeferAsync(ephemeral: true);
 
@@ -170,9 +170,42 @@ public sealed class GeneralModule : MobyModuleBase
         await FollowupAsync(joke.Value, ephemeral: true);
     }
 
-    [SlashCommand("embed", "Create a completely custom embed")]
-    public async Task EmbedAsync()
+    [SlashCommand("top", "Get a list of the largest server where I'm in")]
+    public async Task TopAsync()
     {
+        await DeferAsync(ephemeral: true);
 
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetTopServerListEmbed(_client.Guilds));
+    }
+
+    [Group("color", "Commands with colors")]
+    [Discord.Commands.Name("Color Group Commands")]
+    public sealed class ColorGroupCommands : MobyModuleBase
+    {
+        public ColorGroupCommands(ConsoleLogger console) : base(console) { }
+
+        [SlashCommand("random", "Get one or multiple random colors")]
+        public async Task ColorRandomAsync([Summary("amount", "How many random colors should be generated")] [MinValue(1)] [MaxValue(10)] int amount = 1)
+        {
+            await DeferAsync(ephemeral: true);
+
+            if (amount == 1)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRandomColorEmbed());
+                return;
+            }
+
+            await FollowupAsync(ephemeral: true, embeds: MobyUtil.GetRandomColorEmbeds(amount).ToArray());
+        }
+
+        [SlashCommand("rgb", "Get information about the provided RGB color")]
+        public async Task ColorRgbAsync([Summary("red", "The red color amount")] [MinValue(0)] [MaxValue(255)] byte r,
+            [Summary("green", "The green color amount")] [MinValue(0)] [MaxValue(255)] byte g,
+            [Summary("blue", "The blue color amount")] [MinValue(0)] [MaxValue(255)] byte b)
+        {
+            await DeferAsync(ephemeral: true);
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorEmbed(new Color(r, g, b)));
+        }
     }
 }
