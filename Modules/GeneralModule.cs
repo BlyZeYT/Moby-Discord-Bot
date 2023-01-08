@@ -149,7 +149,7 @@ public sealed class GeneralModule : MobyModuleBase
     }
 
     [SlashCommand("chuck", "Get a random Chuck Norris joke")]
-    public async Task ChuckNorrisAsync([Summary("category", "Choose the category of the joke")] NorrisJokeCategory category = NorrisJokeCategory.None)
+    public async Task ChuckNorrisAsync([Summary("category", "Choose the category of the joke")] ChuckNorrisJokeCategory category = ChuckNorrisJokeCategory.None)
     {
         await DeferAsync(ephemeral: true);
 
@@ -224,10 +224,25 @@ public sealed class GeneralModule : MobyModuleBase
             await FollowupAsync("I can't get a color out of that Hex value", ephemeral: true);
         }
 
-        [SlashCommand("guess", "Guess the shown color")]
+        [SlashCommand("quiz", "Guess the shown color")]
         public async Task ColorGuessAsync()
         {
             await DeferAsync(ephemeral: true);
+
+            var randoms = new ColorQuizColor[4];
+
+            ColorQuizColor color;
+            for (var i = 0; i < 4; i++)
+            {
+                do
+                {
+                    color = Moby.ColorQuizInfo[Random.Shared.Next(0, Moby.ColorQuizInfo.Length - 1)];
+                } while (randoms.Contains(color));
+
+                randoms[i] = color;
+            }
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorQuizEmbed(randoms[0]), components: MobyUtil.GetColorQuizComponent(randoms));
         }
     }
 }

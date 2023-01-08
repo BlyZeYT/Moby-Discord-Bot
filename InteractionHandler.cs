@@ -102,6 +102,28 @@ public sealed class InteractionHandler
                 await msgc.UpdateAsync(x => x.Embed = MobyUtil.GetCoinflipEmbed(Random.Shared.Next(0, 2) == 0));
                 
                 break;
+
+            case Moby.ColorQuizCorrectAnswerCId:
+
+                await msgc.UpdateAsync(x =>
+                {
+                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\✅ Correct**\n\nYou answered: {((ButtonComponent)msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components).First(x => x.CustomId == Moby.ColorQuizCorrectAnswerCId)).Label}").Build();
+                    x.Components = new ComponentBuilder().Build();
+                });
+
+                break;
+
+            case Moby.ColorQuizWrongAnswerCId1 or Moby.ColorQuizWrongAnswerCId2 or Moby.ColorQuizWrongAnswerCId3:
+
+                var buttons = msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components);
+
+                await msgc.UpdateAsync(x =>
+                {
+                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\❌ Wrong**\n\nYou answered: {((ButtonComponent)buttons.First(x => x.CustomId == msgc.Data.CustomId)).Label}\nThe right answer was: {((ButtonComponent)buttons.First(x => x.CustomId == Moby.ColorQuizCorrectAnswerCId)).Label}").Build();
+                    x.Components = new ComponentBuilder().Build();
+                });
+
+                break;
         }
     }
 

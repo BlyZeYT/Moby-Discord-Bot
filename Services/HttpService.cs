@@ -1,7 +1,7 @@
 ﻿namespace Moby.Services;
 
-using ChuckNorrisApi;
 using global::Moby.Common;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public interface IHttpService
@@ -10,7 +10,9 @@ public interface IHttpService
 
     public ValueTask<RedditPost> GetRedditPostAsync(string subreddit);
 
-    public ValueTask<ChuckNorrisJoke> GetChuckNorrisJokeAsync(NorrisJokeCategory category);
+    public ValueTask<ChuckNorrisJoke> GetChuckNorrisJokeAsync(ChuckNorrisJokeCategory category);
+
+    public ValueTask<ColorQuizColor[]> GetColorQuizInfo();
 
     public ValueTask<bool> IsUrlEmpty(string url);
 }
@@ -68,7 +70,7 @@ public sealed class HttpService : IHttpService
             post["over_18"]?.ToString() is "True");
     }
 
-    public async ValueTask<ChuckNorrisJoke> GetChuckNorrisJokeAsync(NorrisJokeCategory category)
+    public async ValueTask<ChuckNorrisJoke> GetChuckNorrisJokeAsync(ChuckNorrisJokeCategory category)
     {
         try
         {
@@ -76,12 +78,27 @@ public sealed class HttpService : IHttpService
 
             _console.LogDebug("Reddit Post was returned successfully");
 
-            return new ChuckNorrisJoke(json.value.ToString(), category is NorrisJokeCategory.Excplicit);
+            return new ChuckNorrisJoke(json.value.ToString(), category is ChuckNorrisJokeCategory.Excplicit);
         }
         catch (Exception ex)
         {
             _console.LogError("Something went wrong, attempting to get a Chuck Norris Meme", ex);
             return ChuckNorrisJoke.Empty();
+        }
+    }
+
+    public async ValueTask<ColorQuizColor[]> GetColorQuizInfo()
+    {
+        try
+        {
+            var json = await _client.GetStringAsync("https://raw.githubusercontent.com/cheprasov/json-colors/master/colors.json");
+
+            return JsonConvert.DeserializeObject<ColorQuizColor[]>(json) ?? throw new Exception("The deserialized Color Quiz Json was null");
+        }
+        catch (Exception ex)
+        {
+            _console.LogError("Something went wrong, attempting to get the Color Quiz colors", ex);
+            return Array.Empty<ColorQuizColor>();
         }
     }
 
@@ -99,26 +116,26 @@ public sealed class HttpService : IHttpService
         }
     }
 
-    private static string GetEndpoint(NorrisJokeCategory category)
+    private static string GetEndpoint(ChuckNorrisJokeCategory category)
     {
         return category switch
         {
-            NorrisJokeCategory.Animal => "?category=animal",
-            NorrisJokeCategory.Career => "?category=career",
-            NorrisJokeCategory.Celebrity => "?category=celebrity",
-            NorrisJokeCategory.Dev => "?category=dev",
-            NorrisJokeCategory.Excplicit => "?category=explicit",
-            NorrisJokeCategory.Fashion => "?category=fashion",
-            NorrisJokeCategory.Food => "?category=food",
-            NorrisJokeCategory.History => "?category=history",
-            NorrisJokeCategory.Money => "?category=money",
-            NorrisJokeCategory.Movie => "?category=movie",
-            NorrisJokeCategory.Music => "?category=music",
-            NorrisJokeCategory.Political => "?category=political",
-            NorrisJokeCategory.Religion => "?category=religion",
-            NorrisJokeCategory.Science => "?category=science",
-            NorrisJokeCategory.Sport => "?category=sport",
-            NorrisJokeCategory.Travel => "?category=travel",
+            ChuckNorrisJokeCategory.Animal => "?category=animal",
+            ChuckNorrisJokeCategory.Career => "?category=career",
+            ChuckNorrisJokeCategory.Celebrity => "?category=celebrity",
+            ChuckNorrisJokeCategory.Dev => "?category=dev",
+            ChuckNorrisJokeCategory.Excplicit => "?category=explicit",
+            ChuckNorrisJokeCategory.Fashion => "?category=fashion",
+            ChuckNorrisJokeCategory.Food => "?category=food",
+            ChuckNorrisJokeCategory.History => "?category=history",
+            ChuckNorrisJokeCategory.Money => "?category=money",
+            ChuckNorrisJokeCategory.Movie => "?category=movie",
+            ChuckNorrisJokeCategory.Music => "?category=music",
+            ChuckNorrisJokeCategory.Political => "?category=political",
+            ChuckNorrisJokeCategory.Religion => "?category=religion",
+            ChuckNorrisJokeCategory.Science => "?category=science",
+            ChuckNorrisJokeCategory.Sport => "?category=sport",
+            ChuckNorrisJokeCategory.Travel => "?category=travel",
             _ => "",
         };
     }

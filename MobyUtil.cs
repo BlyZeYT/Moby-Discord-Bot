@@ -447,4 +447,42 @@ public static class MobyUtil
 
         return new Color(rgb[0], rgb[1], rgb[2]);
     }
+
+    public static Embed GetColorQuizEmbed(ColorQuizColor color)
+    {
+        return new EmbedBuilder()
+            .WithTitle("**\\🌈 Color Quiz**")
+            .WithColor(color.Hex.TryGetColor() ?? Moby.Color)
+            .WithImageUrl($"https://singlecolorimage.com/get/{color.Hex.Replace("#", "")}/150x100.png")
+            .Build();
+    }
+
+    public static MessageComponent GetColorQuizComponent(ColorQuizColor[] colors)
+    {
+        var builder = new ComponentBuilder();
+
+        var correctColor = colors[0];
+
+        Random.Shared.Shuffle(colors);
+
+        var wrongIterations = 0;
+        for (int i = 0; i < colors.Length; i++)
+        {
+            if (colors[i] == correctColor) builder.WithButton(colors[i].Name, Moby.ColorQuizCorrectAnswerCId, ButtonStyle.Secondary, Moby.QuizEmojis[i], row: i % 2 == 0 ? 0 : 1);
+            else
+            {
+                wrongIterations++;
+
+                builder.WithButton(colors[i].Name, wrongIterations switch
+                {
+                    1 => Moby.ColorQuizWrongAnswerCId1,
+                    2 => Moby.ColorQuizWrongAnswerCId2,
+                    3 => Moby.ColorQuizWrongAnswerCId3,
+                    _ => ""
+                }, ButtonStyle.Secondary, Moby.QuizEmojis[i], row: i % 2 == 0 ? 0 : 1);
+            }
+        }
+
+        return builder.Build();
+    }
 }

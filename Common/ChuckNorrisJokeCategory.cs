@@ -2,7 +2,7 @@
 
 using Discord.Interactions;
 
-public enum NorrisJokeCategory
+public enum ChuckNorrisJokeCategory
 {
     [ChoiceDisplay("🎲 Random")]
     None,

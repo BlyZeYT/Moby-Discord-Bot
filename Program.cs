@@ -1,6 +1,5 @@
 ﻿namespace Moby;
 
-using ChuckNorrisApi;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -20,6 +19,7 @@ sealed class Program
     private InteractionService _service = null!;
     private IDatabase _database = null!;
     private IMobyLogger _logger = null!;
+    private IHttpService _http = null!;
     private LavaNode _lavaNode = null!;
 
     static Task Main() => new Program().MainAsync();
@@ -70,6 +70,7 @@ sealed class Program
         _service = provider.GetRequiredService<InteractionService>();
         _database = provider.GetRequiredService<IDatabase>();
         _logger = provider.GetRequiredService<IMobyLogger>();
+        _http = provider.GetRequiredService<IHttpService>();
         _lavaNode = provider.GetRequiredService<LavaNode>();
 
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
@@ -98,6 +99,7 @@ sealed class Program
 
         await SetStatusAsync();
         await SetGameAsync();
+        await SetColorQuizSetupAsync();
         await ConnectToLavaNodeAsync();
 
         if (Moby.IsDebug()) await _service.RegisterCommandsToGuildAsync(Convert.ToUInt64(_config["serverid"]), true);
@@ -123,6 +125,20 @@ sealed class Program
         await _client.SetGameAsync("🐳 noises", null, ActivityType.Listening);
 
         await _logger.LogTraceAsync("Set Bot game"); 
+    }
+
+    private async Task SetColorQuizSetupAsync()
+    {
+        _logger.LogDebugAsync("Started to initialize the Color Quiz data");
+
+        var colors = await _http.GetColorQuizInfo();
+
+        Random.Shared.Shuffle(colors);
+
+        Moby.ColorQuizInfo = colors;
+
+        if (Moby.ColorQuizInfo.Length == 0) _logger.LogErrorAsync(null, "Error to initialize Color Quiz data successfully");
+        else _logger.LogDebugAsync("Initialized Color Quiz data successfully");
     }
 
     private async Task ConnectToLavaNodeAsync()

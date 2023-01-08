@@ -154,10 +154,18 @@ public static class Extensions
 
     public static Color? TryGetColor(this string? hex)
     {
-        return string.IsNullOrWhiteSpace(hex)
-            ? null
-            : hex.Length is not 6 and 7
-            ? null
-            : int.TryParse(hex, NumberStyles.HexNumber, null, out int number) ? new Color((uint)number) : null;
+        return string.IsNullOrWhiteSpace(hex) ? null : hex.Length is 6 or 7
+            ? int.TryParse(hex.Replace("#", ""), NumberStyles.HexNumber, null, out int number) ? new Color((uint)number) : null : null;
+    }
+
+    public static void Shuffle<T>(this Random rng, T[] array)
+    {
+        int n = array.Length;
+
+        while (n > 1)
+        {
+            int k = rng.Next(n--);
+            (array[k], array[n]) = (array[n], array[k]);
+        }
     }
 }

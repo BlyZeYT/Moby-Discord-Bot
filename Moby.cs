@@ -1,6 +1,7 @@
 ﻿namespace Moby;
 
 using Discord;
+using global::Moby.Common;
 using Microsoft.Extensions.Logging;
 
 public static class Moby
@@ -39,6 +40,11 @@ public static class Moby
 
     public const string CoinflipAgainCId = "flip-a-coin-again";
 
+    public const string ColorQuizCorrectAnswerCId = "color-quiz-correct-answer";
+    public const string ColorQuizWrongAnswerCId1 = "color-quiz-wrong-answer-1";
+    public const string ColorQuizWrongAnswerCId2 = "color-quiz-wrong-answer-2";
+    public const string ColorQuizWrongAnswerCId3 = "color-quiz-wrong-answer-3";
+
     public const ulong InformationChannelId = 1058214987170058312;
     public const ulong ContactChannelId = 1057784058517667881;
     public const ulong LogsChannelId = 1053392480034357432;
@@ -51,7 +57,9 @@ public static class Moby
 
     public static IDictionary<LogLevel, Tuple<Color, Emoji>> LogLevels { get; }
 
-    public static Random Random { get; }
+    public static ColorQuizColor[] ColorQuizInfo { get; set; }
+
+    public static Emoji[] QuizEmojis { get; }
 
     static Moby()
     {
@@ -67,7 +75,10 @@ public static class Moby
             { LogLevel.Critical, new Tuple<Color, Emoji>(new Color(171, 12, 76), new Emoji("☢️")) }
         };
 
-        Random = Random.Shared;
+        QuizEmojis = new Emoji[]
+        {
+            "🇦", "🇧", "🇨", "🇩"
+        };
     }
 
     public static bool IsDebug()

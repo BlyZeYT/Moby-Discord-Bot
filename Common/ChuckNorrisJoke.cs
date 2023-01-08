@@ -1,4 +1,4 @@
-﻿namespace ChuckNorrisApi;
+﻿namespace Moby.Common;
 
 public sealed record ChuckNorrisJoke
 {
