@@ -412,22 +412,13 @@ public static class MobyUtil
         return new EmbedBuilder()
             .WithColor(color)
             .WithTitle("**\\🌈 Color**")
-            .AddField("HEX", color.ToHex())
+            .AddField("Hex", color.ToHex())
             .AddField("RGB", $"{color.R}, {color.G}, {color.B}")
-            .AddField("HSV", $"{hsv.Item1.GetFormatted()}°, {hsv.Item2.GetFormatted()}%, {hsv.Item3.GetFormatted()}%")
-            .AddField("HSL", $"{hsl.Item1.GetFormatted()}°, {hsl.Item2.GetFormatted()}%, {hsl.Item3.GetFormatted()}%")
-            .AddField("CMYK", $"{cmyk.Item1.GetFormatted()}%, {cmyk.Item2.GetFormatted()}%, {cmyk.Item3.GetFormatted()}%, {cmyk.Item4.GetFormatted()}%")
-            .AddField("YCbCr", $"{ycbcr.Item1.GetFormatted()}, {ycbcr.Item2.GetFormatted()}, {ycbcr.Item3.GetFormatted()}")
+            .AddField("HSV", $"{hsv.H.Round(0)}°, {hsv.S.Round(0)}%, {hsv.V.Round(0)}%")
+            .AddField("HSL", $"{hsl.H.Round(0)}°, {hsl.S.Round(0)}%, {hsl.L.Round(0)}%")
+            .AddField("CMYK", $"{cmyk.C.Round(0)}%, {cmyk.M.Round(0)}%, {cmyk.Y.Round(0)}%, {cmyk.K.Round(0)}%")
+            .AddField("YCbCr", $"{ycbcr.Y}, {ycbcr.Cb}, {ycbcr.Cr}")
             .Build();
-    }
-
-    public static Embed GetRandomColorEmbed()
-    {
-        Span<byte> rgb = new byte[3];
-
-        Random.Shared.NextBytes(rgb);
-
-        return GetColorEmbed(new Color(rgb[0], rgb[1], rgb[2]));
     }
 
     public static IEnumerable<Embed> GetRandomColorEmbeds(int amount)
@@ -443,8 +434,17 @@ public static class MobyUtil
 
             yield return new EmbedBuilder()
                 .WithColor(color)
-                .WithDescription($"**HEX:** {color.ToHex()} - **RGB:** {color.R}, {color.G}, {color.B}")
+                .WithDescription($"**Hex:** {color.ToHex()} - **RGB:** {color.R}, {color.G}, {color.B}")
                 .Build();
         }
+    }
+
+    public static Color GetRandomColor()
+    {
+        Span<byte> rgb = new byte[3];
+
+        Random.Shared.NextBytes(rgb);
+
+        return new Color(rgb[0], rgb[1], rgb[2]);
     }
 }

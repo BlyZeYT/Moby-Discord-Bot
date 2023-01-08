@@ -191,7 +191,7 @@ public sealed class GeneralModule : MobyModuleBase
 
             if (amount == 1)
             {
-                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRandomColorEmbed());
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorEmbed(MobyUtil.GetRandomColor()));
                 return;
             }
 
@@ -199,13 +199,35 @@ public sealed class GeneralModule : MobyModuleBase
         }
 
         [SlashCommand("rgb", "Get information about the provided RGB color")]
-        public async Task ColorRgbAsync([Summary("red", "The red color amount")] [MinValue(0)] [MaxValue(255)] byte r,
-            [Summary("green", "The green color amount")] [MinValue(0)] [MaxValue(255)] byte g,
-            [Summary("blue", "The blue color amount")] [MinValue(0)] [MaxValue(255)] byte b)
+        public async Task ColorRgbAsync([Summary("red", "The red color amount")] [MinValue(0)] [MaxValue(255)] int r,
+            [Summary("green", "The green color amount")] [MinValue(0)] [MaxValue(255)] int g,
+            [Summary("blue", "The blue color amount")] [MinValue(0)] [MaxValue(255)] int b)
         {
             await DeferAsync(ephemeral: true);
 
             await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorEmbed(new Color(r, g, b)));
+        }
+
+        [SlashCommand("hex", "Get information about the provided Hex color")]
+        public async Task ColorHexAsync([Summary("hex", "Enter a Hex color value without '#'")] [MinLength(6)] [MaxLength(6)] string hex)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var color = hex.TryGetColor();
+
+            if (color.HasValue)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorEmbed(color.Value));
+                return;
+            }
+
+            await FollowupAsync("I can't get a color out of that Hex value", ephemeral: true);
+        }
+
+        [SlashCommand("guess", "Guess the shown color")]
+        public async Task ColorGuessAsync()
+        {
+            await DeferAsync(ephemeral: true);
         }
     }
 }

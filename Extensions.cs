@@ -67,99 +67,97 @@ public static class Extensions
     public static string ToHex(this Color color)
         => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
-    public static Tuple<double, double, double> ToHsv(this Color color)
+    public static HSV ToHsv(this Color color)
     {
-        var r = color.R;
-        var g = color.G;
-        var b = color.B;
+        var r = color.R / 255d;
+        var g = color.G / 255d;
+        var b = color.B / 255d;
 
-        double min = Math.Min(Math.Min(r, g), b);
-        double max = Math.Max(Math.Max(r, g), b);
+        var min = Math.Min(Math.Min(r, g), b);
+        var max = Math.Max(Math.Max(r, g), b);
 
-        double delta = max - min;
+        var v = max;
+        var delta = max - min;
 
-        if (max == 0 || delta == 0) return Tuple.Create(0.0, 0.0, 0.0);
+        if (max == 0 || delta == 0) return new(0, 0, 0);
 
+        var s = delta / max;
         double h;
 
-        if (r == max)
-        {
-            h = (g - b) / delta;
-        }
-        else if (g == max)
-        {
-            h = 2 + (b - r) / delta;
-        }
-        else
-        {
-            h = 4 + (r - g) / delta;
-        }
+        if (r == max) h = (g - b) / delta;
+        else if (g == max) h = 2 + (b - r) / delta;
+        else h = 4 + (r - g) / delta;
 
         h *= 60;
-        if (h < 0)
-        {
-            h += 360;
-        }
+        if (h < 0) h += 360;
 
-        return Tuple.Create(h, delta / max, max);
+        return new(h, s * 100, v * 100);
     }
 
-    public static Tuple<double, double, double> ToHsl(this Color color)
+    public static HSL ToHsl(this Color color)
     {
-        var r = color.R;
-        var g = color.G;
-        var b = color.B;
+        var r = color.R / 255d;
+        var g = color.G / 255d;
+        var b = color.B / 255d;
 
-        double min = Math.Min(Math.Min(r, g), b);
-        double max = Math.Max(Math.Max(r, g), b);
-        double l = (max + min) / 2;
+        var min = Math.Min(Math.Min(r, g), b);
+        var max = Math.Max(Math.Max(r, g), b);
 
-        if (max == min) return Tuple.Create(0.0, 0.0, l);
+        var l = (min + max) / 2;
+        var delta = max - min;
 
-        double d = max - min;
-        double s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        if (max == min) return new(0, 0, l);
+
         double h;
 
-        if (r == max)
-        {
-            h = (g - b) / d + (g < b ? 6 : 0);
-        }
-        else if (g == max)
-        {
-            h = (b - r) / d + 2;
-        }
-        else
-        {
-            h = (r - g) / d + 4;
-        }
+        var s = l < 0.5 ? delta / (max + min) : delta / (2 - max - min);
 
-        h /= 6;
+        if (r == max) h = (g - b) / delta;
+        else if (g == max) h = 2 + (b - r) / delta;
+        else h = 4 + (r - g) / delta;
 
-        return Tuple.Create(h, s, l);
+        h *= 60;
+        if (h < 0) h += 360;
+
+        return new(h, s * 100, l * 100);
     }
 
-    public static Tuple<double, double, double, double> ToCmyk(this Color color)
+    public static CMYK ToCmyk(this Color color)
     {
-        double c = 1 - (color.R / 255.0);
-        double m = 1 - (color.G / 255.0);
-        double y = 1 - (color.B / 255.0);
-        double k = Math.Min(Math.Min(c, m), y);
+        var r = color.R / 255.0;
+        var g = color.G / 255.0;
+        var b = color.B / 255.0;
 
-        return k == 1 ? Tuple.Create(0.0, 0.0, 0.0, k) : Tuple.Create((c - k) / (1 - k), (m - k) / (1 - k), (y - k) / (1 - k), k);
+        var k = 1 - Math.Max(r, Math.Max(g, b));
+        var c = (1 - r - k) / (1 - k);
+        var m = (1 - g - k) / (1 - k);
+        var y = (1 - b - k) / (1 - k);
+
+        return new(c * 100, m * 100, y * 100, k * 100);
     }
 
-    public static Tuple<double, double, double> ToYCbCr(this Color color)
+    public static YCbCr ToYCbCr(this Color color)
     {
         var r = color.R;
         var g = color.G;
         var b = color.B;
 
-        return Tuple.Create(
-            0.299 * r + 0.587 * g + 0.114 * b,
-            128 - 0.168736 * r - 0.331264 * g + 0.5 * b,
-            128 + 0.5 * r - 0.418688 * g - 0.081312 * b);
+        var y = (int)(0.299 * r + 0.587 * g + 0.114 * b);
+        var cb = (int)(0.564 * (b - y) + 128);
+        var cr = (int)(0.713 * (r - y) + 128);
+
+        return new(y, cb, cr);
     }
 
-    public static string GetFormatted(this double d)
-        => d.ToString("f2", new NumberFormatInfo() { NumberDecimalSeparator = "." });
+    public static double Round(this double d, int digits)
+        => Math.Round(d, digits);
+
+    public static Color? TryGetColor(this string? hex)
+    {
+        return string.IsNullOrWhiteSpace(hex)
+            ? null
+            : hex.Length is not 6 and 7
+            ? null
+            : int.TryParse(hex, NumberStyles.HexNumber, null, out int number) ? new Color((uint)number) : null;
+    }
 }
