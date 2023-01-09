@@ -186,7 +186,7 @@ public sealed class GeneralModule : MobyModuleBase
 
         var quote = await _http.GetAnimeQuoteAsync();
 
-        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetAnimeQuoteEmbed(quote.IsEmpty() ? new AnimeQuote("Discord", "Moby", "I think it's enough for today my friend :)") : quote));
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetAnimeQuoteEmbed(quote.IsEmpty() ? new AnimeQuote("Discord", "Moby", "I think it's enough for now my friend. You should try again later") : quote));
     }
 
     [SlashCommand("8ball", "Get an 8ball like answer to your question")]
