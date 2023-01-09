@@ -485,4 +485,20 @@ public static class MobyUtil
 
         return builder.Build();
     }
+
+    public static Embed GetAnimeQuoteEmbed(AnimeQuote quote)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\💮 Anime Quote**")
+            .WithDescription($"> \"{quote.Quote}\"\n\n» {quote.Character}\n« {quote.Anime}")
+            .Build();
+    }
+
+    public static Embed GetEightBallEmbed(string question, string answer)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🎱 8ball**")
+            .WithDescription($"**You asked:** {question}\n**The answer is:** {answer}")
+            .Build();
+    }
 }

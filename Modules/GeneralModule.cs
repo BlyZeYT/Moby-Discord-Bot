@@ -5,6 +5,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using global::Moby.Common;
 using global::Moby.Services;
+using Microsoft.Extensions.Hosting;
 
 [RequireContext(ContextType.Guild)]
 [Discord.Commands.Name("General")]
@@ -170,12 +171,32 @@ public sealed class GeneralModule : MobyModuleBase
         await FollowupAsync(joke.Value, ephemeral: true);
     }
 
-    [SlashCommand("top", "Get a list of the largest server where I'm in")]
+    [SlashCommand("top", "Get a list of the largest server where I'm on")]
     public async Task TopAsync()
     {
         await DeferAsync(ephemeral: true);
 
         await FollowupAsync(ephemeral: true, embed: MobyUtil.GetTopServerListEmbed(_client.Guilds));
+    }
+
+    [SlashCommand("animequote", "Get a random anime quote")]
+    public async Task AnimequoteAsync()
+    {
+        await DeferAsync(ephemeral: true);
+
+        var quote = await _http.GetAnimeQuoteAsync();
+
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetAnimeQuoteEmbed(quote.IsEmpty() ? new AnimeQuote("Discord", "Moby", "I think it's enough for today my friend :)") : quote));
+    }
+
+    [SlashCommand("8ball", "Get an 8ball like answer to your question")]
+    public async Task EightBallAsync([Summary("question", "The question you want the answer to")][MinLength(1)] [MaxLength(100)] string question)
+    {
+        await DeferAsync(ephemeral: true);
+
+        var answer = await _http.GetEightBallAnswerAsync(question, Random.Shared.Next(0, 2) == 0);
+
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetEightBallEmbed(question, string.IsNullOrWhiteSpace(answer) ? "Ask again later" : answer));
     }
 
     [Group("color", "Commands with colors")]
@@ -209,7 +230,7 @@ public sealed class GeneralModule : MobyModuleBase
         }
 
         [SlashCommand("hex", "Get information about the provided Hex color")]
-        public async Task ColorHexAsync([Summary("hex", "Enter a Hex color value without '#'")] [MinLength(6)] [MaxLength(6)] string hex)
+        public async Task ColorHexAsync([Summary("hex", "Enter a Hex color value")] [MinLength(6)] [MaxLength(7)] string hex)
         {
             await DeferAsync(ephemeral: true);
 
@@ -224,8 +245,8 @@ public sealed class GeneralModule : MobyModuleBase
             await FollowupAsync("I can't get a color out of that Hex value", ephemeral: true);
         }
 
-        [SlashCommand("quiz", "Guess the shown color")]
-        public async Task ColorGuessAsync()
+        [SlashCommand("quiz", "Guess the name of the shown color")]
+        public async Task ColorQuizAsync()
         {
             await DeferAsync(ephemeral: true);
 

@@ -14,6 +14,10 @@ public interface IHttpService
 
     public ValueTask<ColorQuizColor[]> GetColorQuizInfo();
 
+    public ValueTask<AnimeQuote> GetAnimeQuoteAsync();
+
+    public ValueTask<string> GetEightBallAnswerAsync(string question, bool lucky);
+
     public ValueTask<bool> IsUrlEmpty(string url);
 }
 
@@ -76,13 +80,13 @@ public sealed class HttpService : IHttpService
         {
             dynamic json = JObject.Parse(await _client.GetStringAsync($"https://api.chucknorris.io/jokes/random{GetEndpoint(category)}"));
 
-            _console.LogDebug("Reddit Post was returned successfully");
+            _console.LogDebug("Chuck Norris Joke was returned successfully");
 
             return new ChuckNorrisJoke(json.value.ToString(), category is ChuckNorrisJokeCategory.Excplicit);
         }
         catch (Exception ex)
         {
-            _console.LogError("Something went wrong, attempting to get a Chuck Norris Meme", ex);
+            _console.LogError("Something went wrong, attempting to get a Chuck Norris Joke", ex);
             return ChuckNorrisJoke.Empty();
         }
     }
@@ -99,6 +103,42 @@ public sealed class HttpService : IHttpService
         {
             _console.LogError("Something went wrong, attempting to get the Color Quiz colors", ex);
             return Array.Empty<ColorQuizColor>();
+        }
+    }
+
+    public async ValueTask<AnimeQuote> GetAnimeQuoteAsync()
+    {
+        try
+        {
+            dynamic json = JObject.Parse(await _client.GetStringAsync("https://animechan.vercel.app/api/random"));
+
+            _console.LogDebug("Anime Quote was returned successfully");
+
+            return new AnimeQuote(json.anime.ToString(), json.character.ToString(), json.quote.ToString());
+        }
+        catch (Exception ex)
+        {
+            _console.LogError("Something went wrong, attempting to get a Anime Quote", ex);
+
+            return AnimeQuote.Empty();
+        }
+    }
+
+    public async ValueTask<string> GetEightBallAnswerAsync(string question, bool lucky)
+    {
+        try
+        {
+            dynamic json = JObject.Parse(await _client.GetStringAsync($"https://www.eightballapi.com/api/biased?question={question.Replace(' ', '+')}?&lucky={lucky}"));
+
+            _console.LogDebug("8ball answer was returned successfully");
+
+            return json.reading.ToString();
+        }
+        catch (Exception ex)
+        {
+            _console.LogError("Something went wrong, attempting to get a 8ball answer", ex);
+
+            return "";
         }
     }
 
