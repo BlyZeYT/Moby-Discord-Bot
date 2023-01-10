@@ -501,4 +501,47 @@ public static class MobyUtil
             .WithDescription($"**You asked:** {question}\n**The answer is:** {answer}")
             .Build();
     }
+
+    public static Embed GetBanInfoEmbed(RestBan ban)
+    {
+        return new MobyEmbedBuilder()
+            .WithThumbnailUrl(ban.User.GetAvatarUrl(size: 2048) ?? ban.User.GetDefaultAvatarUrl())
+            .WithTitle("**\\⛔ Ban Info**")
+            .WithDescription($"{ban.User.Username} #{ban.User.Discriminator}\nId: {ban.User.Id}\nReason: {ban.Reason}")
+            .Build();
+    }
+
+    public static Embed GetUserMutedEmbed(SocketGuildUser user, string? reason)
+    {
+        var builder = new MobyEmbedBuilder()
+            .WithTitle("**\\🔇 Muted** " + user.Username);
+
+        if (!string.IsNullOrWhiteSpace(reason)) builder.WithDescription("Reason: " + reason);
+
+        return builder.Build();
+    }
+
+    public static Embed GetUserDeafenedEmbed(SocketGuildUser user, string? reason)
+    {
+        var builder = new MobyEmbedBuilder()
+            .WithTitle("**\\🔇 Deafened** " + user.Username);
+
+        if (!string.IsNullOrWhiteSpace(reason)) builder.WithDescription("Reason: " + reason);
+
+        return builder.Build();
+    }
+
+    public static Embed GetUserUnmutedEmbed(SocketGuildUser user)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🔈 Unmuted** " + user.Username)
+            .Build();
+    }
+
+    public static Embed GetUserUndeafenedEmbed(SocketGuildUser user)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🔈 Undeafened** " + user.Username)
+            .Build();
+    }
 }

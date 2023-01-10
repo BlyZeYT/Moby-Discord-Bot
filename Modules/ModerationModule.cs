@@ -104,74 +104,6 @@ public sealed class ModerationModule : MobyModuleBase
         }
     }
 
-    [SlashCommand("grant-role", "Grant the mentioned user a role")]
-    [RequireUserPermission(GuildPermission.ManageRoles)]
-    [RequireBotPermission(GuildPermission.ManageRoles)]
-    public async Task GrantRoleAsync([Summary("user", "Mention a user that should get the role")] SocketGuildUser user,
-        [Summary("role", "Mention a role that the user should get")] SocketRole role)
-    {
-        await DeferAsync(ephemeral: true);
-
-        if (role.IsManaged || role.IsEveryone)
-        {
-            await FollowupAsync("I can't work with this role", ephemeral: true);
-
-            return;
-        }
-
-        if (Context.Guild.CurrentUser.Roles.Max(x => x.Position) <= role.Position)
-        {
-            await FollowupAsync("I can't distribute a role that is higher or equal to mine", ephemeral: true);
-
-            return;
-        }
-
-        if (user.Roles.Contains(role))
-        {
-            await FollowupAsync("The user already has that role", ephemeral: true);
-
-            return;
-        }
-
-        await user.AddRoleAsync(role);
-
-        await FollowupAsync($"Granted {user.Mention} the role {(role.IsMentionable ? role.Mention : role.Name)} {role.Emoji}", ephemeral: true);
-    }
-
-    [SlashCommand("remove-role", "Remove a role from the mentioned user")]
-    [RequireUserPermission(GuildPermission.ManageRoles)]
-    [RequireBotPermission(GuildPermission.ManageRoles)]
-    public async Task RemoveRoleAsync([Summary("user", "Mention a user from whom the role should be removed")] SocketGuildUser user,
-        [Summary("role", "Mention a role that should get removed from the user")] SocketRole role)
-    {
-        await DeferAsync(ephemeral: true);
-
-        if (role.IsManaged || role.IsEveryone)
-        {
-            await FollowupAsync("I can't work with this role", ephemeral: true);
-
-            return;
-        }
-
-        if (Context.Guild.CurrentUser.Roles.Max(x => x.Position) <= role.Position)
-        {
-            await FollowupAsync("I can't distribute a role that is higher or equal to mine", ephemeral: true);
-
-            return;
-        }
-
-        if (!user.Roles.Contains(role))
-        {
-            await FollowupAsync("The user doesn't have that role", ephemeral: true);
-
-            return;
-        }
-
-        await user.RemoveRoleAsync(role);
-
-        await FollowupAsync($"Removed the role {(role.IsMentionable ? role.Mention : role.Name)} from {user.Mention} {role.Emoji}", ephemeral: true);
-    }
-
     [SlashCommand("kick", "Kick a user from the server")]
     [RequireUserPermission(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.KickMembers)]
@@ -227,13 +159,42 @@ public sealed class ModerationModule : MobyModuleBase
         }
     }
 
-    [SlashCommand("banlist", "Get a list of the currently banned users")]
+    [SlashCommand("baninfo", "Get information about a banned user")]
     [RequireUserPermission(GuildPermission.BanMembers)]
     [RequireBotPermission(GuildPermission.BanMembers)]
-    public async Task BanlistAsync([Summary("amount", "The amount of bans that should be in the list")] [MinValue(1)] [MaxValue(500)] int amount = 100)
-        => await RespondAsync(ephemeral: true, embed: MobyUtil.GetBanlistEmbed(await Context.Guild.GetBansAsync(amount).FlattenAsync()));
+    public async Task BanInfoAsync([Summary("userid", "Enter the id of the user you want information about")] [MinLength(10)] [MaxLength(30)] string userid)
+    {
+        if (!ulong.TryParse(userid, out var id))
+        {
+            await RespondAsync("Couldn't find a user with the Id: " + userid, ephemeral: true);
 
-    [SlashCommand("pardon", "Unban a user from the server")]
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+
+        var user = await _client.GetUserAsync(id);
+
+        if (user is null)
+        {
+            await FollowupAsync("Couldn't find a user with the Id: " + id, ephemeral: true);
+
+            return;
+        }
+
+        var ban = await Context.Guild.GetBanAsync(user);
+
+        if (ban is null)
+        {
+            await FollowupAsync($"{user.Mention} is not banned from this server", ephemeral: true);
+
+            return;
+        }
+
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBanInfoEmbed(ban));
+    }
+
+    [SlashCommand("unban", "Unban a user from the server")]
     [RequireUserPermission(GuildPermission.BanMembers)]
     [RequireBotPermission(GuildPermission.BanMembers)] 
     public async Task PardonAsync([Summary("userid", "Enter the id of the user that should get unbanned")] [MinLength(10)] [MaxLength(30)] string userid)
@@ -265,6 +226,208 @@ public sealed class ModerationModule : MobyModuleBase
         catch (Exception)
         {
             await FollowupAsync("I can't unban this user", ephemeral: true);
+        }
+    }
+
+    [SlashCommand("mute", "Mute a user in a voice channel")]
+    [RequireUserPermission(GuildPermission.MuteMembers)]
+    [RequireBotPermission(GuildPermission.MuteMembers)]
+    public async Task MuteAsync([Summary("user", "Mention a user that should get muted")] SocketGuildUser user,
+        [Summary("reason", "Enter a reason why the user is muted")] [MinLength(1)] [MaxLength(250)] string? reason = null)
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (user.VoiceChannel is null)
+        {
+            await FollowupAsync($"{user.Mention} is not in a voice channel", ephemeral: true);
+            return;
+        }
+
+        if (user.IsMuted || user.IsSelfMuted)
+        {
+            await FollowupAsync($"{user.Mention} is already muted", ephemeral: true);
+            return;
+        }
+
+        await user.VoiceChannel.ModifyAsync(x => x.SelfMute = true);
+
+        await user.VoiceChannel.SendMessageAsync(embed: MobyUtil.GetUserMutedEmbed(user, reason));
+    }
+
+    [SlashCommand("deaf", "Deafen a user in a voice channel")]
+    [RequireUserPermission(GuildPermission.DeafenMembers)]
+    [RequireBotPermission(GuildPermission.DeafenMembers)]
+    public async Task DeafAsync([Summary("user", "Mention a user that should get deafened")] SocketGuildUser user,
+        [Summary("reason", "Enter a reason why the user is deafened")] [MinLength(1)] [MaxLength(250)] string? reason = null)
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (user.VoiceChannel is null)
+        {
+            await FollowupAsync($"{user.Mention} is not in a voice channel", ephemeral: true);
+            return;
+        }
+
+        if (user.IsDeafened || user.IsSelfDeafened)
+        {
+            await FollowupAsync($"{user.Mention} is already deafened", ephemeral: true);
+            return;
+        }
+
+        await user.VoiceChannel.ModifyAsync(x => x.SelfDeaf = true);
+
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetUserDeafenedEmbed(user, reason));
+    }
+
+    [SlashCommand("unmute", "Unmute a user in a voice channel")]
+    [RequireUserPermission(GuildPermission.MuteMembers)]
+    [RequireBotPermission(GuildPermission.MuteMembers)]
+    public async Task UnmuteAsync([Summary("user", "Mention a user that should get unmuted")] SocketGuildUser user)
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (user.VoiceChannel is null)
+        {
+            await FollowupAsync($"{user.Mention} is not in a voice channel", ephemeral: true);
+            return;
+        }
+
+        if (!(user.IsMuted || user.IsSelfMuted))
+        {
+            await FollowupAsync($"{user.Mention} is already unmuted", ephemeral: true);
+            return;
+        }
+
+        await user.VoiceChannel.ModifyAsync(x => x.SelfMute = false);
+
+        await user.VoiceChannel.SendMessageAsync(embed: MobyUtil.GetUserUnmutedEmbed(user));
+    }
+
+    [SlashCommand("undeaf", "Undeafen a user in a voice channel")]
+    [RequireUserPermission(GuildPermission.DeafenMembers)]
+    [RequireBotPermission(GuildPermission.DeafenMembers)]
+    public async Task UndeafAsync([Summary("user", "Mention a user that should get undeafened")] SocketGuildUser user)
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (user.VoiceChannel is null)
+        {
+            await FollowupAsync($"{user.Mention} is not in a voice channel", ephemeral: true);
+            return;
+        }
+
+        if (!(user.IsDeafened || user.IsSelfDeafened))
+        {
+            await FollowupAsync($"{user.Mention} is already undeafened", ephemeral: true);
+            return;
+        }
+
+        await user.VoiceChannel.ModifyAsync(x => x.SelfDeaf = false);
+
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetUserUndeafenedEmbed(user));
+    }
+
+    [SlashCommand("slowmode", "Change the slowmode settings for this channel")]
+    [RequireUserPermission(GuildPermission.ManageChannels)]
+    [RequireBotPermission(GuildPermission.ManageChannels)]
+    public async Task SlowmodeAsync([Summary("interval", "Enter the interval for the slowmode, 0 to disable slowmode")] [MinValue(0)] [MaxValue(2880)] int interval)
+    {
+        await DeferAsync(ephemeral: true);
+        
+        await ((ITextChannel)Context.Channel).ModifyAsync(x => x.SlowModeInterval = interval);
+
+        await FollowupAsync(interval == 0 ? "Slowmode was deactivated" : $"The slowmode interval was set to {interval} seconds", ephemeral: true);
+    }
+
+    [Group("role", "Commands to manage roles")]
+    [Discord.Commands.Name("Role Group Commands")]
+    public sealed class RoleCommandGroup : MobyModuleBase
+    {
+        public RoleCommandGroup(ConsoleLogger console) : base(console) { }
+
+        [SlashCommand("grant", "Grant the mentioned user a role")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        public async Task RoleGrantAsync([Summary("user", "Mention a user that should get the role")] SocketGuildUser user,
+        [Summary("role", "Mention a role that the user should get")] SocketRole role)
+        {
+            await DeferAsync(ephemeral: true);
+
+            if (role.IsManaged || role.IsEveryone)
+            {
+                await FollowupAsync("I can't work with this role", ephemeral: true);
+
+                return;
+            }
+
+            if (Context.Guild.CurrentUser.Roles.Max(x => x.Position) <= role.Position)
+            {
+                await FollowupAsync("I can't distribute a role that is higher or equal to mine", ephemeral: true);
+
+                return;
+            }
+
+            if (user.Roles.Contains(role))
+            {
+                await FollowupAsync("The user already has that role", ephemeral: true);
+
+                return;
+            }
+
+            await user.AddRoleAsync(role);
+
+            await FollowupAsync($"Granted {user.Mention} the role {(role.IsMentionable ? role.Mention : role.Name)} {role.Emoji}", ephemeral: true);
+        }
+
+        [SlashCommand("remove", "Remove a role from the mentioned user")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        public async Task RoleRemoveAsync([Summary("user", "Mention a user from whom the role should be removed")] SocketGuildUser user,
+            [Summary("role", "Mention a role that should get removed from the user")] SocketRole role)
+        {
+            await DeferAsync(ephemeral: true);
+
+            if (role.IsManaged || role.IsEveryone)
+            {
+                await FollowupAsync("I can't work with this role", ephemeral: true);
+
+                return;
+            }
+
+            if (Context.Guild.CurrentUser.Roles.Max(x => x.Position) <= role.Position)
+            {
+                await FollowupAsync("I can't distribute a role that is higher or equal to mine", ephemeral: true);
+
+                return;
+            }
+
+            if (!user.Roles.Contains(role))
+            {
+                await FollowupAsync("The user doesn't have that role", ephemeral: true);
+
+                return;
+            }
+
+            await user.RemoveRoleAsync(role);
+
+            await FollowupAsync($"Removed the role {(role.IsMentionable ? role.Mention : role.Name)} from {user.Mention} {role.Emoji}", ephemeral: true);
+        }
+    }
+
+    [Group("list", "Commands to list something")]
+    [Discord.Commands.Name("List Group Commands")]
+    public sealed class ListGroupCommands : MobyModuleBase
+    {
+        public ListGroupCommands(ConsoleLogger console) : base(console) { }
+
+        [SlashCommand("bans", "Get a list of the currently banned users")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [RequireBotPermission(GuildPermission.ManageGuild)]
+        public async Task ListBansAsync([Summary("amount", "The amount of bans that should be in the list")] [MinValue(1)] [MaxValue(500)] int amount = 100)
+        {
+            await DeferAsync(ephemeral: true);
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBanlistEmbed(await Context.Guild.GetBansAsync(amount).FlattenAsync()));
         }
     }
 }
