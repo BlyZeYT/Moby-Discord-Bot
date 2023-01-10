@@ -21,7 +21,7 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("purge", "Delete messages that are not older than 14 days")]
     [RequireUserPermission(GuildPermission.ManageMessages)]
     [RequireBotPermission(GuildPermission.ManageMessages)]
-    public async Task PurgeAsync([Summary("amount", "Enter a amount of messages that should be purged between 1 and 100")] [MinValue(1)] [MaxValue(100)] int amount)
+    public async Task PurgeAsync([Summary("amount", "Enter the amount of messages that should be purged between 1 and 100")] [MinValue(1)] [MaxValue(100)] int amount)
     {
         await DeferAsync(ephemeral: true);
 
@@ -63,8 +63,8 @@ public sealed class ModerationModule : MobyModuleBase
     [RequireUserPermission(GuildPermission.CreateInstantInvite)]
     [RequireBotPermission(GuildPermission.CreateInstantInvite)]
     public async Task InviteAsync([Summary("userid", "Enter the id of the user that should get an invite")] [MinLength(10)] [MaxLength(30)] string userid,
-        [Summary("message", "Enter a custom invitation message")] [MinLength(1)] [MaxLength(2500)] string? message = null,
-        [Summary("url", "Enter a custom invitation link")] [MinLength(10)] [MaxLength(100)] string? url = null)
+        [Summary("message", "Enter the custom invitation message")] [MinLength(1)] [MaxLength(2500)] string? message = null,
+        [Summary("url", "Enter the custom invitation link")] [MinLength(10)] [MaxLength(100)] string? url = null)
     {
         if (!ulong.TryParse(userid, out var id))
         {
@@ -107,8 +107,8 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("kick", "Kick a user from the server")]
     [RequireUserPermission(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.KickMembers)]
-    public async Task KickAsync([Summary("user", "Mention a user that should get kicked")] SocketGuildUser user,
-        [Summary("reason", "Enter a reason why the user is kicked")] [MinLength(1)] [MaxLength(250)] string? reason = null)
+    public async Task KickAsync([Summary("user", "Mention the user that should get kicked")] SocketGuildUser user,
+        [Summary("reason", "Enter the reason why the user is kicked")] [MinLength(1)] [MaxLength(250)] string? reason = null)
     {
         await DeferAsync(ephemeral: true);
 
@@ -134,8 +134,8 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("ban", "Ban a user from the server")]
     [RequireUserPermission(GuildPermission.BanMembers)]
     [RequireBotPermission(GuildPermission.BanMembers)]
-    public async Task BanAsync([Summary("user", "Mention a user that should get banned")] SocketGuildUser user,
-        [Summary("reason", "Enter a reason why the user is banned")] [MinLength(1)] [MaxLength(250)] string? reason = null,
+    public async Task BanAsync([Summary("user", "Mention the user that should get banned")] SocketGuildUser user,
+        [Summary("reason", "Enter the reason why the user is banned")] [MinLength(1)] [MaxLength(250)] string? reason = null,
         [Summary("prunedays", "Enter the days from which the message history should be deleted")] [MinValue(0)] [MaxValue(7)] int prunedays = 0)
     {
         await DeferAsync(ephemeral: true);
@@ -232,8 +232,8 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("mute", "Mute a user in a voice channel")]
     [RequireUserPermission(GuildPermission.MuteMembers)]
     [RequireBotPermission(GuildPermission.MuteMembers)]
-    public async Task MuteAsync([Summary("user", "Mention a user that should get muted")] SocketGuildUser user,
-        [Summary("reason", "Enter a reason why the user is muted")] [MinLength(1)] [MaxLength(250)] string? reason = null)
+    public async Task MuteAsync([Summary("user", "Mention the user that should get muted")] SocketGuildUser user,
+        [Summary("reason", "Enter the reason why the user is muted")] [MinLength(1)] [MaxLength(250)] string? reason = null)
     {
         await DeferAsync(ephemeral: true);
 
@@ -257,8 +257,8 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("deaf", "Deafen a user in a voice channel")]
     [RequireUserPermission(GuildPermission.DeafenMembers)]
     [RequireBotPermission(GuildPermission.DeafenMembers)]
-    public async Task DeafAsync([Summary("user", "Mention a user that should get deafened")] SocketGuildUser user,
-        [Summary("reason", "Enter a reason why the user is deafened")] [MinLength(1)] [MaxLength(250)] string? reason = null)
+    public async Task DeafAsync([Summary("user", "Mention the user that should get deafened")] SocketGuildUser user,
+        [Summary("reason", "Enter the reason why the user is deafened")] [MinLength(1)] [MaxLength(250)] string? reason = null)
     {
         await DeferAsync(ephemeral: true);
 
@@ -282,7 +282,7 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("unmute", "Unmute a user in a voice channel")]
     [RequireUserPermission(GuildPermission.MuteMembers)]
     [RequireBotPermission(GuildPermission.MuteMembers)]
-    public async Task UnmuteAsync([Summary("user", "Mention a user that should get unmuted")] SocketGuildUser user)
+    public async Task UnmuteAsync([Summary("user", "Mention the user that should get unmuted")] SocketGuildUser user)
     {
         await DeferAsync(ephemeral: true);
 
@@ -306,7 +306,7 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("undeaf", "Undeafen a user in a voice channel")]
     [RequireUserPermission(GuildPermission.DeafenMembers)]
     [RequireBotPermission(GuildPermission.DeafenMembers)]
-    public async Task UndeafAsync([Summary("user", "Mention a user that should get undeafened")] SocketGuildUser user)
+    public async Task UndeafAsync([Summary("user", "Mention the user that should get undeafened")] SocketGuildUser user)
     {
         await DeferAsync(ephemeral: true);
 
@@ -336,7 +336,7 @@ public sealed class ModerationModule : MobyModuleBase
         
         await ((ITextChannel)Context.Channel).ModifyAsync(x => x.SlowModeInterval = interval);
 
-        await FollowupAsync(interval == 0 ? "Slowmode was deactivated" : $"The slowmode interval was set to {interval} seconds", ephemeral: true);
+        await FollowupAsync(interval == 0 ? "Slowmode was deactivated \\🐆" : $"The slowmode interval was set to {interval} seconds \\🐢", ephemeral: true);
     }
 
     [Group("role", "Commands to manage roles")]
@@ -348,8 +348,8 @@ public sealed class ModerationModule : MobyModuleBase
         [SlashCommand("grant", "Grant the mentioned user a role")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task RoleGrantAsync([Summary("user", "Mention a user that should get the role")] SocketGuildUser user,
-        [Summary("role", "Mention a role that the user should get")] SocketRole role)
+        public async Task RoleGrantAsync([Summary("user", "Mention the user that should get the role")] SocketGuildUser user,
+            [Summary("role", "Mention the role that the user should get")] SocketRole role)
         {
             await DeferAsync(ephemeral: true);
 
@@ -382,8 +382,8 @@ public sealed class ModerationModule : MobyModuleBase
         [SlashCommand("remove", "Remove a role from the mentioned user")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task RoleRemoveAsync([Summary("user", "Mention a user from whom the role should be removed")] SocketGuildUser user,
-            [Summary("role", "Mention a role that should get removed from the user")] SocketRole role)
+        public async Task RoleRemoveAsync([Summary("user", "Mention the user from whom the role should be removed")] SocketGuildUser user,
+            [Summary("role", "Mention the role that should get removed from the user")] SocketRole role)
         {
             await DeferAsync(ephemeral: true);
 
@@ -411,6 +411,16 @@ public sealed class ModerationModule : MobyModuleBase
             await user.RemoveRoleAsync(role);
 
             await FollowupAsync($"Removed the role {(role.IsMentionable ? role.Mention : role.Name)} from {user.Mention} {role.Emoji}", ephemeral: true);
+        }
+
+        [SlashCommand("info", "Get information about the mentioned role")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        public async Task RoleInfoAsync([Summary("role", "Mention the role you want information about")] SocketRole role)
+        {
+            await DeferAsync(ephemeral: true);
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRoleInfoEmbed(role));
         }
     }
 

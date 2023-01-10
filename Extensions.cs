@@ -8,6 +8,9 @@ using System.Text;
 
 public static class Extensions
 {
+    public static string DiscordFormat(this string str)
+        => str.Trim().Replace('`', '\'').Replace("||", "");
+
     public static Stream ToStream(this string str, Encoding? encoding = null)
         => new MemoryStream((encoding ?? Encoding.UTF8).GetBytes(str));
 

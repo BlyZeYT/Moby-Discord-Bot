@@ -190,13 +190,26 @@ public sealed class GeneralModule : MobyModuleBase
     }
 
     [SlashCommand("8ball", "Get an 8ball like answer to your question")]
-    public async Task EightBallAsync([Summary("question", "The question you want the answer to")][MinLength(1)] [MaxLength(100)] string question)
+    public async Task EightBallAsync([Summary("question", "The question you want the answer to")] [MinLength(1)] [MaxLength(100)] string question)
     {
         await DeferAsync(ephemeral: true);
 
         var answer = await _http.GetEightBallAnswerAsync(question, Random.Shared.Next(0, 2) == 0);
 
         await FollowupAsync(ephemeral: true, embed: MobyUtil.GetEightBallEmbed(question, string.IsNullOrWhiteSpace(answer) ? "Ask again later" : answer));
+    }
+
+    [SlashCommand("fact", "Get a random fact")]
+    public async Task FactAsync([Summary("today", "Yes if you want todays fact, otherwise No")] Answer today = Answer.No)
+    {
+        await DeferAsync(ephemeral: true);
+
+        var fact = await _http.GetFactAsync(today is Answer.Yes);
+
+        await FollowupAsync(ephemeral: true,
+            embed: today is Answer.No
+            ? MobyUtil.GetRandomFactEmbed(string.IsNullOrWhiteSpace(fact) ? "Sometimes...there are no facts." : fact)
+            : MobyUtil.GetFactOfTheDayEmbed(string.IsNullOrWhiteSpace(fact) ? "Sometimes...there are no facts." : fact));
     }
 
     [Group("color", "Commands with colors")]

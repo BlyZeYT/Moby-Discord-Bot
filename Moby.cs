@@ -61,6 +61,8 @@ public static class Moby
 
     public static Emoji[] QuizEmojis { get; }
 
+    public static FactOfTheDay FactOfTheDay { get; set; }
+
     static Moby()
     {
         Color = new Color(34, 141, 255);
@@ -79,6 +81,8 @@ public static class Moby
         {
             "🇦", "🇧", "🇨", "🇩"
         };
+
+        FactOfTheDay = new("");
     }
 
     public static bool IsDebug()

@@ -4,8 +4,8 @@ using Discord.Interactions;
 
 public enum Answer
 {
-    [ChoiceDisplay("No")]
+    [ChoiceDisplay("❌ No")]
     No,
-    [ChoiceDisplay("Yes")]
+    [ChoiceDisplay("✅ Yes")]
     Yes
 }

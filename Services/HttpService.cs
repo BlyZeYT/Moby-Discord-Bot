@@ -18,6 +18,8 @@ public interface IHttpService
 
     public ValueTask<string> GetEightBallAnswerAsync(string question, bool lucky);
 
+    public ValueTask<string> GetFactAsync(bool today);
+
     public ValueTask<bool> IsUrlEmpty(string url);
 }
 
@@ -137,6 +139,29 @@ public sealed class HttpService : IHttpService
         catch (Exception ex)
         {
             _console.LogError("Something went wrong, attempting to get a 8ball answer", ex);
+
+            return "";
+        }
+    }
+
+    public async ValueTask<string> GetFactAsync(bool today)
+    {
+        try
+        {
+            if (today)
+            {
+                if (!Moby.FactOfTheDay.IsEmptyOrOutdated()) return Moby.FactOfTheDay.Text;
+            }
+
+            dynamic json = JObject.Parse(await _client.GetStringAsync($"https://uselessfacts.jsph.pl/{(today ? "today" : "random")}.json?language=en"));
+
+            _console.LogDebug("Fact was returned successfully");
+
+            return json.text.ToString();
+        }
+        catch (Exception ex)
+        {
+            _console.LogError("Something went wrong, attempting to get a fact", ex);
 
             return "";
         }

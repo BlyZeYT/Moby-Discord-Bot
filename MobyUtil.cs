@@ -70,7 +70,8 @@ public static class MobyUtil
 
     public static Embed GetUserInfoEmbed(SocketGuildUser user)
     {
-        var builder = new MobyEmbedBuilder()
+        var builder = new EmbedBuilder()
+            .WithColor(user.Roles.MaxBy(x => x.Position)?.Color ?? Moby.Color)
             .WithTitle($"**Information about {user.Username}**")
             .WithThumbnailUrl(user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl())
             .AddField("Created Account at", user.CreatedAt.ToString("d"));
@@ -490,7 +491,7 @@ public static class MobyUtil
     {
         return new MobyEmbedBuilder()
             .WithTitle("**\\💮 Anime Quote**")
-            .WithDescription($"> \"{quote.Quote}\"\n\n» {quote.Character}\n« {quote.Anime}")
+            .WithDescription($"> \"{quote.Quote.DiscordFormat()}\"\n\n» {quote.Character.DiscordFormat()}\n« {quote.Anime.DiscordFormat()}")
             .Build();
     }
 
@@ -498,7 +499,7 @@ public static class MobyUtil
     {
         return new MobyEmbedBuilder()
             .WithTitle("**\\🎱 8ball**")
-            .WithDescription($"**You asked:** {question}\n**The answer is:** {answer}")
+            .WithDescription($"**You asked:** {question.DiscordFormat()}\n**The answer is:** {answer}")
             .Build();
     }
 
@@ -542,6 +543,35 @@ public static class MobyUtil
     {
         return new MobyEmbedBuilder()
             .WithTitle("**\\🔈 Undeafened** " + user.Username)
+            .Build();
+    }
+
+    public static Embed GetRoleInfoEmbed(SocketRole role)
+    {
+        var permissions = role.Permissions.ToList();
+
+        return new EmbedBuilder()
+            .WithColor(role.Color)
+            .WithTitle($"**{(string.IsNullOrWhiteSpace(role.Emoji.Name) ? "" : $"\\{role.Emoji.Name} ")}Information about {role.Name}**")
+            .WithThumbnailUrl(role.GetIconUrl() ?? Moby.ImageNotFound)
+            .AddField("Position", role.Position)
+            .AddField("Permissions", permissions.Count == 0 ? "None" : string.Join("\n", permissions.OrderByDescending(x => x)))
+            .Build();
+    }
+
+    public static Embed GetRandomFactEmbed(string fact)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\📖 Fact**")
+            .WithDescription($"> {fact.DiscordFormat()}")
+            .Build();
+    }
+
+    public static Embed GetFactOfTheDayEmbed(string fact)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\📖 Fact of the day**")
+            .WithDescription($"> {fact.DiscordFormat()}")
             .Build();
     }
 }
