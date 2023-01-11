@@ -4,6 +4,7 @@ using Discord;
 using Discord.WebSocket;
 using global::Moby.Common;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 public static class Extensions
@@ -171,4 +172,32 @@ public static class Extensions
             (array[k], array[n]) = (array[n], array[k]);
         }
     }
+
+    public static T Random<T>(this IEnumerable<T> sequence)
+    {
+        if (!sequence.TryGetNonEnumeratedCount(out var count))
+        {
+            count = sequence.Count();
+        }
+
+        return sequence.ElementAt(System.Random.Shared.Next(0, count));
+    }
+
+    public static string GetString(this HashMethod method)
+    {
+        return method switch
+        {
+            HashMethod.Base64Encode => "Base64 Encoding",
+            HashMethod.Base64Decode => "Base64 Decoding",
+            HashMethod.MD5 => "MD5 Hashing",
+            HashMethod.SHA1 => "SHA1 Hashing",
+            HashMethod.SHA256 => "SHA256 Hashing",
+            HashMethod.SHA384 => "SHA384 Hashing",
+            HashMethod.SHA512 => "SHA512 Hashing",
+            _ => ""
+        };
+    }
+
+    public static bool IsDecode(this HashMethod method)
+        => method is HashMethod.Base64Decode;
 }

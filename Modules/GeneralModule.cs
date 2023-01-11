@@ -6,6 +6,9 @@ using Discord.WebSocket;
 using global::Moby.Common;
 using global::Moby.Services;
 using Microsoft.Extensions.Hosting;
+using System.Data;
+using System.Diagnostics;
+using System.Text;
 
 [RequireContext(ContextType.Guild)]
 [Discord.Commands.Name("General")]
@@ -200,7 +203,7 @@ public sealed class GeneralModule : MobyModuleBase
     }
 
     [SlashCommand("fact", "Get a random fact")]
-    public async Task FactAsync([Summary("today", "Yes if you want todays fact, otherwise No")] Answer today = Answer.No)
+    public async Task FactAsync([Summary("today", "Do you want todays random fact?")] Answer today = Answer.No)
     {
         await DeferAsync(ephemeral: true);
 
@@ -212,25 +215,40 @@ public sealed class GeneralModule : MobyModuleBase
             : MobyUtil.GetFactOfTheDayEmbed(string.IsNullOrWhiteSpace(fact) ? "Sometimes...there are no facts." : fact));
     }
 
+    [SlashCommand("hash", "Hash, encode or decode the provided text")]
+    public async Task HashAsync([Summary("method", "Choose the hashing method")] HashMethod method,
+        [Summary("text", "Enter the text to hash, encode or decode")] [MinLength(1)] [MaxLength(500)] string text)
+    {
+        await DeferAsync(ephemeral: true);
+
+        var sw = Stopwatch.StartNew();
+
+        string hashed = method switch
+        {
+            HashMethod.Base64Encode => Crypto.ToBase64(text),
+            HashMethod.Base64Decode => Crypto.FromBase64(text),
+            HashMethod.MD5 => Crypto.ToMD5(text),
+            HashMethod.SHA1 => Crypto.ToSHA1(text),
+            HashMethod.SHA256 => Crypto.ToSHA256(text),
+            HashMethod.SHA384 => Crypto.ToSHA384(text),
+            HashMethod.SHA512 => Crypto.ToSHA512(text),
+            _ => ""
+        };
+
+        sw.Stop();
+
+        await FollowupAsync(
+            ephemeral: true,
+            embed: method.IsDecode()
+            ? MobyUtil.GetDecodingEmbed(text, hashed, method.GetString(), sw.Elapsed)
+            : MobyUtil.GetEncodingEmbed(text, hashed, method.GetString(), sw.Elapsed));
+    }
+
     [Group("color", "Commands with colors")]
     [Discord.Commands.Name("Color Group Commands")]
     public sealed class ColorGroupCommands : MobyModuleBase
     {
         public ColorGroupCommands(ConsoleLogger console) : base(console) { }
-
-        [SlashCommand("random", "Get one or multiple random colors")]
-        public async Task ColorRandomAsync([Summary("amount", "How many random colors should be generated")] [MinValue(1)] [MaxValue(10)] int amount = 1)
-        {
-            await DeferAsync(ephemeral: true);
-
-            if (amount == 1)
-            {
-                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorEmbed(MobyUtil.GetRandomColor()));
-                return;
-            }
-
-            await FollowupAsync(ephemeral: true, embeds: MobyUtil.GetRandomColorEmbeds(amount).ToArray());
-        }
 
         [SlashCommand("rgb", "Get information about the provided RGB color")]
         public async Task ColorRgbAsync([Summary("red", "The red color amount")] [MinValue(0)] [MaxValue(255)] int r,
@@ -243,7 +261,7 @@ public sealed class GeneralModule : MobyModuleBase
         }
 
         [SlashCommand("hex", "Get information about the provided Hex color")]
-        public async Task ColorHexAsync([Summary("hex", "Enter a Hex color value")] [MinLength(6)] [MaxLength(7)] string hex)
+        public async Task ColorHexAsync([Summary("hex", "Enter the Hex color value")] [MinLength(6)] [MaxLength(7)] string hex)
         {
             await DeferAsync(ephemeral: true);
 
@@ -277,6 +295,86 @@ public sealed class GeneralModule : MobyModuleBase
             }
 
             await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorQuizEmbed(randoms[0]), components: MobyUtil.GetColorQuizComponent(randoms));
+        }
+    }
+
+    [Group("random", "Commands with Random")]
+    [Discord.Commands.Name("Random Group Commands")]
+    public sealed class RandomGroupCommands : MobyModuleBase
+    {
+        public RandomGroupCommands(ConsoleLogger console) : base(console) { }
+
+        [SlashCommand("member", "Pick a random user from this server")]
+        public async Task RandomMemberAsync([Summary("role", "Mention the role under which the user will be selected")] SocketRole? role = null,
+            [Summary("include-bots", "Do you want to include Bots?")] Answer includebots = Answer.No,
+            [Summary("only-boosters", "Do you want only to include Server Boosters?")] Answer onlyboosters = Answer.No)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var users = await Context.Guild.GetUsersAsync().FlattenAsync();
+
+            if (role is not null) users = users.Where(x => x.RoleIds.Contains(role.Id));
+
+            if (includebots is Answer.No) users = users.Where(x => !(x.IsBot || x.IsWebhook));
+
+            if (onlyboosters is Answer.Yes) users = users.Where(x => x.PremiumSince is not null);
+
+            if (!users.Any())
+            {
+                await FollowupAsync("Couldn't find a member on this server that satisfies all conditions", ephemeral: true);
+                return;
+            }
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRandomMemberEmbed(users.Random()));
+        }
+
+        [SlashCommand("role", "Pick a random role from this server")]
+        public async Task RandomRoleAsync([Summary("include-everyone", "Do you want to include @everyone role?")] Answer includeeveryone = Answer.No,
+            [Summary("from-user", "Only include roles that the mentioned user has")] SocketGuildUser? user = null)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var roles = user is null ? Context.Guild.Roles.AsEnumerable() : user.Roles.AsEnumerable();
+
+            if (includeeveryone is Answer.No) roles = roles.Where(x => x != Context.Guild.EveryoneRole);
+
+            if (!roles.Any())
+            {
+                await FollowupAsync("Couldn't find a role on this server that satisfies all conditions", ephemeral: true);
+                return;
+            }
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRandomRoleEmbed(roles.Random()));
+        }
+
+        [SlashCommand("number", "Pick one or multiple random number")]
+        public async Task RandomNumberAsync([Summary("amount", "How many random numbers should be generated")] [MinValue(1)] [MaxValue(10)] int amount = 1,
+            [Summary("lowest", "Enter the lowest possible number that could get picked")] [MinValue(0)] [MaxValue(int.MaxValue - 2)] int lowest = 0,
+            [Summary("highest", "Enter the highest possible number that could get picked")] [MinValue(1)] [MaxValue(int.MaxValue - 1)] int highest = int.MaxValue - 1)
+        {
+            await DeferAsync(ephemeral: true);
+
+            if (amount == 1)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRandomNumberEmbed(Random.Shared.Next(lowest, highest + 1)));
+                return;
+            }
+
+            await FollowupAsync(ephemeral: true, embeds: MobyUtil.GetRandomNumberEmbeds(amount, lowest, highest + 1).ToArray());
+        }
+
+        [SlashCommand("color", "Pick one or multiple random colors")]
+        public async Task ColorRandomAsync([Summary("amount", "How many random colors should be generated")] [MinValue(1)] [MaxValue(10)] int amount = 1)
+        {
+            await DeferAsync(ephemeral: true);
+
+            if (amount == 1)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetColorEmbed(MobyUtil.GetRandomColor()));
+                return;
+            }
+
+            await FollowupAsync(ephemeral: true, embeds: MobyUtil.GetRandomColorEmbeds(amount).ToArray());
         }
     }
 }

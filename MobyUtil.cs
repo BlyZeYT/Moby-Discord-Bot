@@ -574,4 +574,60 @@ public static class MobyUtil
             .WithDescription($"> {fact.DiscordFormat()}")
             .Build();
     }
+
+    public static Embed GetEncodingEmbed(string plainText, string encodedText, string encoding, TimeSpan time)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle($"**\\🔒 {encoding}**")
+            .AddField("Input text", plainText)
+            .AddField("Encoded text", $"```\n{encodedText}\n```")
+            .AddField("Elapsed milliseconds", time.TotalMilliseconds)
+            .Build();
+    }
+
+    public static Embed GetDecodingEmbed(string encodedText, string decodedText, string encoding, TimeSpan time)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle($"**\\🔑 {encoding}**")
+            .AddField("Input text", encodedText)
+            .AddField("Decoded text", $"```\n{decodedText}\n```")
+            .AddField("Elapsed milliseconds", time.TotalMilliseconds)
+            .Build();
+    }
+
+    public static Embed GetRandomMemberEmbed(IGuildUser member)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🍀 Random Member**")
+            .WithThumbnailUrl(member.GetAvatarUrl(size: 2048) ?? member.GetDefaultAvatarUrl())
+            .WithDescription($"Picked member: || **{member.Mention}** ||")
+            .Build();
+    }
+
+    public static Embed GetRandomNumberEmbed(int number)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🍀 Random Number**")
+            .WithDescription($"Picked number: || **{number}** ||")
+            .Build();
+    }
+
+    public static IEnumerable<Embed> GetRandomNumberEmbeds(int amount, int lowest, int highest)
+    {
+        for (var i = 0; i < amount; i++)
+        {
+            yield return new MobyEmbedBuilder()
+                .WithDescription($"**Number:** {Random.Shared.Next(lowest, highest)}")
+                .Build();
+        }
+    }
+
+    public static Embed GetRandomRoleEmbed(SocketRole role)
+    {
+        return new EmbedBuilder()
+        .WithTitle("**\\🍀 Random Role**")
+        .WithColor(role.Color)
+            .WithDescription($"Picked role: || **{(string.IsNullOrWhiteSpace(role.Emoji.Name) ? "" : $"\\{role.Emoji.Name} ")}{(role.IsMentionable ? role.Mention : role.Name)}** ||")
+            .Build();
+    }
 }
