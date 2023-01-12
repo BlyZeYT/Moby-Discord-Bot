@@ -625,9 +625,27 @@ public static class MobyUtil
     public static Embed GetRandomRoleEmbed(SocketRole role)
     {
         return new EmbedBuilder()
-        .WithTitle("**\\🍀 Random Role**")
-        .WithColor(role.Color)
+            .WithTitle("**\\🍀 Random Role**")
+            .WithColor(role.Color)
             .WithDescription($"Picked role: || **{(string.IsNullOrWhiteSpace(role.Emoji.Name) ? "" : $"\\{role.Emoji.Name} ")}{(role.IsMentionable ? role.Mention : role.Name)}** ||")
             .Build();
+    }
+
+    public static Embed GetRandomValueEmbed(string value)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🍀 Random Value**")
+            .WithDescription($"Picked value: || **{value}** ||")
+            .Build();
+    }
+
+    public static IEnumerable<Embed> GetRandomValueEmbeds(string[] values, int amount)
+    {
+        for (var i = 0; i < amount; i++)
+        {
+            yield return new MobyEmbedBuilder()
+                .WithDescription($"**Value:** {values.Random()}")
+                .Build();
+        }
     }
 }

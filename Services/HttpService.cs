@@ -20,6 +20,8 @@ public interface IHttpService
 
     public ValueTask<string> GetFactAsync(bool today);
 
+    public ValueTask<string> GetTextFromUrl(string url);
+
     public ValueTask<bool> IsUrlEmpty(string url);
 }
 
@@ -162,6 +164,24 @@ public sealed class HttpService : IHttpService
         catch (Exception ex)
         {
             _console.LogError("Something went wrong, attempting to get a fact", ex);
+
+            return "";
+        }
+    }
+
+    public async ValueTask<string> GetTextFromUrl(string url)
+    {
+        try
+        {
+            var text = await _client.GetStringAsync(url);
+
+            _console.LogDebug("Attachment text was returned successfully");
+
+            return text;
+        }
+        catch (Exception ex)
+        {
+            _console.LogError("Something went wrong, attempting to get the attachment text", ex);
 
             return "";
         }

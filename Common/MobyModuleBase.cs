@@ -1,9 +1,14 @@
 ﻿namespace Moby.Common;
 
+using Discord;
 using Discord.Interactions;
 using global::Moby.Services;
 using System.Threading.Tasks;
 
+[RequireContext(ContextType.Guild)]
+[RequireBotPermission(ChannelPermission.ViewChannel)]
+[RequireBotPermission(ChannelPermission.ReadMessageHistory)]
+[RequireBotPermission(ChannelPermission.SendMessages)]
 public abstract class MobyModuleBase : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ConsoleLogger _console;

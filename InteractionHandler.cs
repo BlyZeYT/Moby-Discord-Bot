@@ -198,7 +198,7 @@ public sealed class InteractionHandler
                     break;
 
                 case InteractionCommandError.Exception:
-                    await context.Interaction.RespondAsync("Command exception: " + result.ErrorReason, ephemeral: true);
+                    await context.Interaction.RespondAsync(result.ErrorReason, ephemeral: true);
 
                     await _logger.LogWarningAsync($"Something went wrong on executing a Slash Command: {result.ErrorReason}");
                     break;
@@ -210,7 +210,7 @@ public sealed class InteractionHandler
                     break;
 
                 case InteractionCommandError.UnmetPrecondition:
-                    await context.Interaction.RespondAsync("Unmet Precondition: " + result.ErrorReason, ephemeral: true);
+                    await context.Interaction.RespondAsync(result.ErrorReason, ephemeral: true);
                     break;
             }
         }

@@ -7,7 +7,6 @@ using Discord.WebSocket;
 using global::Moby.Common;
 using global::Moby.Services;
 
-[RequireContext(ContextType.Guild)]
 [Discord.Commands.Name("Moderation")]
 public sealed class ModerationModule : MobyModuleBase
 {
@@ -21,11 +20,11 @@ public sealed class ModerationModule : MobyModuleBase
     [SlashCommand("purge", "Delete messages that are not older than 14 days")]
     [RequireUserPermission(GuildPermission.ManageMessages)]
     [RequireBotPermission(GuildPermission.ManageMessages)]
-    public async Task PurgeAsync([Summary("amount", "Enter the amount of messages that should be purged between 1 and 100")] [MinValue(1)] [MaxValue(100)] int amount)
+    public async Task PurgeAsync([Summary("amount", "Enter the amount of messages that should be purged")] [MinValue(1)] [MaxValue(100)] int amount)
     {
         await DeferAsync(ephemeral: true);
 
-        var messages = (await Context.Channel.GetMessagesAsync(amount, CacheMode.AllowDownload).FlattenAsync()).Where(x => (DateTimeOffset.UtcNow - x.Timestamp).TotalDays < 14 && x.Flags is not MessageFlags.Ephemeral or MessageFlags.Loading);
+        var messages = (await Context.Channel.GetMessagesAsync(amount + 1, CacheMode.AllowDownload).FlattenAsync()).Skip(1).Where(x => x.Timestamp > DateTime.UtcNow.AddDays(-14) && x.Flags is not MessageFlags.Ephemeral or MessageFlags.Loading);
 
         if (!messages.TryGetNonEnumeratedCount(out int count))
         {

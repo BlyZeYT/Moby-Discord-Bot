@@ -7,7 +7,6 @@ using global::Moby.Common;
 using global::Moby.Services;
 
 [RequireOwner]
-[RequireContext(ContextType.Guild)]
 [Discord.Commands.Name(Moby.OnlyMobyGuildModule)]
 public sealed class RuntimeModule : MobyModuleBase
 {

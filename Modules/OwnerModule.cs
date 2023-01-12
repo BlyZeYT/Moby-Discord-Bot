@@ -8,7 +8,6 @@ using global::Moby.Services;
 using System;
 
 [RequireOwner]
-[RequireContext(ContextType.Guild)]
 [Discord.Commands.Name(Moby.OnlyMobyGuildModule)]
 public sealed class OwnerModule : MobyModuleBase
 {

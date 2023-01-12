@@ -20,6 +20,7 @@ public sealed class ContextModule : MobyModuleBase
         await FollowupAsync(ephemeral: true, embed: MobyUtil.GetUserInfoEmbed(user));
     }
 
+    [RateLimit(1, 1)]
     [UserCommand("Get Avatar")]
     public async Task ContextGetAvatarAsync(SocketGuildUser user)
     {

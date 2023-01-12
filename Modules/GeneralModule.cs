@@ -5,12 +5,10 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using global::Moby.Common;
 using global::Moby.Services;
-using Microsoft.Extensions.Hosting;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
 
-[RequireContext(ContextType.Guild)]
 [Discord.Commands.Name("General")]
 public sealed class GeneralModule : MobyModuleBase
 {
@@ -302,7 +300,12 @@ public sealed class GeneralModule : MobyModuleBase
     [Discord.Commands.Name("Random Group Commands")]
     public sealed class RandomGroupCommands : MobyModuleBase
     {
-        public RandomGroupCommands(ConsoleLogger console) : base(console) { }
+        private readonly IHttpService _http;
+
+        public RandomGroupCommands(IHttpService http, ConsoleLogger console) : base(console)
+        {
+            _http = http;
+        }
 
         [SlashCommand("member", "Pick a random user from this server")]
         public async Task RandomMemberAsync([Summary("role", "Mention the role under which the user will be selected")] SocketRole? role = null,
@@ -347,7 +350,7 @@ public sealed class GeneralModule : MobyModuleBase
             await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRandomRoleEmbed(roles.Random()));
         }
 
-        [SlashCommand("number", "Pick one or multiple random number")]
+        [SlashCommand("number", "Pick one or multiple random numbers")]
         public async Task RandomNumberAsync([Summary("amount", "How many random numbers should be generated")] [MinValue(1)] [MaxValue(10)] int amount = 1,
             [Summary("lowest", "Enter the lowest possible number that could get picked")] [MinValue(0)] [MaxValue(int.MaxValue - 2)] int lowest = 0,
             [Summary("highest", "Enter the highest possible number that could get picked")] [MinValue(1)] [MaxValue(int.MaxValue - 1)] int highest = int.MaxValue - 1)
@@ -364,7 +367,7 @@ public sealed class GeneralModule : MobyModuleBase
         }
 
         [SlashCommand("color", "Pick one or multiple random colors")]
-        public async Task ColorRandomAsync([Summary("amount", "How many random colors should be generated")] [MinValue(1)] [MaxValue(10)] int amount = 1)
+        public async Task RandomColorAsync([Summary("amount", "How many random colors should be generated")] [MinValue(1)] [MaxValue(10)] int amount = 1)
         {
             await DeferAsync(ephemeral: true);
 
@@ -375,6 +378,32 @@ public sealed class GeneralModule : MobyModuleBase
             }
 
             await FollowupAsync(ephemeral: true, embeds: MobyUtil.GetRandomColorEmbeds(amount).ToArray());
+        }
+
+        [SlashCommand("file", "Pick one or multiple random values from a file")]
+        public async Task RandomWordAsync([Summary("file", "The file to pick the random value from")] IAttachment file,
+            [Summary("seperator", "The seperator of the values")] [MinLength(1)] [MaxLength(10)] string seperator = "\n",
+            [Summary("amount", "How many random values should be picked from the file")] [MinValue(1)] [MaxValue(10)] int amount = 1)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var text = await _http.GetTextFromUrl(file.Url);
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                await FollowupAsync("Couldn't get any text out of the attachment", ephemeral: true);
+                return;
+            }
+
+            string[] splitted = text.Split(seperator);
+
+            if (amount == 1)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRandomValueEmbed(splitted.Random()));
+                return;
+            }
+
+            await FollowupAsync(ephemeral: true, embeds: MobyUtil.GetRandomValueEmbeds(splitted, amount).ToArray());
         }
     }
 }
