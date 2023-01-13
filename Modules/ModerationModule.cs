@@ -24,14 +24,14 @@ public sealed class ModerationModule : MobyModuleBase
     {
         await DeferAsync(ephemeral: true);
 
-        var messages = (await Context.Channel.GetMessagesAsync(amount + 1, CacheMode.AllowDownload).FlattenAsync()).Skip(1).Where(x => x.Timestamp > DateTime.UtcNow.AddDays(-14) && x.Flags is not MessageFlags.Ephemeral or MessageFlags.Loading);
+        var messages = (await Context.Channel.GetMessagesAsync(amount + 1, CacheMode.AllowDownload).FlattenAsync()).Where(x => x.Timestamp > DateTime.UtcNow.AddDays(-14) && x.Flags is not MessageFlags.Ephemeral or MessageFlags.Loading);
 
-        if (!messages.TryGetNonEnumeratedCount(out int count))
+        if (!messages.TryGetNonEnumeratedCount(out amount))
         {
-            count = messages.Count();
+            amount = messages.Count();
         }
 
-        if (count <= 1)
+        if (amount <= 1)
         {
             await FollowupAsync("Couldn't get any deletable messages", ephemeral: true);
 
@@ -40,7 +40,7 @@ public sealed class ModerationModule : MobyModuleBase
 
         await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
 
-        await FollowupAsync($"Deleted {count} messages \\✉️", ephemeral: true);
+        await FollowupAsync($"Deleted {amount} messages \\✉️", ephemeral: true);
     }
 
     [SlashCommand("unpin", "Unpin all messages in the mentioned channel")]
@@ -432,11 +432,90 @@ public sealed class ModerationModule : MobyModuleBase
         [SlashCommand("bans", "Get a list of the currently banned users")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [RequireBotPermission(GuildPermission.ManageGuild)]
-        public async Task ListBansAsync([Summary("amount", "The amount of bans that should be in the list")] [MinValue(1)] [MaxValue(500)] int amount = 100)
+        public async Task ListBansAsync([Summary("amount", "The amount of bans that should be in the list")] [MinValue(1)] [MaxValue(500)] int amount = 100,
+            [Summary("as-file", "Yes if you want to get the whole ban list as a text file")] Answer asfile = Answer.No)
         {
             await DeferAsync(ephemeral: true);
 
-            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBanlistEmbed(await Context.Guild.GetBansAsync(amount).FlattenAsync()));
+            var bans = await Context.Guild.GetBansAsync(amount).FlattenAsync();
+
+            if (asfile is Answer.No)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBanlistEmbed(bans));
+                return;
+            }
+
+            await FollowupWithFileAsync(MobyUtil.GetBanListAttachment(bans), ephemeral: true);
+        }
+
+        [SlashCommand("boosters", "Get a list of the users that are currently boosting the server")]
+        public async Task ListBoostersAsync([Summary("as-file", "Yes if you want to get the whole booster list as a text file")] Answer asfile = Answer.No)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var boosters = Context.Guild.Users.Where(x => x.PremiumSince is not null);
+
+            if (asfile is Answer.No)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBoosterlistEmbed(boosters));
+                return;
+            }
+
+            await FollowupWithFileAsync(MobyUtil.GetBoosterListAttachment(boosters), ephemeral: true);
+        }
+
+        [SlashCommand("channels", "Get a list of all channels on this server")]
+        [RequireUserPermission(GuildPermission.ManageChannels)]
+        [RequireBotPermission(GuildPermission.ManageChannels)]
+        public async Task ListChannelsAsync([Summary("as-file", "Yes if you want to get the whole channel list as a text file")] Answer asfile = Answer.No)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var channels = Context.Guild.Channels.OrderByDescending(x => x.Position);
+
+            if (asfile is Answer.No)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetChannellistEmbed(channels));
+                return;
+            }
+
+            await FollowupWithFileAsync(MobyUtil.GetChannelListAttachment(channels), ephemeral: true);
+        }
+
+        [SlashCommand("emotes", "Get a list of all emotes on this server")]
+        [RequireUserPermission(GuildPermission.ManageEmojisAndStickers)]
+        [RequireBotPermission(GuildPermission.ManageEmojisAndStickers)]
+        public async Task ListEmotesAsync([Summary("as-file", "Yes if you want to get the whole emote list as a text file")] Answer asfile = Answer.No)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var emotes = Context.Guild.Emotes.OrderByDescending(x => x.CreatedAt);
+
+            if (asfile is Answer.No)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetEmotelistEmbed(emotes));
+                return;
+            }
+
+            await FollowupWithFileAsync(MobyUtil.GetEmoteListAttachment(emotes), ephemeral: true);
+        }
+
+        [SlashCommand("roles", "Get a list of all roles on this server")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        public async Task ListRolesAsync([Summary("as-file", "Yes if you want to get the whole role list as a text file")] Answer asfile = Answer.No)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var roles = Context.Guild.Roles.OrderByDescending(x => x.CreatedAt);
+
+            if (asfile is Answer.No)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRolelistEmbed(roles));
+                return;
+            }
+
+            await FollowupWithFileAsync(MobyUtil.GetRoleListAttachment(roles), ephemeral: true);
         }
     }
 }

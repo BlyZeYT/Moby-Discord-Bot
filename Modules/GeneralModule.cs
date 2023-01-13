@@ -242,6 +242,20 @@ public sealed class GeneralModule : MobyModuleBase
             : MobyUtil.GetEncodingEmbed(text, hashed, method.GetString(), sw.Elapsed));
     }
 
+    [SlashCommand("membercount", "Count all server members and bots")]
+    public async Task MembercountAsync([Summary("exclude-bots", "Yes if you want to exclude bots")] Answer excludebots = Answer.No)
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (excludebots is Answer.Yes)
+        {
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetMemberCountEmbed((await Context.Guild.GetUsersAsync().FlattenAsync()).Where(x => !(x.IsBot || x.IsWebhook)).Count(), false));
+            return;
+        }
+
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetMemberCountEmbed(Context.Guild.MemberCount, true));
+    }
+
     [Group("color", "Commands with colors")]
     [Discord.Commands.Name("Color Group Commands")]
     public sealed class ColorGroupCommands : MobyModuleBase

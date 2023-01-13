@@ -59,7 +59,7 @@ public static class MobyUtil
     public static Embed GetServerInfoEmbed(SocketGuild guild)
     {
         return new MobyEmbedBuilder()
-            .WithTitle($"**Information about {guild.Name}**")
+            .WithTitle($"**\\👥 Information about {guild.Name}**")
             .WithThumbnailUrl(guild.IconUrl ?? Moby.ImageNotFound)
             .AddField("Created at", guild.CreatedAt.ToString("d"))
             .AddField("Member Count", guild.MemberCount)
@@ -72,7 +72,7 @@ public static class MobyUtil
     {
         var builder = new EmbedBuilder()
             .WithColor(user.Roles.MaxBy(x => x.Position)?.Color ?? Moby.Color)
-            .WithTitle($"**Information about {user.Username}**")
+            .WithTitle($"**\\🪪 Information about {user.Username}**")
             .WithThumbnailUrl(user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl())
             .AddField("Created Account at", user.CreatedAt.ToString("d"));
 
@@ -266,22 +266,123 @@ public static class MobyUtil
 
         foreach (var ban in banlist)
         {
-            var username = ban.User.Username;
+            var mention = ban.User.Mention;
             var discriminator = ban.User.Discriminator;
             var userId = ban.User.Id.ToString();
             var reason = ban.Reason;
 
-            if (EmbedBuilder.MaxDescriptionLength >= sb.Length + username.Length + discriminator.Length + userId.Length + reason.Length + 25) break;
+            if (EmbedBuilder.MaxDescriptionLength <= sb.Length + mention.Length + discriminator.Length + userId.Length + reason.Length + 25) break;
 
-            sb.AppendLine($"**{username} #{discriminator}**");
+            sb.AppendLine($"**{mention} #{discriminator}**");
             sb.AppendLine("Id: " + userId);
             sb.AppendLine("Reason: "+ reason);
             sb.AppendLine();
         }
 
         return new MobyEmbedBuilder()
-            .WithTitle("**\\⛔ Banlist**")
+            .WithTitle("**\\⛔ Ban List**")
             .WithDescription(sb.Length == 0 ? "No users are currently banned \\💚" : sb.ToString())
+            .Build();
+    }
+
+    public static Embed GetBoosterlistEmbed(IEnumerable<SocketGuildUser> boosterlist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var boost in boosterlist)
+        {
+            var mention = boost.Mention;
+            var discriminator = boost.Discriminator;
+            var userId = boost.Id.ToString();
+            var premiumSince = boost.PremiumSince!.Value.UtcDateTime.ToString("d");
+
+            if (EmbedBuilder.MaxDescriptionLength <= sb.Length + mention.Length + discriminator.Length + userId.Length + premiumSince.Length + 25) break;
+
+            sb.AppendLine($"**{mention} #{discriminator}**");
+            sb.AppendLine("Id: " + userId);
+            sb.AppendLine("Boosting since: " + premiumSince);
+            sb.AppendLine();
+        }
+
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\💎 Booster List**")
+            .WithDescription(sb.Length == 0 ? "No users are currently boosting \\🥲" : sb.ToString())
+            .Build();
+    }
+
+    public static Embed GetChannellistEmbed(IEnumerable<SocketGuildChannel> channellist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var channel in channellist)
+        {
+            var channelName = channel.Name;
+            var channelType = channel.GetChannelType() ?? ChannelType.Text;
+            var channelId = channel.Id.ToString();
+            var createdAt = channel.CreatedAt.UtcDateTime.ToString("d");
+            
+            if (EmbedBuilder.MaxDescriptionLength <= sb.Length + channelName.Length + 20 + channelId.Length + createdAt.Length + 25) break;
+
+            sb.AppendLine($"**{channelName}**");
+            sb.AppendLine("Channel type: " + channelType);
+            sb.AppendLine("Id: " + channelId);
+            sb.AppendLine("Created at: " + createdAt);
+            sb.AppendLine();
+        }
+
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🔤 Channel List**")
+            .WithDescription(sb.Length == 0 ? "No channels found (how is that even possible?) \\🥲" : sb.ToString())
+            .Build();
+    }
+
+    public static Embed GetEmotelistEmbed(IEnumerable<GuildEmote> emotelist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var emote in emotelist)
+        {
+            var emoteName = emote.Name;
+            var url = emote.Url;
+            var emoteId = emote.Id.ToString();
+            var createdAt = emote.CreatedAt.UtcDateTime.ToString("d");
+
+            if (EmbedBuilder.MaxDescriptionLength <= sb.Length + emoteName.Length + url.Length + emoteId.Length + createdAt.Length + 25) break;
+
+            sb.AppendLine($"**[{emoteName}]({url})**");
+            sb.AppendLine("Id: " + emoteId);
+            sb.AppendLine("Created at: " + createdAt);
+            sb.AppendLine();
+        }
+
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\😃 Emote List**")
+            .WithDescription(sb.Length == 0 ? "No emotes found \\🥲" : sb.ToString())
+            .Build();
+    }
+
+    public static Embed GetRolelistEmbed(IEnumerable<SocketRole> rolelist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var role in rolelist)
+        {
+            var roleNameOrMention = role.IsMentionable ? role.Mention : role.Name;
+            var roleEmoji = role.Emoji?.Name ?? role.Icon ?? "";
+            var roleId = role.Id.ToString();
+            var createdAt = role.CreatedAt.UtcDateTime.ToString("d");
+
+            if (EmbedBuilder.MaxDescriptionLength <= sb.Length + roleNameOrMention.Length + roleEmoji.Length + roleId.Length + createdAt.Length + 25) break;
+
+            sb.AppendLine($"**{(string.IsNullOrWhiteSpace(roleEmoji) ? "" : $"\\{roleEmoji} ")}{roleNameOrMention}**");
+            sb.AppendLine("Id: " + roleId);
+            sb.AppendLine("Created at: " + createdAt);
+            sb.AppendLine();
+        }
+
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🧻 Role List**")
+            .WithDescription(sb.Length == 0 ? "No roles found \\🥲" : sb.ToString())
             .Build();
     }
 
@@ -647,5 +748,130 @@ public static class MobyUtil
                 .WithDescription($"**Value:** {values.Random()}")
                 .Build();
         }
+    }
+
+    public static FileAttachment GetBanListAttachment(IEnumerable<RestBan> banlist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var ban in banlist)
+        {
+            sb.Append(ban.User.Id);
+            sb.Append(" - ");
+            sb.Append(ban.User.Username);
+            sb.Append('#');
+            sb.Append(ban.User.Discriminator);
+            sb.Append(" - ");
+            sb.AppendLine(ban.Reason);
+        }
+
+        if (sb.Length == 0) return new FileAttachment("No users are currently banned".ToStream(), "banlist.txt");
+
+        sb.Length--;
+
+        return new FileAttachment(sb.ToString().ToStream(), "banlist.txt");
+    }
+
+    public static FileAttachment GetBoosterListAttachment(IEnumerable<SocketGuildUser> boosterlist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var boost in boosterlist)
+        {
+            sb.Append(boost.Id);
+            sb.Append(" - ");
+            sb.Append(boost.Username);
+            sb.Append('#');
+            sb.Append(boost.Discriminator);
+            sb.Append(" - ");
+            sb.AppendLine(boost.PremiumSince!.Value.UtcDateTime.ToString("d"));
+        }
+
+        if (sb.Length == 0) return new FileAttachment("No users are currently boosting".ToStream(), "boosterlist.txt");
+
+        sb.Length--;
+
+        return new FileAttachment(sb.ToString().ToStream(), "boosterlist.txt");
+    }
+
+    public static FileAttachment GetChannelListAttachment(IEnumerable<SocketGuildChannel> channellist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var channel in channellist)
+        {
+            sb.Append(channel.Id);
+            sb.Append(" - ");
+            sb.Append(channel.Name);
+            sb.Append(" - ");
+            sb.Append(channel.GetChannelType() ?? ChannelType.Text);
+            sb.Append(" - ");
+            sb.AppendLine(channel.CreatedAt.UtcDateTime.ToString("d"));
+        }
+
+        if (sb.Length == 0) return new FileAttachment("No channel found (how is that even possible?)".ToStream(), "channellist.txt");
+
+        sb.Length--;
+
+        return new FileAttachment(sb.ToString().ToStream(), "channellist.txt");
+    }
+
+    public static FileAttachment GetEmoteListAttachment(IEnumerable<GuildEmote> emotelist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var emote in emotelist)
+        {
+            sb.Append(emote.Id);
+            sb.Append(" - ");
+            sb.Append(emote.Name);
+            sb.Append(" - ");
+            sb.Append(emote.CreatedAt.UtcDateTime.ToString("d"));
+            sb.Append(" - ");
+            sb.AppendLine(emote.Url);
+        }
+
+        if (sb.Length == 0) return new FileAttachment("No emotes found".ToStream(), "emotelist.txt");
+
+        sb.Length--;
+
+        return new FileAttachment(sb.ToString().ToStream(), "emotelist.txt");
+    }
+
+    public static FileAttachment GetRoleListAttachment(IEnumerable<SocketRole> rolelist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var role in rolelist)
+        {
+            sb.Append(role.Id);
+            sb.Append(" - ");
+            sb.Append(role.Name);
+            sb.Append(" - ");
+            sb.Append(role.CreatedAt.UtcDateTime.ToString("d"));
+
+            if (role.Emoji?.Name is null && role.Icon is null)
+            {
+                sb.AppendLine();
+                continue;
+            }
+
+            sb.Append(" - ");
+            sb.AppendLine(role.Emoji?.Name ?? role.Icon ?? "");
+        }
+
+        if (sb.Length == 0) return new FileAttachment("No roles found".ToStream(), "rolelist.txt");
+
+        sb.Length--;
+
+        return new FileAttachment(sb.ToString().ToStream(), "rolelist.txt");
+    }
+
+    public static Embed GetMemberCountEmbed(int membercount, bool includingBots)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\👥 Member Count**")
+            .WithDescription($"The current member count {(includingBots ? "" : "excluding bots ")}is **{membercount}**")
+            .Build();
     }
 }
