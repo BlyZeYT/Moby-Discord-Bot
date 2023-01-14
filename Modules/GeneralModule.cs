@@ -26,13 +26,7 @@ public sealed class GeneralModule : MobyModuleBase
     [SlashCommand("help", "Get help for all my functions")]
     public async Task HelpAsync()
     {
-        foreach (var module in _service.Modules.Where(x => x.Name != Moby.OnlyMobyGuildModule).OrderBy(x => x.Name))
-        {
-            foreach (var command in module.SlashCommands.OrderBy(x => x.Name))
-            {
-                
-            }
-        }
+
     }
 
     [SlashCommand("contact", "Contact my creator to give feedback, submit ideas or report bugs")]
