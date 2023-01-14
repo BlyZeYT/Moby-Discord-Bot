@@ -260,7 +260,7 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetBanlistEmbed(IEnumerable<RestBan> banlist)
+    public static Embed GetBanListEmbed(IEnumerable<RestBan> banlist)
     {
         var sb = new StringBuilder();
 
@@ -285,7 +285,7 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetBoosterlistEmbed(IEnumerable<SocketGuildUser> boosterlist)
+    public static Embed GetBoosterListEmbed(IEnumerable<SocketGuildUser> boosterlist)
     {
         var sb = new StringBuilder();
 
@@ -310,7 +310,7 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetChannellistEmbed(IEnumerable<SocketGuildChannel> channellist)
+    public static Embed GetChannelListEmbed(IEnumerable<SocketGuildChannel> channellist)
     {
         var sb = new StringBuilder();
 
@@ -336,7 +336,7 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetEmotelistEmbed(IEnumerable<GuildEmote> emotelist)
+    public static Embed GetEmoteListEmbed(IEnumerable<GuildEmote> emotelist)
     {
         var sb = new StringBuilder();
 
@@ -361,7 +361,7 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetRolelistEmbed(IEnumerable<SocketRole> rolelist)
+    public static Embed GetRoleListEmbed(IEnumerable<SocketRole> rolelist)
     {
         var sb = new StringBuilder();
 
@@ -383,6 +383,34 @@ public static class MobyUtil
         return new MobyEmbedBuilder()
             .WithTitle("**\\🧻 Role List**")
             .WithDescription(sb.Length == 0 ? "No roles found \\🥲" : sb.ToString())
+            .Build();
+    }
+
+    public static Embed GetAuditLogListEmbed(IEnumerable<RestAuditLogEntry> auditloglist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var entry in auditloglist)
+        {
+            var userMention = entry.User.Mention;
+            var entryId = entry.Id.ToString();
+            var entryAction = entry.Action.ToString();
+            var createdAt = entry.CreatedAt.UtcDateTime.ToString("d");
+            var reason = entry.Reason ?? "-";
+
+            if (EmbedBuilder.MaxDescriptionLength <= sb.Length + userMention.Length + 20 + entryId.Length + createdAt.Length + reason.Length + 25) break;
+
+            sb.AppendLine($"**{userMention}**");
+            sb.AppendLine("Id: " + entryId);
+            sb.AppendLine("Action: " + entryAction);
+            sb.AppendLine("Reason: " + reason);
+            sb.AppendLine("Created at: " + createdAt);
+            sb.AppendLine();
+        }
+
+        return new MobyEmbedBuilder()
+            .WithTitle("\\📜 Audit Log List")
+            .WithDescription(sb.Length == 0 ? "No audit log entries found \\🥲" : sb.ToString())
             .Build();
     }
 
@@ -867,11 +895,73 @@ public static class MobyUtil
         return new FileAttachment(sb.ToString().ToStream(), "rolelist.txt");
     }
 
+    public static FileAttachment GetAuditLogListAttachment(IEnumerable<RestAuditLogEntry> auditloglist)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var entry in auditloglist)
+        {
+            sb.Append(entry.Id);
+            sb.Append(" - ");
+            sb.Append(entry.User.Username);
+            sb.Append('#');
+            sb.Append(entry.User.Discriminator);
+            sb.Append(" - ");
+            sb.Append(entry.Action);
+            sb.Append(" - ");
+            sb.Append(entry.CreatedAt.UtcDateTime.ToString("d"));
+            sb.Append(" - ");
+            sb.AppendLine(entry.Reason ?? "");
+        }
+
+        if (sb.Length == 0) return new FileAttachment("No audit log entries found".ToStream(), "auditloglist.txt");
+
+        sb.Length--;
+
+        return new FileAttachment(sb.ToString().ToStream(), "auditloglist.txt");
+    }
+
     public static Embed GetMemberCountEmbed(int membercount, bool includingBots)
     {
         return new MobyEmbedBuilder()
             .WithTitle("**\\👥 Member Count**")
             .WithDescription($"The current member count {(includingBots ? "" : "excluding bots ")}is **{membercount}**")
+            .Build();
+    }
+
+    public static Embed GetKickDmEmbed(SocketUser user, SocketGuild guild, string? reason)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\⛔ You got kicked**")
+            .WithThumbnailUrl(guild.IconUrl ?? Moby.ImageNotFound)
+            .WithDescription($"{user.Username}#{user.Discriminator} kicked you from {guild.Name}\nReason: {(string.IsNullOrWhiteSpace(reason) ? "-" : reason)}")
+            .Build();
+    }
+
+    public static Embed GetKickEmbed(SocketUser kickedUser, string? reason)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\⛔ Kicked User**")
+            .WithThumbnailUrl(kickedUser.GetAvatarUrl(size: 2048) ?? kickedUser.GetDefaultAvatarUrl())
+            .WithDescription($"User: {kickedUser.Username}#{kickedUser.Discriminator}\nReason: {(string.IsNullOrWhiteSpace(reason) ? "-" : reason)}")
+            .Build();
+    }
+
+    public static Embed GetBanDmEmbed(SocketUser user, SocketGuild guild, string? reason)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\⛔ You got banned**")
+            .WithThumbnailUrl(guild.IconUrl ?? Moby.ImageNotFound)
+            .WithDescription($"{user.Username}#{user.Discriminator} banned you from {guild.Name}\nReason: {(string.IsNullOrWhiteSpace(reason) ? "-" : reason)}")
+            .Build();
+    }
+
+    public static Embed GetBanEmbed(SocketUser kickedUser, string? reason)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\⛔ Banned User**")
+            .WithThumbnailUrl(kickedUser.GetAvatarUrl(size: 2048) ?? kickedUser.GetDefaultAvatarUrl())
+            .WithDescription($"User: {kickedUser.Username}#{kickedUser.Discriminator}\nReason: {(string.IsNullOrWhiteSpace(reason) ? "-" : reason)}")
             .Build();
     }
 }

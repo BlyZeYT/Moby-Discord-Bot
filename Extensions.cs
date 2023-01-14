@@ -200,4 +200,18 @@ public static class Extensions
 
     public static bool IsDecode(this HashMethod method)
         => method is HashMethod.Base64Decode;
+
+    public static async ValueTask<IUserMessage?> TrySendMessageAsync(this IUser user, string? text = null, bool isTTS = false,
+        Embed? embed = null, RequestOptions? requestOptions = null, AllowedMentions? allowedMentions = null,
+        MessageComponent? messageComponent = null, Embed[]? embeds = null)
+    {
+        try
+        {
+            return await user.SendMessageAsync(text, isTTS, embed, requestOptions, allowedMentions, messageComponent, embeds);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
 }

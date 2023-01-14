@@ -107,7 +107,8 @@ public sealed class ModerationModule : MobyModuleBase
     [RequireUserPermission(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.KickMembers)]
     public async Task KickAsync([Summary("user", "Mention the user that should get kicked")] SocketGuildUser user,
-        [Summary("reason", "Enter the reason why the user is kicked")] [MinLength(1)] [MaxLength(250)] string? reason = null)
+        [Summary("reason", "Enter the reason why the user is kicked")] [MinLength(1)] [MaxLength(250)] string? reason = null,
+        [Summary("send-dm", "Yes if you want me to send a DM to the user that he got kicked")] Answer senddm = Answer.No)
     {
         await DeferAsync(ephemeral: true);
 
@@ -118,14 +119,19 @@ public sealed class ModerationModule : MobyModuleBase
             return;
         }
 
+        IUserMessage? dm = null;
         try
         {
             await user.KickAsync(reason);
 
-            await FollowupAsync($"Kicked \\⛔: **{user.Username}#{user.Discriminator}**{(reason is null ? "" : $"\nReason \\💬: {reason}")}", ephemeral: true);
+            if (senddm is Answer.Yes) dm = await user.TrySendMessageAsync(embed: MobyUtil.GetKickDmEmbed(Context.User, Context.Guild, reason));
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetKickEmbed(user, reason));
         }
         catch (Exception)
         {
+            if (dm is not null) await dm.DeleteAsync();
+
             await FollowupAsync("I can't kick this user", ephemeral: true);
         }
     }
@@ -135,7 +141,8 @@ public sealed class ModerationModule : MobyModuleBase
     [RequireBotPermission(GuildPermission.BanMembers)]
     public async Task BanAsync([Summary("user", "Mention the user that should get banned")] SocketGuildUser user,
         [Summary("reason", "Enter the reason why the user is banned")] [MinLength(1)] [MaxLength(250)] string? reason = null,
-        [Summary("prunedays", "Enter the days from which the message history should be deleted")] [MinValue(0)] [MaxValue(7)] int prunedays = 0)
+        [Summary("prunedays", "Enter the days from which the message history should be deleted")] [MinValue(0)] [MaxValue(7)] int prunedays = 0,
+        [Summary("send-dm", "Yes if you want me to send a DM to the user that he got banned")] Answer senddm = Answer.No)
     {
         await DeferAsync(ephemeral: true);
 
@@ -146,14 +153,19 @@ public sealed class ModerationModule : MobyModuleBase
             return;
         }
 
+        IUserMessage? dm = null;
         try
         {
             await user.BanAsync(prunedays, reason);
 
-            await FollowupAsync($"Banned \\⛔: **{user.Username}#{user.Discriminator}**{(reason is null ? "" : $"\nReason \\💬: {reason}")}", ephemeral: true);
+            if (senddm is Answer.Yes) dm = await user.TrySendMessageAsync(embed: MobyUtil.GetBanDmEmbed(Context.User, Context.Guild, reason));
+
+            await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBanEmbed(user, reason));
         }
         catch (Exception)
         {
+            if (dm is not null) await dm.DeleteAsync();
+
             await FollowupAsync("I can't ban this user", ephemeral: true);
         }
     }
@@ -441,7 +453,7 @@ public sealed class ModerationModule : MobyModuleBase
 
             if (asfile is Answer.No)
             {
-                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBanlistEmbed(bans));
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBanListEmbed(bans));
                 return;
             }
 
@@ -457,7 +469,7 @@ public sealed class ModerationModule : MobyModuleBase
 
             if (asfile is Answer.No)
             {
-                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBoosterlistEmbed(boosters));
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetBoosterListEmbed(boosters));
                 return;
             }
 
@@ -475,7 +487,7 @@ public sealed class ModerationModule : MobyModuleBase
 
             if (asfile is Answer.No)
             {
-                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetChannellistEmbed(channels));
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetChannelListEmbed(channels));
                 return;
             }
 
@@ -493,7 +505,7 @@ public sealed class ModerationModule : MobyModuleBase
 
             if (asfile is Answer.No)
             {
-                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetEmotelistEmbed(emotes));
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetEmoteListEmbed(emotes));
                 return;
             }
 
@@ -511,11 +523,31 @@ public sealed class ModerationModule : MobyModuleBase
 
             if (asfile is Answer.No)
             {
-                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRolelistEmbed(roles));
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetRoleListEmbed(roles));
                 return;
             }
 
             await FollowupWithFileAsync(MobyUtil.GetRoleListAttachment(roles), ephemeral: true);
+        }
+
+        [SlashCommand("audit-log", "Get a list of audit log entries on this server")]
+        [RequireUserPermission(GuildPermission.ViewAuditLog)]
+        [RequireBotPermission(GuildPermission.ViewAuditLog)]
+        public async Task ListAuditLogAsync([Summary("amount", "The amount of audit log entries that should be in the list")] [MinValue(1)] [MaxValue(500)] int amount = 100,
+            [Summary("user", "Mention the user to filter the audit log entries from")] IUser? user = null,
+            [Summary("as-file", "Yes if you want to get the whole audit log list as a text file")] Answer asfile = Answer.No)
+        {
+            await DeferAsync(ephemeral: true);
+
+            var roles = (await Context.Guild.GetAuditLogsAsync(amount, userId: user?.Id).FlattenAsync()).OrderByDescending(x => x.CreatedAt);
+
+            if (asfile is Answer.No)
+            {
+                await FollowupAsync(ephemeral: true, embed: MobyUtil.GetAuditLogListEmbed(roles));
+                return;
+            }
+
+            await FollowupWithFileAsync(MobyUtil.GetAuditLogListAttachment(roles), ephemeral: true);
         }
     }
 }
