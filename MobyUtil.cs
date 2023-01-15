@@ -964,4 +964,25 @@ public static class MobyUtil
             .WithDescription($"User: {kickedUser.Username}#{kickedUser.Discriminator}\nReason: {(string.IsNullOrWhiteSpace(reason) ? "-" : reason)}")
             .Build();
     }
+
+    public static Embed GetPollEmbed(IUser user, string question, string?[] responses, Emoji[] emojis)
+    {
+        var sb = new StringBuilder($"**{question}**");
+        sb.AppendLine();
+
+        for (var i = 0; i < responses.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(responses[i])) break;
+
+            sb.AppendLine($"\\{emojis[i]}: {responses[i]}");
+        }
+
+        sb.Length--;
+
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\📊 Poll**")
+            .WithDescription(sb.ToString())
+            .WithFooter($"Poll by {user.Username}", user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl())
+            .Build();
+    }
 }
