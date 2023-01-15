@@ -364,11 +364,11 @@ public sealed class ModerationModule : MobyModuleBase
         [Summary("response10", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response10 = null,
         [Summary("emojiset", "The set of emotes that should be used for the answers")] EmojiSet emojiset = EmojiSet.Letters)
     {
-        await DeferAsync(ephemeral: true);
+        await DeferAsync();
 
         var emojis = emojiset switch
         {
-            EmojiSet.Love => new Emoji[] { "❤️", "🧡", "💙", "💜", "🤍", "💚", "💛", "🤎", "🖤", "💗" },
+            EmojiSet.Love => new Emoji[] { "❤️", "🧡", "💙", "💜", "🤍", "💚", "💛", "🤎", "💝", "💗" },
             EmojiSet.Animals => new Emoji[] { "🐶", "🐱", "🐭", "🐷", "🐮", "🦁", "🐨", "🐰", "🦊", "🐵" },
             EmojiSet.Nature => new Emoji[] { "🌞", "🌚", "🌹", "🌷", "🌵", "🌼", "🌻", "🍁", "🌲", "🍄" },
             EmojiSet.Food => new Emoji[] { "🍎", "🍐", "🍇", "🍌", "🍉", "🍒", "🍕", "🥨", "🍓", "🍫" },
@@ -388,11 +388,11 @@ public sealed class ModerationModule : MobyModuleBase
             response8,
             response9,
             response10
-        };
+        }.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
 
         var message = await FollowupAsync(embed: MobyUtil.GetPollEmbed(Context.User, question, responses, emojis));
 
-        await message.AddReactionsAsync(emojis);
+        await message.AddReactionsAsync(emojis.Take(responses.Length));
     }
 
     [Group("role", "Commands to manage roles")]

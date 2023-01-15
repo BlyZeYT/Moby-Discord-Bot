@@ -969,12 +969,11 @@ public static class MobyUtil
     {
         var sb = new StringBuilder($"**{question}**");
         sb.AppendLine();
+        sb.AppendLine();
 
         for (var i = 0; i < responses.Length; i++)
         {
-            if (string.IsNullOrWhiteSpace(responses[i])) break;
-
-            sb.AppendLine($"\\{emojis[i]}: {responses[i]}");
+            sb.AppendLine($"{emojis[i]} {responses[i]}");
         }
 
         sb.Length--;
