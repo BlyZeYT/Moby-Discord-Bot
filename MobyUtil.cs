@@ -984,4 +984,12 @@ public static class MobyUtil
             .WithFooter($"Poll by {user.Username}", user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl())
             .Build();
     }
+
+    public static Embed GetPurgeEmbed(int deletedMessages)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\✉️ Cleared Messages**")
+            .WithDescription($"Deleted {deletedMessages} messages")
+            .Build();
+    }
 }

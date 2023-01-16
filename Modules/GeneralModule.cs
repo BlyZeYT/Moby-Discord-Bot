@@ -250,6 +250,51 @@ public sealed class GeneralModule : MobyModuleBase
         await FollowupAsync(ephemeral: true, embed: MobyUtil.GetMemberCountEmbed(Context.Guild.MemberCount, true));
     }
 
+    [SlashCommand("poll", "Create a poll where users can vote")]
+    public async Task PollAsync([Summary("question", "The question that's being asked")] [MinLength(1)] [MaxLength(35)] string question,
+       [Summary("response1", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string response1,
+       [Summary("response2", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response2 = null,
+       [Summary("response3", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response3 = null,
+       [Summary("response4", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response4 = null,
+       [Summary("response5", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response5 = null,
+       [Summary("response6", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response6 = null,
+       [Summary("response7", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response7 = null,
+       [Summary("response8", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response8 = null,
+       [Summary("response9", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response9 = null,
+       [Summary("response10", "A response to vote for")] [MinLength(1)] [MaxLength(35)] string? response10 = null,
+       [Summary("emojiset", "The set of emotes that should be used for the answers")] EmojiSet emojiset = EmojiSet.Letters)
+    {
+        await DeferAsync();
+
+        var emojis = emojiset switch
+        {
+            EmojiSet.Love => new Emoji[] { "❤️", "🧡", "💙", "💜", "🤍", "💚", "💛", "🤎", "💝", "💗" },
+            EmojiSet.Animals => new Emoji[] { "🐶", "🐱", "🐭", "🐷", "🐮", "🦁", "🐨", "🐰", "🦊", "🐵" },
+            EmojiSet.Nature => new Emoji[] { "🌞", "🌚", "🌹", "🌷", "🌵", "🌼", "🌻", "🍁", "🌲", "🍄" },
+            EmojiSet.Food => new Emoji[] { "🍎", "🍐", "🍇", "🍌", "🍉", "🍒", "🍕", "🥨", "🍓", "🍫" },
+            EmojiSet.Vehicles => new Emoji[] { "🚗", "🚙", "🏍️", "🚲", "🚂", "🚓", "🚑", "🚁", "⛵", "🛴" },
+            _ => new Emoji[] { "🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯" }
+        };
+
+        var responses = new string?[]
+        {
+            response1,
+            response2,
+            response3,
+            response4,
+            response5,
+            response6,
+            response7,
+            response8,
+            response9,
+            response10
+        }.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+
+        var message = await FollowupAsync(embed: MobyUtil.GetPollEmbed(Context.User, question, responses, emojis));
+
+        await message.AddReactionsAsync(emojis.Take(responses.Length));
+    }
+
     [Group("color", "Commands with colors")]
     [Discord.Commands.Name("Color Group Commands")]
     public sealed class ColorGroupCommands : MobyModuleBase
