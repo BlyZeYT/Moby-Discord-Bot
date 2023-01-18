@@ -151,19 +151,15 @@ public sealed class GeneralModule : MobyModuleBase
 
         var joke = await _http.GetChuckNorrisJokeAsync(category);
 
-        if (joke.IsEmpty())
-        {
-            await FollowupAsync("Failed to get a Chuck Norris joke", ephemeral: true);
-            return;
-        }
+        var isEmpty = joke.IsEmpty();
 
-        if (joke.IsExplicit && !((ITextChannel)Context.Channel).IsNsfw)
+        if (!isEmpty && joke.IsExplicit && !((ITextChannel)Context.Channel).IsNsfw)
         {
             await FollowupAsync("This joke contained Nsfw content but this isn't a Nsfw channel", ephemeral: true);
             return;
         }
 
-        await FollowupAsync(joke.Value, ephemeral: true);
+        await FollowupAsync(isEmpty ? "Chuck Norris is so damn badass he won't allow me to send a joke at the moment." : joke.Value, ephemeral: true); //Send an embed instead of message
     }
 
     [SlashCommand("top", "Get a list of the largest server where I'm on")]
@@ -293,6 +289,16 @@ public sealed class GeneralModule : MobyModuleBase
         var message = await FollowupAsync(embed: MobyUtil.GetPollEmbed(Context.User, question, responses, emojis));
 
         await message.AddReactionsAsync(emojis.Take(responses.Length));
+    }
+
+    [SlashCommand("trivia", "Get a multiple choice question")]
+    public async Task TriviaAsync([Summary("difficulty", "The difficulty of the question")] TriviaQuestionDifficulty difficulty = TriviaQuestionDifficulty.Random)
+    {
+        await DeferAsync(ephemeral: true);
+
+        var question = await _http.GetTriviaQuestionAsync(difficulty);
+
+        //Finish the command - Buttons, etc. included
     }
 
     [Group("color", "Commands with colors")]
@@ -440,7 +446,7 @@ public sealed class GeneralModule : MobyModuleBase
         {
             await DeferAsync(ephemeral: true);
 
-            var text = await _http.GetTextFromUrl(file.Url);
+            var text = await _http.GetTextFromUrlAsync(file.Url);
 
             if (string.IsNullOrWhiteSpace(text))
             {

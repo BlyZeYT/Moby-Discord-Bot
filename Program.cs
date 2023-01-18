@@ -131,7 +131,7 @@ sealed class Program
     {
         _logger.LogDebugAsync("Started to initialize the Color Quiz data");
 
-        var colors = await _http.GetColorQuizInfo();
+        var colors = await _http.GetColorQuizInfoAsync();
 
         Random.Shared.Shuffle(colors);
 

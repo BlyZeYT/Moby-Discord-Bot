@@ -12,7 +12,7 @@ public interface IHttpService
 
     public ValueTask<ChuckNorrisJoke> GetChuckNorrisJokeAsync(ChuckNorrisJokeCategory category);
 
-    public ValueTask<ColorQuizColor[]> GetColorQuizInfo();
+    public ValueTask<ColorQuizColor[]> GetColorQuizInfoAsync();
 
     public ValueTask<AnimeQuote> GetAnimeQuoteAsync();
 
@@ -20,9 +20,11 @@ public interface IHttpService
 
     public ValueTask<string> GetFactAsync(bool today);
 
-    public ValueTask<string> GetTextFromUrl(string url);
+    public ValueTask<string> GetTextFromUrlAsync(string url);
 
-    public ValueTask<bool> IsUrlEmpty(string url);
+    public ValueTask<TriviaQuestion> GetTriviaQuestionAsync(TriviaQuestionDifficulty difficulty);
+
+    public ValueTask<bool> IsUrlEmptyAsync(string url);
 }
 
 public sealed class HttpService : IHttpService
@@ -95,7 +97,7 @@ public sealed class HttpService : IHttpService
         }
     }
 
-    public async ValueTask<ColorQuizColor[]> GetColorQuizInfo()
+    public async ValueTask<ColorQuizColor[]> GetColorQuizInfoAsync()
     {
         try
         {
@@ -169,7 +171,7 @@ public sealed class HttpService : IHttpService
         }
     }
 
-    public async ValueTask<string> GetTextFromUrl(string url)
+    public async ValueTask<string> GetTextFromUrlAsync(string url)
     {
         try
         {
@@ -187,7 +189,41 @@ public sealed class HttpService : IHttpService
         }
     }
 
-    public async ValueTask<bool> IsUrlEmpty(string url)
+    public async ValueTask<TriviaQuestion> GetTriviaQuestionAsync(TriviaQuestionDifficulty difficulty)
+    {
+        try
+        {
+            dynamic json = JObject.Parse(await _client.GetStringAsync("https://opentdb.com/api.php?amount=1&category=9" + GetEndpoint(difficulty)));
+
+            if (json.response_code != 0) throw new Exception("Response code was not 0");
+
+            json = JArray.Parse(json.results.ToString());
+
+            json = JObject.Parse(json[0].ToString());
+
+            difficulty = difficulty is TriviaQuestionDifficulty.Random ? FromString(json.difficulty.ToString()) : difficulty;
+
+            var question = new TriviaQuestion(difficulty, json.question.ToString(), json.correct_answer.ToString());
+
+            _console.LogDebug("Trivia question was returned successfully");
+
+            return json.type.ToString() == "multiple"
+                ? new MultipleChoiceQuestion(question, new string[]
+                {
+                    json.incorrect_answers[0].ToString(),
+                    json.incorrect_answers[1].ToString(),
+                    json.incorrect_answers[2].ToString()
+                }) : new TrueOrFalseQuestion(question, json.incorrect_answers[0].ToString());
+        }
+        catch (Exception ex)
+        {
+            _console.LogError("Something went wrong, attempting to get a trivia question", ex);
+
+            return TriviaQuestion.Empty();
+        }
+    }
+
+    public async ValueTask<bool> IsUrlEmptyAsync(string url)
     {
         try
         {
@@ -222,6 +258,28 @@ public sealed class HttpService : IHttpService
             ChuckNorrisJokeCategory.Sport => "?category=sport",
             ChuckNorrisJokeCategory.Travel => "?category=travel",
             _ => "",
+        };
+    }
+
+    private static string GetEndpoint(TriviaQuestionDifficulty difficulty)
+    {
+        return difficulty switch
+        {
+            TriviaQuestionDifficulty.Easy => "&difficulty=easy",
+            TriviaQuestionDifficulty.Medium => "&difficulty=medium",
+            TriviaQuestionDifficulty.Hard => "&difficulty=hard",
+            _ => ""
+        };
+    }
+
+    private static TriviaQuestionDifficulty FromString(string str)
+    {
+        return str.ToLower() switch
+        {
+            "easy" => TriviaQuestionDifficulty.Easy,
+            "medium" => TriviaQuestionDifficulty.Medium,
+            "hard" => TriviaQuestionDifficulty.Hard,
+            _ => TriviaQuestionDifficulty.Random
         };
     }
 }
