@@ -88,7 +88,7 @@ public sealed class HttpService : IHttpService
 
             _console.LogDebug("Chuck Norris Joke was returned successfully");
 
-            return new ChuckNorrisJoke(json.value.ToString(), category is ChuckNorrisJokeCategory.Excplicit);
+            return new ChuckNorrisJoke(json.value.ToString(), category);
         }
         catch (Exception ex)
         {
@@ -203,17 +203,17 @@ public sealed class HttpService : IHttpService
 
             difficulty = difficulty is TriviaQuestionDifficulty.Random ? FromString(json.difficulty.ToString()) : difficulty;
 
-            var question = new TriviaQuestion(difficulty, json.question.ToString(), json.correct_answer.ToString());
+            var question = new TriviaQuestion(difficulty, json.question.ToString());
 
             _console.LogDebug("Trivia question was returned successfully");
 
             return json.type.ToString() == "multiple"
-                ? new MultipleChoiceQuestion(question, new string[]
+                ? new MultipleChoiceQuestion(question, json.correct_answer.ToString(), new string[]
                 {
                     json.incorrect_answers[0].ToString(),
                     json.incorrect_answers[1].ToString(),
                     json.incorrect_answers[2].ToString()
-                }) : new TrueOrFalseQuestion(question, json.incorrect_answers[0].ToString());
+                }) : new TrueOrFalseQuestion(question, bool.Parse(json.correct_answer.ToString()), bool.Parse(json.incorrect_answers[0].ToString()));
         }
         catch (Exception ex)
         {

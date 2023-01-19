@@ -992,4 +992,31 @@ public static class MobyUtil
             .WithDescription($"Deleted {deletedMessages} messages")
             .Build();
     }
+
+    public static Embed GetChuckNorrisJokeEmbed(ChuckNorrisJoke joke)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🤠 Chuck Norris Joke**")
+            .WithDescription($"> \"{joke.Value.DiscordFormat()}\"\n\n» {joke.Category}")
+            .Build();
+    }
+
+    public static Embed GetTriviaEmbed(TriviaQuestion question)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle(question is MultipleChoiceQuestion ? $"**\\❓ Multiple Choice Question**" : $"**\\❔ True Or False Question**")
+            .WithDescription($"> {question.Question.DiscordFormat()}\n\n» {question.Difficulty}")
+            .Build();
+    }
+
+    public static MessageComponent GetTrueOrFalseQuestionComponent(TrueOrFalseQuestion question)
+    {
+        return new ComponentBuilder()
+            .WithButton("True", )
+    }
+
+    public static MessageComponent GetMultipleChoiceQuestionComponent(MultipleChoiceQuestion question)
+    {
+
+    }
 }

@@ -6,38 +6,40 @@ public record TriviaQuestion
 {
     public TriviaQuestionDifficulty Difficulty { get; }
     public string Question { get; }
-    public string CorrectAnswer { get; }
 
-    public TriviaQuestion(TriviaQuestionDifficulty difficulty, string question, string correctAnswer)
+    public TriviaQuestion(TriviaQuestionDifficulty difficulty, string question)
     {
         Difficulty = difficulty;
         Question = question;
-        CorrectAnswer = correctAnswer;
     }
 
     public static TriviaQuestion Empty()
-        => new(TriviaQuestionDifficulty.Easy, "", "");
+        => new(TriviaQuestionDifficulty.Random, "");
 
     public bool IsEmpty()
-        => Difficulty == TriviaQuestionDifficulty.Easy && Question == "" && CorrectAnswer == "";
+        => Difficulty == TriviaQuestionDifficulty.Random && string.IsNullOrWhiteSpace(Question);
 }
 
 public sealed record TrueOrFalseQuestion : TriviaQuestion
 {
-    public string IncorrectAnswer { get; }
+    public bool CorrectAnswer { get; }
+    public bool IncorrectAnswer { get; }
 
-    public TrueOrFalseQuestion(TriviaQuestion original, string incorrectAnswer) : base(original)
+    public TrueOrFalseQuestion(TriviaQuestion original, bool correctAnswer, bool incorrectAnswer) : base(original)
     {
+        CorrectAnswer = correctAnswer;
         IncorrectAnswer = incorrectAnswer;
     }
 }
 
 public sealed record MultipleChoiceQuestion : TriviaQuestion
 {
+    public string CorrectAnswer { get; }
     public string[] IncorrectAnswers { get; }
 
-    public MultipleChoiceQuestion(TriviaQuestion original, string[] incorrectAnswers) : base(original)
+    public MultipleChoiceQuestion(TriviaQuestion original, string correctAnswer, string[] incorrectAnswers) : base(original)
     {
+        CorrectAnswer = correctAnswer;
         IncorrectAnswers = incorrectAnswers;
     }
 }

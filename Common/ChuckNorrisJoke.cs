@@ -3,17 +3,17 @@
 public sealed record ChuckNorrisJoke
 {
     public string Value { get; }
-    public bool IsExplicit { get; }
+    public ChuckNorrisJokeCategory Category { get; }
 
-    public ChuckNorrisJoke(string value, bool isExplicit)
+    public ChuckNorrisJoke(string value, ChuckNorrisJokeCategory category)
     {
         Value = value;
-        IsExplicit = isExplicit;
+        Category = category;
     }
 
     public bool IsEmpty()
-        => string.IsNullOrWhiteSpace(Value) && !IsExplicit;
+        => string.IsNullOrWhiteSpace(Value) && Category is ChuckNorrisJokeCategory.None;
 
     public static ChuckNorrisJoke Empty()
-        => new("", false);
+        => new("", ChuckNorrisJokeCategory.None);
 }

@@ -45,6 +45,14 @@ public static class Moby
     public const string ColorQuizWrongAnswerCId2 = "color-quiz-wrong-answer-2";
     public const string ColorQuizWrongAnswerCId3 = "color-quiz-wrong-answer-3";
 
+    public const string TrueOrFalseCorrectAnswerCId = "true-or-false-question-correct-answer";
+    public const string TrueOrFalseIncorrectAnswerCId = "true-or-false-question-wrong-answer";
+
+    public const string MultipleChoiceCorrectAnswerCId = "multiple-choice-question-correct-answer";
+    public const string MultipleChoiceIncorrectAnswerCId1 = "multiple-choice-question-wrong-answer-1";
+    public const string MultipleChoiceIncorrectAnswerCId2 = "multiple-choice-question-wrong-answer-2";
+    public const string MultipleChoiceIncorrectAnswerCId3 = "multiple-choice-question-wrong-answer-3";
+
     public const ulong InformationChannelId = 1058214987170058312;
     public const ulong ContactChannelId = 1057784058517667881;
     public const ulong LogsChannelId = 1053392480034357432;

@@ -145,7 +145,7 @@ public sealed class GeneralModule : MobyModuleBase
     }
 
     [SlashCommand("chuck", "Get a random Chuck Norris joke")]
-    public async Task ChuckNorrisAsync([Summary("category", "Choose the category of the joke")] ChuckNorrisJokeCategory category = ChuckNorrisJokeCategory.None)
+    public async Task ChuckNorrisAsync([Summary("category", "Choose the category of the joke")] ChuckNorrisJokeCategory category = ChuckNorrisJokeCategory.None) 
     {
         await DeferAsync(ephemeral: true);
 
@@ -153,13 +153,15 @@ public sealed class GeneralModule : MobyModuleBase
 
         var isEmpty = joke.IsEmpty();
 
-        if (!isEmpty && joke.IsExplicit && !((ITextChannel)Context.Channel).IsNsfw)
+        if (!isEmpty && joke.Category is ChuckNorrisJokeCategory.Excplicit && !((ITextChannel)Context.Channel).IsNsfw)
         {
             await FollowupAsync("This joke contained Nsfw content but this isn't a Nsfw channel", ephemeral: true);
             return;
         }
 
-        await FollowupAsync(isEmpty ? "Chuck Norris is so damn badass he won't allow me to send a joke at the moment." : joke.Value, ephemeral: true); //Send an embed instead of message
+        await FollowupAsync(embed: MobyUtil.GetChuckNorrisJokeEmbed(isEmpty ?
+            new ChuckNorrisJoke("Chuck Norris is so damn badass he won't allow me to send a joke at the moment.",
+            ChuckNorrisJokeCategory.None) : joke), ephemeral: true);
     }
 
     [SlashCommand("top", "Get a list of the largest server where I'm on")]
@@ -291,14 +293,28 @@ public sealed class GeneralModule : MobyModuleBase
         await message.AddReactionsAsync(emojis.Take(responses.Length));
     }
 
-    [SlashCommand("trivia", "Get a multiple choice question")]
+    [SlashCommand("trivia", "Get a question to test your general knowledge")]
     public async Task TriviaAsync([Summary("difficulty", "The difficulty of the question")] TriviaQuestionDifficulty difficulty = TriviaQuestionDifficulty.Random)
     {
         await DeferAsync(ephemeral: true);
 
         var question = await _http.GetTriviaQuestionAsync(difficulty);
 
-        //Finish the command - Buttons, etc. included
+        if (question.IsEmpty())
+        {
+            await FollowupAsync("Couldn't get a trivia question", ephemeral: true);
+            return;
+        }
+
+        var embed = MobyUtil.GetTriviaEmbed(question);
+
+        if (question is MultipleChoiceQuestion)
+        {
+            await FollowupAsync(ephemeral: true, embed: embed, components: MobyUtil.GetMultipleChoiceQuestionComponent((MultipleChoiceQuestion)question));
+            return;
+        }
+
+        await FollowupAsync(ephemeral: true, embed: embed, components: MobyUtil.GetTrueOrFalseQuestionComponent((TrueOrFalseQuestion)question));
     }
 
     [Group("color", "Commands with colors")]
