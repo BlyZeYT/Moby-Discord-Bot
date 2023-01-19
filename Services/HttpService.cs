@@ -194,7 +194,7 @@ public sealed class HttpService : IHttpService
     {
         try
         {
-            dynamic json = JObject.Parse(await _client.GetStringAsync("https://opentdb.com/api.php?amount=1&category=9&encode=base64" + GetEndpoint(difficulty)));
+            dynamic json = JObject.Parse(await _client.GetStringAsync("https://opentdb.com/api.php?amount=1&encode=base64" + GetEndpoint(difficulty)));
 
             if (json.response_code != 0) throw new Exception("Response code was not 0");
 
@@ -202,9 +202,11 @@ public sealed class HttpService : IHttpService
 
             json = JObject.Parse(json[0].ToString());
 
-            difficulty = difficulty is TriviaQuestionDifficulty.Random ? FromString(FromBase64String(json.difficulty.ToString())) : difficulty;
-
-            var question = new TriviaQuestion(difficulty, FromBase64String(json.question.ToString()));
+            var question = new TriviaQuestion(difficulty is TriviaQuestionDifficulty.Random
+                ? FromString(FromBase64String(json.difficulty.ToString()))
+                : difficulty,
+                FromBase64String(json.question.ToString()),
+                FromBase64String(json.category.ToString()));
 
             _console.LogDebug("Trivia question was returned successfully");
 

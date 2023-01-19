@@ -6,18 +6,20 @@ public record TriviaQuestion
 {
     public TriviaQuestionDifficulty Difficulty { get; }
     public string Question { get; }
+    public string Category { get; }
 
-    public TriviaQuestion(TriviaQuestionDifficulty difficulty, string question)
+    public TriviaQuestion(TriviaQuestionDifficulty difficulty, string question, string category)
     {
         Difficulty = difficulty;
         Question = question;
+        Category = category;
     }
 
     public static TriviaQuestion Empty()
-        => new(TriviaQuestionDifficulty.Random, "");
+        => new(TriviaQuestionDifficulty.Random, "", "");
 
     public bool IsEmpty()
-        => Difficulty == TriviaQuestionDifficulty.Random && string.IsNullOrWhiteSpace(Question);
+        => Difficulty == TriviaQuestionDifficulty.Random && string.IsNullOrWhiteSpace(Question) && string.IsNullOrWhiteSpace(Category);
 }
 
 public sealed record TrueOrFalseQuestion : TriviaQuestion

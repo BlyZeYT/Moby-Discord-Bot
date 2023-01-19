@@ -1005,7 +1005,7 @@ public static class MobyUtil
     {
         return new MobyEmbedBuilder()
             .WithTitle(question is MultipleChoiceQuestion ? $"**\\❓ Multiple Choice Question**" : $"**\\❔ True Or False Question**")
-            .WithDescription($"> {question.Question.DiscordFormat()}\n\n» {question.Difficulty}")
+            .WithDescription($"> {question.Question.DiscordFormat()}\n\n» {question.Difficulty}\n« {question.Category.DiscordFormat()}")
             .Build();
     }
 

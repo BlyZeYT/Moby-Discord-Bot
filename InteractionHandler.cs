@@ -136,9 +136,25 @@ public sealed class InteractionHandler
                 break;
 
             case Moby.TrueOrFalseCorrectAnswerCId:
+
+                await msgc.UpdateAsync(x =>
+                {
+                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\✅ Correct**\n\nYou answered: {((ButtonComponent)msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components).First(x => x.CustomId == Moby.TrueOrFalseCorrectAnswerCId)).Label}").Build();
+                    x.Components = new ComponentBuilder().Build();
+                });
+
                 break;
 
             case Moby.TrueOrFalseIncorrectAnswerCId:
+
+                var trueOrFalse = msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components);
+
+                await msgc.UpdateAsync(x =>
+                {
+                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\❌ Wrong**\n\nYou answered: {((ButtonComponent)trueOrFalse.First(x => x.CustomId == msgc.Data.CustomId)).Label}\nThe right answer was: {((ButtonComponent)trueOrFalse.First(x => x.CustomId == Moby.TrueOrFalseCorrectAnswerCId)).Label}").Build();
+                    x.Components = new ComponentBuilder().Build();
+                });
+
                 break;
 
             case Moby.MultipleChoiceIncorrectAnswerCId1 or Moby.MultipleChoiceIncorrectAnswerCId2 or Moby.MultipleChoiceIncorrectAnswerCId3:
