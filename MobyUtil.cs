@@ -956,12 +956,12 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetBanEmbed(SocketUser kickedUser, string? reason)
+    public static Embed GetBanEmbed(SocketUser bannedUser, string? reason)
     {
         return new MobyEmbedBuilder()
             .WithTitle("**\\⛔ Banned User**")
-            .WithThumbnailUrl(kickedUser.GetAvatarUrl(size: 2048) ?? kickedUser.GetDefaultAvatarUrl())
-            .WithDescription($"User: {kickedUser.Username}#{kickedUser.Discriminator}\nReason: {(string.IsNullOrWhiteSpace(reason) ? "-" : reason)}")
+            .WithThumbnailUrl(bannedUser.GetAvatarUrl(size: 2048) ?? bannedUser.GetDefaultAvatarUrl())
+            .WithDescription($"User: {bannedUser.Username}#{bannedUser.Discriminator}\nReason: {(string.IsNullOrWhiteSpace(reason) ? "-" : reason)}")
             .Build();
     }
 
@@ -1012,11 +1012,48 @@ public static class MobyUtil
     public static MessageComponent GetTrueOrFalseQuestionComponent(TrueOrFalseQuestion question)
     {
         return new ComponentBuilder()
-            .WithButton("True", )
+            .WithButton("True", question.CorrectAnswer
+            ? Moby.TrueOrFalseCorrectAnswerCId
+            : Moby.TrueOrFalseIncorrectAnswerCId, ButtonStyle.Secondary, new Emoji("✅"), row: 0)
+            .WithButton("False", question.CorrectAnswer
+            ? Moby.TrueOrFalseIncorrectAnswerCId
+            : Moby.TrueOrFalseCorrectAnswerCId, ButtonStyle.Secondary, new Emoji("❌"), row: 1)
+            .Build();
     }
 
     public static MessageComponent GetMultipleChoiceQuestionComponent(MultipleChoiceQuestion question)
     {
+        var choices = new string[4];
 
+        for (int i = 0; i < 3; i++)
+        {
+            choices[i] = question.IncorrectAnswers[i];
+        }
+
+        choices[3] = question.CorrectAnswer;
+
+        Random.Shared.Shuffle(choices);
+
+        var builder = new ComponentBuilder();
+
+        var wrongIterations = 0;
+        for (int i = 0; i < choices.Length; i++)
+        {
+            if (choices[i] == question.CorrectAnswer) builder.WithButton(choices[i], Moby.MultipleChoiceCorrectAnswerCId, ButtonStyle.Secondary, Moby.QuizEmojis[i], row: i % 2 == 0 ? 0 : 1);
+            else
+            {
+                wrongIterations++;
+
+                builder.WithButton(choices[i], wrongIterations switch
+                {
+                    1 => Moby.MultipleChoiceIncorrectAnswerCId1,
+                    2 => Moby.MultipleChoiceIncorrectAnswerCId2,
+                    3 => Moby.MultipleChoiceIncorrectAnswerCId3,
+                    _ => ""
+                }, ButtonStyle.Secondary, Moby.QuizEmojis[i], row: i % 2 == 0 ? 0 : 1);
+            }
+        }
+
+        return builder.Build();
     }
 }

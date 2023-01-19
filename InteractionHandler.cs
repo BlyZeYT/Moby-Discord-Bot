@@ -115,11 +115,39 @@ public sealed class InteractionHandler
 
             case Moby.ColorQuizWrongAnswerCId1 or Moby.ColorQuizWrongAnswerCId2 or Moby.ColorQuizWrongAnswerCId3:
 
-                var buttons = msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components);
+                var colors = msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components);
 
                 await msgc.UpdateAsync(x =>
                 {
-                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\❌ Wrong**\n\nYou answered: {((ButtonComponent)buttons.First(x => x.CustomId == msgc.Data.CustomId)).Label}\nThe right answer was: {((ButtonComponent)buttons.First(x => x.CustomId == Moby.ColorQuizCorrectAnswerCId)).Label}").Build();
+                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\❌ Wrong**\n\nYou answered: {((ButtonComponent)colors.First(x => x.CustomId == msgc.Data.CustomId)).Label}\nThe right answer was: {((ButtonComponent)colors.First(x => x.CustomId == Moby.ColorQuizCorrectAnswerCId)).Label}").Build();
+                    x.Components = new ComponentBuilder().Build();
+                });
+
+                break;
+
+            case Moby.MultipleChoiceCorrectAnswerCId:
+
+                await msgc.UpdateAsync(x =>
+                {
+                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\✅ Correct**\n\nYou answered: {((ButtonComponent)msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components).First(x => x.CustomId == Moby.MultipleChoiceCorrectAnswerCId)).Label}").Build();
+                    x.Components = new ComponentBuilder().Build();
+                });
+
+                break;
+
+            case Moby.TrueOrFalseCorrectAnswerCId:
+                break;
+
+            case Moby.TrueOrFalseIncorrectAnswerCId:
+                break;
+
+            case Moby.MultipleChoiceIncorrectAnswerCId1 or Moby.MultipleChoiceIncorrectAnswerCId2 or Moby.MultipleChoiceIncorrectAnswerCId3:
+
+                var choices = msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components);
+
+                await msgc.UpdateAsync(x =>
+                {
+                    x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\❌ Wrong**\n\nYou answered: {((ButtonComponent)choices.First(x => x.CustomId == msgc.Data.CustomId)).Label}\nThe right answer was: {((ButtonComponent)choices.First(x => x.CustomId == Moby.MultipleChoiceCorrectAnswerCId)).Label}").Build();
                     x.Components = new ComponentBuilder().Build();
                 });
 

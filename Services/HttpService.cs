@@ -3,6 +3,7 @@
 using global::Moby.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 public interface IHttpService
 {
@@ -193,7 +194,7 @@ public sealed class HttpService : IHttpService
     {
         try
         {
-            dynamic json = JObject.Parse(await _client.GetStringAsync("https://opentdb.com/api.php?amount=1&category=9" + GetEndpoint(difficulty)));
+            dynamic json = JObject.Parse(await _client.GetStringAsync("https://opentdb.com/api.php?amount=1&category=9&encode=base64" + GetEndpoint(difficulty)));
 
             if (json.response_code != 0) throw new Exception("Response code was not 0");
 
@@ -201,19 +202,19 @@ public sealed class HttpService : IHttpService
 
             json = JObject.Parse(json[0].ToString());
 
-            difficulty = difficulty is TriviaQuestionDifficulty.Random ? FromString(json.difficulty.ToString()) : difficulty;
+            difficulty = difficulty is TriviaQuestionDifficulty.Random ? FromString(FromBase64String(json.difficulty.ToString())) : difficulty;
 
-            var question = new TriviaQuestion(difficulty, json.question.ToString());
+            var question = new TriviaQuestion(difficulty, FromBase64String(json.question.ToString()));
 
             _console.LogDebug("Trivia question was returned successfully");
 
-            return json.type.ToString() == "multiple"
-                ? new MultipleChoiceQuestion(question, json.correct_answer.ToString(), new string[]
+            return FromBase64String(json.type.ToString()) == "multiple"
+                ? new MultipleChoiceQuestion(question, FromBase64String(json.correct_answer.ToString()), new string[]
                 {
-                    json.incorrect_answers[0].ToString(),
-                    json.incorrect_answers[1].ToString(),
-                    json.incorrect_answers[2].ToString()
-                }) : new TrueOrFalseQuestion(question, bool.Parse(json.correct_answer.ToString()), bool.Parse(json.incorrect_answers[0].ToString()));
+                    FromBase64String(json.incorrect_answers[0].ToString()),
+                    FromBase64String(json.incorrect_answers[1].ToString()),
+                    FromBase64String(json.incorrect_answers[2].ToString())
+                }) : new TrueOrFalseQuestion(question, bool.Parse(FromBase64String(json.correct_answer.ToString())));
         }
         catch (Exception ex)
         {
@@ -282,4 +283,7 @@ public sealed class HttpService : IHttpService
             _ => TriviaQuestionDifficulty.Random
         };
     }
+
+    private static string FromBase64String(string base64)
+        => Encoding.UTF8.GetString(Convert.FromBase64String(base64));
 }

@@ -23,12 +23,10 @@ public record TriviaQuestion
 public sealed record TrueOrFalseQuestion : TriviaQuestion
 {
     public bool CorrectAnswer { get; }
-    public bool IncorrectAnswer { get; }
 
-    public TrueOrFalseQuestion(TriviaQuestion original, bool correctAnswer, bool incorrectAnswer) : base(original)
+    public TrueOrFalseQuestion(TriviaQuestion original, bool correctAnswer) : base(original)
     {
         CorrectAnswer = correctAnswer;
-        IncorrectAnswer = incorrectAnswer;
     }
 }
 
