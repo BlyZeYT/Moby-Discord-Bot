@@ -2,8 +2,8 @@
 
 using Discord.Interactions;
 using Discord.WebSocket;
-using global::Moby.Common;
-using global::Moby.Services;
+using Common;
+using Services;
 using Victoria.Node;
 using Victoria.Node.EventArgs;
 using Victoria.Player;

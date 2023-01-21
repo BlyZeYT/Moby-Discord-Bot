@@ -3,7 +3,7 @@
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using global::Moby.Common;
+using Common;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.InteropServices;

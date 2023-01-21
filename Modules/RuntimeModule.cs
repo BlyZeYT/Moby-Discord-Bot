@@ -1,10 +1,9 @@
 ﻿namespace Moby.Modules;
 
-using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using global::Moby.Common;
-using global::Moby.Services;
+using Common;
+using Services;
 
 [RequireOwner]
 [Discord.Commands.Name(Moby.OnlyMobyGuildModule)]

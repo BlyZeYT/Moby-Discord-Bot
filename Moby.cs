@@ -1,7 +1,7 @@
 ﻿namespace Moby;
 
 using Discord;
-using global::Moby.Common;
+using Common;
 using Microsoft.Extensions.Logging;
 
 public static class Moby
@@ -87,7 +87,7 @@ public static class Moby
 
         QuizEmojis = new Emoji[]
         {
-            "🇦", "🇧", "🇨", "🇩"
+            "🇦", "🇨", "🇧", "🇩"
         };
 
         FactOfTheDay = new("");

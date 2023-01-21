@@ -3,8 +3,8 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using Discord;
-using global::Moby.Common;
-using global::Moby.Services;
+using Common;
+using Services;
 
 [RequireContext(ContextType.Guild)]
 [Discord.Commands.Name("Context")]

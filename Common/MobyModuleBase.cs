@@ -2,7 +2,7 @@
 
 using Discord;
 using Discord.Interactions;
-using global::Moby.Services;
+using Services;
 using System.Threading.Tasks;
 
 [RequireContext(ContextType.Guild)]

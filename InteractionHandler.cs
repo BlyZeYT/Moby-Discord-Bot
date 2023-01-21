@@ -4,7 +4,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Discord;
 using System.Reflection;
-using global::Moby.Services;
+using Services;
 using Microsoft.Extensions.Configuration;
 using System;
 

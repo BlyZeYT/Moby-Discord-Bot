@@ -2,7 +2,7 @@
 
 using Discord;
 using Discord.WebSocket;
-using global::Moby.Common;
+using Common;
 using System.Globalization;
 using System.Linq;
 using System.Text;

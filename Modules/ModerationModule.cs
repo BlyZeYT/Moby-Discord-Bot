@@ -4,8 +4,8 @@ using Discord;
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
-using global::Moby.Common;
-using global::Moby.Services;
+using Common;
+using Services;
 
 [Discord.Commands.Name("Moderation")]
 public sealed class ModerationModule : MobyModuleBase

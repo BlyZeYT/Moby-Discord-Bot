@@ -1,6 +1,6 @@
 ﻿namespace Moby.Services;
 
-using global::Moby.Common;
+using Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;

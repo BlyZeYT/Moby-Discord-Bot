@@ -1,6 +1,6 @@
 ﻿namespace Moby.Services;
 
-using global::Moby.Common;
+using Common;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using System.Data;

@@ -3,8 +3,8 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using global::Moby.Common;
-using global::Moby.Services;
+using Common;
+using Services;
 using System.Data;
 using System.Diagnostics;
 using System.Text;

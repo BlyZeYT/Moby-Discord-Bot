@@ -1,8 +1,8 @@
 ﻿namespace Moby.Modules;
 
 using Discord.Interactions;
-using global::Moby.Common;
-using global::Moby.Services;
+using Common;
+using Services;
 using Victoria.Node;
 
 [Discord.Commands.Name("Music")]
