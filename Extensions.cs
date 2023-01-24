@@ -6,6 +6,8 @@ using Common;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using DeepL;
+using System.Linq.Expressions;
 
 public static class Extensions
 {
@@ -181,6 +183,39 @@ public static class Extensions
         }
 
         return sequence.ElementAt(System.Random.Shared.Next(0, count));
+    }
+
+    public static string GetString(this Language language)
+    {
+        return language switch
+        {
+            Language.AmericanEnglish => LanguageCode.EnglishAmerican,
+            Language.BrazilianPortuguese => LanguageCode.PortugueseBrazilian,
+            Language.BritishEnglish => LanguageCode.EnglishBritish,
+            Language.Bulgarian => LanguageCode.Bulgarian,
+            Language.Chinese => LanguageCode.Chinese,
+            Language.Czech => LanguageCode.Czech,
+            Language.Danish => LanguageCode.Danish,
+            Language.Dutch => LanguageCode.Dutch,
+            Language.English => LanguageCode.English,
+            Language.EuropeanPortuguese => LanguageCode.PortugueseEuropean,
+            Language.French => LanguageCode.French,
+            Language.German => LanguageCode.German,
+            Language.Greek => LanguageCode.Greek,
+            Language.Hungarian => LanguageCode.Hungarian,
+            Language.Indonesian => LanguageCode.Indonesian,
+            Language.Italian => LanguageCode.Italian,
+            Language.Japanese => LanguageCode.Japanese,
+            Language.Polish => LanguageCode.Polish,
+            Language.Portuguese => LanguageCode.Portuguese,
+            Language.Romanian => LanguageCode.Romanian,
+            Language.Russian => LanguageCode.Russian,
+            Language.Spanish => LanguageCode.Spanish,
+            Language.Swedish => LanguageCode.Swedish,
+            Language.Turkish => LanguageCode.Turkish,
+            Language.Ukrainian => LanguageCode.Ukrainian,
+            _ => ""
+        };
     }
 
     public static string GetString(this HashMethod method)

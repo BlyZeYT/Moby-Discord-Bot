@@ -1,6 +1,8 @@
 ﻿namespace Moby.Services;
 
 using Common;
+using DeepL;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
@@ -25,20 +27,28 @@ public interface IHttpService
 
     public ValueTask<TriviaQuestion> GetTriviaQuestionAsync(TriviaQuestionDifficulty difficulty);
 
-    public ValueTask<bool> IsUrlEmptyAsync(string url);
+    public ValueTask<DeepL.Model.TextResult?> TranslateTextAsync(string text, Language? from, Language to);
 }
 
 public sealed class HttpService : IHttpService
 {
     private readonly HttpClient _client;
+    private readonly ITranslator _deepl;
     private readonly ConsoleLogger _console;
 
-    public HttpService(ConsoleLogger console)
+    public HttpService(IConfiguration config, ConsoleLogger console)
     {
         _client = new HttpClient()
         {
             Timeout = TimeSpan.FromSeconds(5)
         };
+        _deepl = new Translator(config["deepl"]!, new TranslatorOptions
+        {
+            ClientFactory = () => new HttpClientAndDisposeFlag
+            {
+                HttpClient = _client
+            }
+        });
         _console = console;
     }
 
@@ -226,17 +236,17 @@ public sealed class HttpService : IHttpService
         }
     }
 
-    public async ValueTask<bool> IsUrlEmptyAsync(string url)
+    public async ValueTask<DeepL.Model.TextResult?> TranslateTextAsync(string text, Language? from, Language to)
     {
         try
         {
-            var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
-
-            return !response.IsSuccessStatusCode;
+            return await _deepl.TranslateTextAsync(text, from.HasValue ? from.Value.GetString() : null, to.GetString());
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return false;
+            _console.LogError("Something went wrong, attempting to get a translate a text", ex);
+
+            return null;
         }
     }
 

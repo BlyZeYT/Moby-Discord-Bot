@@ -8,6 +8,7 @@ using Services;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 
 [Discord.Commands.Name("General")]
 public sealed class GeneralModule : MobyModuleBase
@@ -15,12 +16,14 @@ public sealed class GeneralModule : MobyModuleBase
     private readonly DiscordSocketClient _client;
     private readonly InteractionService _service;
     private readonly IHttpService _http;
+    private readonly IConfiguration _config;
 
-    public GeneralModule(DiscordSocketClient client, InteractionService service, IHttpService http, ConsoleLogger consoleLogger) : base(consoleLogger)
+    public GeneralModule(DiscordSocketClient client, InteractionService service, IHttpService http, IConfiguration config, ConsoleLogger consoleLogger) : base(consoleLogger)
     {
         _client = client;
         _service = service;
         _http = http;
+        _config = config;
     }
 
     [SlashCommand("help", "Get help for all my functions")]
@@ -315,6 +318,16 @@ public sealed class GeneralModule : MobyModuleBase
         }
 
         await FollowupAsync(ephemeral: true, embed: embed, components: MobyUtil.GetTrueOrFalseQuestionComponent((TrueOrFalseQuestion)question));
+    }
+
+    [SlashCommand("translate", "Translates the provided text")]
+    public async Task TranslateAsync([Summary("text", "The text that should be translated")] [MinLength(1)] [MaxLength(100)] string text,
+        [Summary("to", "The language the text should be translated to")] Language to,
+        [Summary("from", "The language of the text")] Language? from = null)
+    {
+        await DeferAsync(ephemeral: true);
+
+
     }
 
     [Group("color", "Commands with colors")]
