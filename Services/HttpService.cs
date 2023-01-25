@@ -27,7 +27,7 @@ public interface IHttpService
 
     public ValueTask<TriviaQuestion> GetTriviaQuestionAsync(TriviaQuestionDifficulty difficulty);
 
-    public ValueTask<DeepL.Model.TextResult?> TranslateTextAsync(string text, Language? from, Language to);
+    public ValueTask<DeepL.Model.TextResult?> TranslateTextAsync(string text, Language toLanguage);
 }
 
 public sealed class HttpService : IHttpService
@@ -236,15 +236,17 @@ public sealed class HttpService : IHttpService
         }
     }
 
-    public async ValueTask<DeepL.Model.TextResult?> TranslateTextAsync(string text, Language? from, Language to)
+    public async ValueTask<DeepL.Model.TextResult?> TranslateTextAsync(string text, Language toLanguage)
     {
         try
         {
-            return await _deepl.TranslateTextAsync(text, from.HasValue ? from.Value.GetString() : null, to.GetString());
+            _console.LogDebug("Request to translate this text: " + text);
+
+            return await _deepl.TranslateTextAsync(text, null, toLanguage.GetLanguageCode());
         }
         catch (Exception ex)
         {
-            _console.LogError("Something went wrong, attempting to get a translate a text", ex);
+            _console.LogError("Something went wrong, attempting to translate a text", ex);
 
             return null;
         }

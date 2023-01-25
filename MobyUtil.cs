@@ -1056,4 +1056,12 @@ public static class MobyUtil
 
         return builder.Build();
     }
+
+    public static Embed GetTranslationTextEmbed(DeepL.Model.TextResult result, Language language)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("**\\🌍 Translation**")
+            .WithDescription($"```\n{result.Text}\n```\nTranslated {result.DetectedSourceLanguageCode.GetLanguage().GetFormattedString()} to {language.GetFormattedString()}")
+            .Build();
+    }
 }

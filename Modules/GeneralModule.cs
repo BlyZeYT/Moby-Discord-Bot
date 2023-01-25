@@ -322,12 +322,19 @@ public sealed class GeneralModule : MobyModuleBase
 
     [SlashCommand("translate", "Translates the provided text")]
     public async Task TranslateAsync([Summary("text", "The text that should be translated")] [MinLength(1)] [MaxLength(100)] string text,
-        [Summary("to", "The language the text should be translated to")] Language to,
-        [Summary("from", "The language of the text")] Language? from = null)
+        [Summary("language", "The language the text should be translated to")] Language language)
     {
         await DeferAsync(ephemeral: true);
 
+        var translated = await _http.TranslateTextAsync(text, language);
 
+        if (translated is null)
+        {
+            await FollowupAsync("The translation service is seems to be down, please try again later", ephemeral: true);
+            return;
+        }
+
+        await FollowupAsync(ephemeral: true, embed: MobyUtil.GetTranslationTextEmbed(translated, language));
     }
 
     [Group("color", "Commands with colors")]

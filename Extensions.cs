@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using DeepL;
-using System.Linq.Expressions;
+using static System.Net.Mime.MediaTypeNames;
 
 public static class Extensions
 {
@@ -185,7 +185,7 @@ public static class Extensions
         return sequence.ElementAt(System.Random.Shared.Next(0, count));
     }
 
-    public static string GetString(this Language language)
+    public static string GetLanguageCode(this Language language)
     {
         return language switch
         {
@@ -216,6 +216,59 @@ public static class Extensions
             Language.Ukrainian => LanguageCode.Ukrainian,
             _ => ""
         };
+    }
+
+    public static Language GetLanguage(this string str)
+    {
+        return str switch
+        {
+            LanguageCode.EnglishAmerican => Language.AmericanEnglish,
+            LanguageCode.PortugueseBrazilian => Language.BrazilianPortuguese,
+            LanguageCode.EnglishBritish => Language.BritishEnglish,
+            LanguageCode.Bulgarian => Language.Bulgarian,
+            LanguageCode.Chinese => Language.Chinese,
+            LanguageCode.Czech => Language.Czech,
+            LanguageCode.Danish => Language.Danish,
+            LanguageCode.Dutch => Language.Dutch,
+            LanguageCode.English => Language.English,
+            LanguageCode.PortugueseEuropean => Language.EuropeanPortuguese,
+            LanguageCode.French => Language.French,
+            LanguageCode.German => Language.German,
+            LanguageCode.Greek => Language.Greek,
+            LanguageCode.Hungarian => Language.Hungarian,
+            LanguageCode.Indonesian => Language.Indonesian,
+            LanguageCode.Italian => Language.Italian,
+            LanguageCode.Japanese => Language.Japanese,
+            LanguageCode.Polish => Language.Polish,
+            LanguageCode.Portuguese => Language.Portuguese,
+            LanguageCode.Romanian => Language.Romanian,
+            LanguageCode.Russian => Language.Russian,
+            LanguageCode.Spanish => Language.Spanish,
+            LanguageCode.Swedish => Language.Swedish,
+            LanguageCode.Turkish => Language.Turkish,
+            LanguageCode.Ukrainian => Language.Ukrainian,
+            _ => new Language()
+        };
+    }
+
+    public static string GetFormattedString(this Language language)
+    {
+        var langStr = language.ToString();
+
+        if (string.IsNullOrWhiteSpace(langStr)) return "";
+
+        StringBuilder sb = new StringBuilder(langStr.Length * 2);
+
+        sb.Append(langStr[0]);
+
+        for (int i = 1; i < langStr.Length; i++)
+        {
+            if (char.IsUpper(langStr[i]) && langStr[i - 1] != ' ') sb.Append(' ');
+
+            sb.Append(langStr[i]);
+        }
+
+        return sb.ToString();
     }
 
     public static string GetString(this HashMethod method)

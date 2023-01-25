@@ -4,54 +4,54 @@ using Discord.Interactions;
 
 public enum Language
 {
-    [ChoiceDisplay("Bulgarian")]
+    [ChoiceDisplay("🌍 Bulgarian")]
     Bulgarian,
-    [ChoiceDisplay("Czech")]
+    [ChoiceDisplay("🌍 Czech")]
     Czech,
-    [ChoiceDisplay("Danish")]
+    [ChoiceDisplay("🌍 Danish")]
     Danish,
-    [ChoiceDisplay("German")]
+    [ChoiceDisplay("🌍 German")]
     German,
-    [ChoiceDisplay("Greek")]
+    [ChoiceDisplay("🌍 Greek")]
     Greek,
-    [ChoiceDisplay("English")]
+    [ChoiceDisplay("🌍 English")]
     English,
-    [ChoiceDisplay("British English")]
+    [ChoiceDisplay("🌍 British English")]
     BritishEnglish,
-    [ChoiceDisplay("American English")]
+    [ChoiceDisplay("🌍 American English")]
     AmericanEnglish,
-    [ChoiceDisplay("Spanish")]
+    [ChoiceDisplay("🌍 Spanish")]
     Spanish,
-    [ChoiceDisplay("French")]
+    [ChoiceDisplay("🌍 French")]
     French,
-    [ChoiceDisplay("Hungarian")]
+    [ChoiceDisplay("🌍 Hungarian")]
     Hungarian,
-    [ChoiceDisplay("Indonesian")]
+    [ChoiceDisplay("🌍 Indonesian")]
     Indonesian,
-    [ChoiceDisplay("Italian")]
+    [ChoiceDisplay("🌍 Italian")]
     Italian,
-    [ChoiceDisplay("Japanese")]
+    [ChoiceDisplay("🌍 Japanese")]
     Japanese,
-    [ChoiceDisplay("Dutch")]
+    [ChoiceDisplay("🌍 Dutch")]
     Dutch,
-    [ChoiceDisplay("Polish")]
+    [ChoiceDisplay("🌍 Polish")]
     Polish,
-    [ChoiceDisplay("Portuguese")]
+    [ChoiceDisplay("🌍 Portuguese")]
     Portuguese,
-    [ChoiceDisplay("Brazilian Portuguese")]
+    [ChoiceDisplay("🌍 Brazilian Portuguese")]
     BrazilianPortuguese,
-    [ChoiceDisplay("European Portuguese")]
+    [ChoiceDisplay("🌍 European Portuguese")]
     EuropeanPortuguese,
-    [ChoiceDisplay("Romanian")]
+    [ChoiceDisplay("🌍 Romanian")]
     Romanian,
-    [ChoiceDisplay("Russian")]
+    [ChoiceDisplay("🌍 Russian")]
     Russian,
-    [ChoiceDisplay("Swedish")]
+    [ChoiceDisplay("🌍 Swedish")]
     Swedish,
-    [ChoiceDisplay("Turkish")]
+    [ChoiceDisplay("🌍 Turkish")]
     Turkish,
-    [ChoiceDisplay("Ukrainian")]
+    [ChoiceDisplay("🌍 Ukrainian")]
     Ukrainian,
-    [ChoiceDisplay("Chinese")]
+    [ChoiceDisplay("🌍 Chinese")]
     Chinese
 }
