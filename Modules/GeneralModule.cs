@@ -17,13 +17,15 @@ public sealed class GeneralModule : MobyModuleBase
     private readonly InteractionService _service;
     private readonly IHttpService _http;
     private readonly IConfiguration _config;
+    private readonly IDatabase _database;
 
-    public GeneralModule(DiscordSocketClient client, InteractionService service, IHttpService http, IConfiguration config, ConsoleLogger consoleLogger) : base(consoleLogger)
+    public GeneralModule(DiscordSocketClient client, InteractionService service, IHttpService http, IConfiguration config, IDatabase database, ConsoleLogger consoleLogger) : base(consoleLogger)
     {
         _client = client;
         _service = service;
         _http = http;
         _config = config;
+        _database = database;
     }
 
     [SlashCommand("help", "Get help for all my functions")]

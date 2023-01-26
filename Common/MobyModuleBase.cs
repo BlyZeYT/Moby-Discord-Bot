@@ -27,7 +27,7 @@ public abstract class MobyModuleBase : InteractionModuleBase<SocketInteractionCo
             await base.BeforeExecuteAsync(command);
         }
     }
-
+    
     public override async Task AfterExecuteAsync(ICommandInfo command)
     {
         await base.AfterExecuteAsync(command);

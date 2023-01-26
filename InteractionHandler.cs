@@ -16,8 +16,9 @@ public sealed class InteractionHandler
     private readonly IConfiguration _config;
     private readonly ConsoleLogger _console;
     private readonly IMobyLogger _logger;
+    private readonly IDatabase _database;
 
-    public InteractionHandler(DiscordSocketClient client, InteractionService service, IServiceProvider provider, IConfiguration config, ConsoleLogger console, IMobyLogger logger)
+    public InteractionHandler(DiscordSocketClient client, InteractionService service, IServiceProvider provider, IConfiguration config, ConsoleLogger console, IMobyLogger logger, IDatabase database)
     {
         _client = client;
         _service = service;
@@ -25,6 +26,7 @@ public sealed class InteractionHandler
         _config = config;
         _console = console;
         _logger = logger;
+        _database = database;
     }
 
     public async Task InitializeAsync()
@@ -42,7 +44,7 @@ public sealed class InteractionHandler
 
     private async Task HandleInteractionAsync(SocketInteraction interaction)
     {
-        _console.LogDebug($"Handling interaction in Guild: {interaction.GuildId}");
+        _console.LogDebug($"Handling interaction in Guild: {interaction.GuildId} with Type: {interaction.Type}");
 
         try
         {
@@ -55,6 +57,11 @@ public sealed class InteractionHandler
 
             if (interaction.Type is InteractionType.ApplicationCommand)
                 await interaction.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
+        }
+        finally
+        {
+            if (interaction.Type is InteractionType.ApplicationCommand && !(interaction.User.IsBot || interaction.User.IsWebhook))
+                await _database.AddScoreAsync(interaction.User.Id, 5);
         }
     }
 
@@ -111,6 +118,8 @@ public sealed class InteractionHandler
                     x.Components = new ComponentBuilder().Build();
                 });
 
+                await _database.AddScoreAsync(msgc.User.Id, 25);
+
                 break;
 
             case Moby.ColorQuizWrongAnswerCId1 or Moby.ColorQuizWrongAnswerCId2 or Moby.ColorQuizWrongAnswerCId3:
@@ -123,6 +132,8 @@ public sealed class InteractionHandler
                     x.Components = new ComponentBuilder().Build();
                 });
 
+                await _database.AddScoreAsync(msgc.User.Id, 10);
+
                 break;
 
             case Moby.MultipleChoiceCorrectAnswerCId:
@@ -133,6 +144,8 @@ public sealed class InteractionHandler
                     x.Components = new ComponentBuilder().Build();
                 });
 
+                await _database.AddScoreAsync(msgc.User.Id, 25);
+
                 break;
 
             case Moby.TrueOrFalseCorrectAnswerCId:
@@ -142,6 +155,8 @@ public sealed class InteractionHandler
                     x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\✅ Correct**\n\nYou answered: {((ButtonComponent)msgc.Message.Components.ElementAt(0).Components.Union(msgc.Message.Components.ElementAt(1).Components).First(x => x.CustomId == Moby.TrueOrFalseCorrectAnswerCId)).Label}").Build();
                     x.Components = new ComponentBuilder().Build();
                 });
+
+                await _database.AddScoreAsync(msgc.User.Id, 25);
 
                 break;
 
@@ -155,6 +170,8 @@ public sealed class InteractionHandler
                     x.Components = new ComponentBuilder().Build();
                 });
 
+                await _database.AddScoreAsync(msgc.User.Id, 10);
+
                 break;
 
             case Moby.MultipleChoiceIncorrectAnswerCId1 or Moby.MultipleChoiceIncorrectAnswerCId2 or Moby.MultipleChoiceIncorrectAnswerCId3:
@@ -166,6 +183,8 @@ public sealed class InteractionHandler
                     x.Embed = msgc.Message.Embeds.First().ToEmbedBuilder().WithDescription($"**\\❌ Wrong**\n\nYou answered: {((ButtonComponent)choices.First(x => x.CustomId == msgc.Data.CustomId)).Label}\nThe right answer was: {((ButtonComponent)choices.First(x => x.CustomId == Moby.MultipleChoiceCorrectAnswerCId)).Label}").Build();
                     x.Components = new ComponentBuilder().Build();
                 });
+
+                await _database.AddScoreAsync(msgc.User.Id, 10);
 
                 break;
         }
@@ -220,6 +239,8 @@ public sealed class InteractionHandler
                 await _client.GetGuild(Convert.ToUInt64(_config["serverid"])).GetTextChannel(Moby.ContactChannelId).SendMessageAsync(embed: embed);
 
                 await modal.FollowupAsync("Your message was sent successfully to my creator\nThanks for helping him to make me better :)", ephemeral: true);
+
+                await _database.AddScoreAsync(modal.User.Id, 50);
 
                 break;
         }

@@ -36,6 +36,12 @@ public interface IDatabase
 
     public IAsyncEnumerable<DatabaseGuildInfo> GetAllGuildsAsync();
 
+    public Task AddUserAsync(ulong userId);
+
+    public Task RemoveUserAsync(ulong userId);
+
+    public Task AddScoreAsync(ulong userId, long score);
+
     public ValueTask<TimeSpan> PingAsync();
 }
 
@@ -396,6 +402,66 @@ public sealed class Database : IDatabase
             }
 
             await _logger.LogDebugAsync($"Returned all Guilds from database");
+        }
+    }
+
+    public async Task AddUserAsync(ulong userId)
+    {
+        await ConnectAsync();
+
+        await _logger.LogDebugAsync($"Executes **{nameof(AddUserAsync)}** for User Id: {userId}");
+
+        try
+        {
+            await new MySqlCommand($"INSERT INTO users(User_Id, Score) VALUES('{userId}', '0')", _connection).ExecuteNonQueryAsync();
+
+            await _logger.LogDebugAsync($"Added a user with User Id: {userId}");
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to add a user with User Id: {userId}");
+        }
+    }
+
+    public async Task RemoveUserAsync(ulong userId)
+    {
+        await ConnectAsync();
+
+        await _logger.LogDebugAsync($"Executes **{nameof(RemoveUserAsync)}** for User Id: {userId}");
+
+        try
+        {
+            await new MySqlCommand($"DELETE FROM users WHERE User_Id = {userId}", _connection).ExecuteNonQueryAsync();
+
+            await _logger.LogDebugAsync($"Removed a user with User Id: {userId}");
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to remove a user with User Id: {userId}");
+        }
+    }
+
+    public async Task AddScoreAsync(ulong userId, long score)
+    {
+        await ConnectAsync();
+
+        await _logger.LogDebugAsync($"Executes **{nameof(AddScoreAsync)}** for User Id: {userId} and Score: {score}");
+
+        try
+        {
+            var id = Convert.ToInt32(await new MySqlCommand($"SELECT ID FROM users WHERE User_Id = {userId}", _connection).ExecuteScalarAsync());
+
+            if (id < 1) await AddUserAsync(userId);
+
+            score = Convert.ToInt64(await new MySqlCommand($"SELECT Score FROM users WHERE User_Id = {userId}", _connection).ExecuteScalarAsync()) + score;
+
+            await new MySqlCommand($"UPDATE users SET Score = {score} WHERE User_Id = {userId}", _connection).ExecuteNonQueryAsync();
+
+            await _logger.LogDebugAsync($"Updated score: {score} to user with User Id: {userId}");
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogCriticalAsync(ex, $"Failed to update score: {score} to user with User Id: {userId}");
         }
     }
 
