@@ -32,15 +32,19 @@ public interface IDatabase
 
     public Task RemoveAllPlaylistsAsync(ulong guildId);
 
-    public ValueTask<DatabaseGuildInfo> GetGuildInfoAsync(ulong guildId);
+    public ValueTask<DbGuild> GetGuildInfoAsync(ulong guildId);
 
-    public IAsyncEnumerable<DatabaseGuildInfo> GetAllGuildsAsync();
+    public IAsyncEnumerable<DbGuild> GetAllGuildsAsync();
 
     public Task AddUserAsync(ulong userId);
 
     public Task RemoveUserAsync(ulong userId);
 
     public Task AddScoreAsync(ulong userId, long score);
+
+    public ValueTask<DbUser> GetUserInfoAsync(ulong userId);
+
+    public IAsyncEnumerable<DbUser> GetAllUsersAsync();
 
     public ValueTask<TimeSpan> PingAsync();
 }
@@ -365,7 +369,7 @@ public sealed class Database : IDatabase
         }
     }
 
-    public async ValueTask<DatabaseGuildInfo> GetGuildInfoAsync(ulong guildId)
+    public async ValueTask<DbGuild> GetGuildInfoAsync(ulong guildId)
     {
         await ConnectAsync();
 
@@ -377,18 +381,18 @@ public sealed class Database : IDatabase
             {
                 await _logger.LogDebugAsync($"Returned Guild Info for Guild Id: {guildId}");
 
-                return new DatabaseGuildInfo(reader.GetInt32(0), guildId, reader.GetBoolean(2));
+                return new DbGuild(reader.GetInt32(0), guildId, reader.GetBoolean(2));
             }
             else
             {
                 await _logger.LogWarningAsync($"Couldn't find Guild Info for Guild Id: {guildId}");
 
-                return DatabaseGuildInfo.Empty();
+                return DbGuild.Empty();
             }
         }
     }
 
-    public async IAsyncEnumerable<DatabaseGuildInfo> GetAllGuildsAsync()
+    public async IAsyncEnumerable<DbGuild> GetAllGuildsAsync()
     {
         await ConnectAsync();
 
@@ -398,7 +402,7 @@ public sealed class Database : IDatabase
         {
             while (await reader.ReadAsync())
             {
-                yield return new DatabaseGuildInfo(reader.GetInt32(0), reader.GetUInt64(1), reader.GetBoolean(2));
+                yield return new DbGuild(reader.GetInt32(0), reader.GetUInt64(1), reader.GetBoolean(2));
             }
 
             await _logger.LogDebugAsync($"Returned all Guilds from database");
@@ -462,6 +466,46 @@ public sealed class Database : IDatabase
         catch (Exception ex)
         {
             await _logger.LogCriticalAsync(ex, $"Failed to update score: {score} to user with User Id: {userId}");
+        }
+    }
+
+    public async ValueTask<DbUser> GetUserInfoAsync(ulong userId)
+    {
+        await ConnectAsync();
+
+        await _logger.LogDebugAsync($"Executes **{nameof(GetUserInfoAsync)}** for User Id: {userId}");
+
+        using (var reader = await new MySqlCommand($"SELECT * FROM users WHERE User_Id = {userId}", _connection).ExecuteReaderAsync())
+        {
+            if (await reader.ReadAsync())
+            {
+                await _logger.LogDebugAsync($"Returned User Info for User Id: {userId}");
+
+                return new DbUser(reader.GetInt32(0), userId, reader.GetInt64(2));
+            }
+            else
+            {
+                await _logger.LogWarningAsync($"Couldn't find User Info for User Id: {userId}");
+
+                return DbUser.Empty();
+            }
+        }
+    }
+
+    public async IAsyncEnumerable<DbUser> GetAllUsersAsync()
+    {
+        await ConnectAsync();
+
+        await _logger.LogDebugAsync($"Executes **{nameof(GetAllUsersAsync)}**");
+
+        using (var reader = await new MySqlCommand($"SELECT User_Id FROM users", _connection).ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                yield return new DbUser(reader.GetInt32(0), reader.GetUInt64(1), reader.GetInt64(2));
+            }
+
+            await _logger.LogDebugAsync($"Returned all Users from database");
         }
     }
 

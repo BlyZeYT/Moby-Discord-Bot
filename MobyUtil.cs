@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using Enums;
 
 public static class MobyUtil
 {
@@ -233,7 +234,7 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetServerDataEmbed(DatabaseGuildInfo guildInfo)
+    public static Embed GetServerDataEmbed(DbGuild guildInfo)
     {
         return new MobyEmbedBuilder()
             .WithTitle("**Server data**")

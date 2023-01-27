@@ -9,6 +9,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Enums;
 
 [Discord.Commands.Name("General")]
 public sealed class GeneralModule : MobyModuleBase
@@ -337,6 +338,12 @@ public sealed class GeneralModule : MobyModuleBase
         }
 
         await FollowupAsync(ephemeral: true, embed: MobyUtil.GetTranslationTextEmbed(translated, language));
+    }
+
+    [SlashCommand("modifytext", "Modifies the provided text")]
+    public async Task ModifyTextAsync()
+    {
+        await DeferAsync(ephemeral: true);
     }
 
     [Group("color", "Commands with colors")]

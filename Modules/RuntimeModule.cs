@@ -69,25 +69,25 @@ public sealed class RuntimeModule : MobyModuleBase
 
         await DeferAsync(ephemeral: true);
 
-        var guildInfo = await _database.GetGuildInfoAsync(Convert.ToUInt64(serverid));
+        var guild = await _database.GetGuildInfoAsync(Convert.ToUInt64(serverid));
 
-        if (guildInfo.IsEmpty())
+        if (guild.IsEmpty())
         {
             await FollowupAsync("Couldn't fetch a server with the Id: " + serverid, ephemeral: true);
 
             return;
         }
 
-        if (_client.GetGuild(guildInfo.GuildId) is not null)
+        if (!_client.Guilds.Any(x => x.Id == guild.GuildId))
         {
-            await FollowupAsync($"The server: {guildInfo.GuildId} can't be removed from the database because I'm on this server", ephemeral: true);
+            await FollowupAsync($"The server: {guild.GuildId} can't be removed from the database because I'm on this server", ephemeral: true);
 
             return;
         }
 
-        await _database.RemoveGuildAsync(guildInfo.GuildId);
+        await _database.RemoveGuildAsync(guild.GuildId);
 
-        await FollowupAsync($"The server: {guildInfo.GuildId} was removed from the database", ephemeral: true);
+        await FollowupAsync($"The server: {guild.GuildId} was removed from the database", ephemeral: true);
     }
 
     [SlashCommand("resetserver", "Reset the data of a server on the database")]
@@ -102,19 +102,149 @@ public sealed class RuntimeModule : MobyModuleBase
 
         await DeferAsync(ephemeral: true);
 
-        var guildInfo = await _database.GetGuildInfoAsync(Convert.ToUInt64(serverid));
+        var guild = await _database.GetGuildInfoAsync(Convert.ToUInt64(serverid));
 
-        if (guildInfo.IsEmpty())
+        if (guild.IsEmpty())
         {
             await FollowupAsync("Couldn't fetch a server with the Id: " + serverid, ephemeral: true);
 
             return;
         }
 
-        await _database.SetRepeatAsync(guildInfo.GuildId, false);
+        await _database.SetRepeatAsync(guild.GuildId, false);
 
-        await _database.RemoveAllPlaylistsAsync(guildInfo.GuildId);
+        await _database.RemoveAllPlaylistsAsync(guild.GuildId);
 
-        await FollowupAsync($"The server: {guildInfo.GuildId} was reset on the database", ephemeral: true);
+        await FollowupAsync($"The server: {guild.GuildId} was reset on the database", ephemeral: true);
+    }
+
+    [SlashCommand("adduser", "Add a user manually to the database")]
+    public async Task AddUserAsync([Summary("userid", "Enter a user id")] [MinLength(10)] [MaxLength(30)] string userid)
+    {
+        if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
+        {
+            await RespondAsync("This is not the right channel", ephemeral: true);
+
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+
+        var user = await _client.GetUserAsync(Convert.ToUInt64(userid));
+
+        if (user is null)
+        {
+            await FollowupAsync("Couldn't fetch a user with the Id: " + userid, ephemeral: true);
+
+            return;
+        }
+
+        await _database.AddUserAsync(user.Id);
+
+        await FollowupAsync($"The user: {user.Id} was added to the database", ephemeral: true);
+    }
+
+    [SlashCommand("removeuser", "Remove a user manually from the database")]
+    public async Task RemoveUserAsync([Summary("userid", "Enter a user id")] [MinLength(10)] [MaxLength(30)] string userid)
+    {
+        if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
+        {
+            await RespondAsync("This is not the right channel", ephemeral: true);
+
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+
+        var user = await _client.GetUserAsync(Convert.ToUInt64(userid));
+
+        if (user is null)
+        {
+            await FollowupAsync("Couldn't fetch a user with the Id: " + userid, ephemeral: true);
+
+            return;
+        }
+
+        await _database.RemoveUserAsync(user.Id);
+
+        await FollowupAsync($"The user: {user.Id} was removed from the database", ephemeral: true);
+    }
+
+    [SlashCommand("addscore", "Add score to a user")]
+    public async Task AddScoreAsync([Summary("userid", "Enter a user id")] [MinLength(10)] [MaxLength(30)] string userid,
+        [Summary("score", "The score to add")] [MinValue(1)] [MaxValue(int.MaxValue)] int score)
+    {
+        if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
+        {
+            await RespondAsync("This is not the right channel", ephemeral: true);
+
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+
+        var user = await _database.GetUserInfoAsync(Convert.ToUInt64(userid));
+
+        if (user.IsEmpty())
+        {
+            await FollowupAsync("Couldn't fetch a user with the Id: " + userid, ephemeral: true);
+
+            return;
+        }
+
+        await _database.AddScoreAsync(user.UserId, score);
+
+        await FollowupAsync($"Added {score} to the user: {user.Id} on the database", ephemeral: true);
+    }
+
+    [SlashCommand("deductscore", "Deduct score from a user")]
+    public async Task DeductScoreAsync([Summary("userid", "Enter a user id")] [MinLength(10)] [MaxLength(30)] string userid,
+        [Summary("score", "The score to deduct")] [MinValue(1)] [MaxValue(int.MaxValue)] int score)
+    {
+        if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
+        {
+            await RespondAsync("This is not the right channel", ephemeral: true);
+
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+
+        var user = await _database.GetUserInfoAsync(Convert.ToUInt64(userid));
+
+        if (user.IsEmpty())
+        {
+            await FollowupAsync("Couldn't fetch a user with the Id: " + userid, ephemeral: true);
+
+            return;
+        }
+
+        await _database.AddScoreAsync(user.UserId, -score);
+
+        await FollowupAsync($"Deducted {score} from the user: {user.Id} on the database", ephemeral: true);
+    }
+
+    [SlashCommand("getscore", "Get score from a user")]
+    public async Task GetScoreAsync([Summary("userid", "Enter a user id")] [MinLength(10)] [MaxLength(30)] string userid)
+    {
+        if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
+        {
+            await RespondAsync("This is not the right channel", ephemeral: true);
+
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+
+        var user = await _database.GetUserInfoAsync(Convert.ToUInt64(userid));
+
+        if (user.IsEmpty())
+        {
+            await FollowupAsync("Couldn't fetch a user with the Id: " + userid, ephemeral: true);
+
+            return;
+        }
+
+        await FollowupAsync($"The database user: {user.Id} has the score: {user.Score}", ephemeral: true);
     }
 }

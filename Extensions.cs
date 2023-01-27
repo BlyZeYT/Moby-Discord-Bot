@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using DeepL;
-using static System.Net.Mime.MediaTypeNames;
+using Enums;
 
 public static class Extensions
 {

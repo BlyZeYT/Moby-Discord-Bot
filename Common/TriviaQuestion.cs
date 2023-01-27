@@ -1,7 +1,6 @@
-﻿namespace Moby.Common;
+﻿using Moby.Enums;
 
-using Discord.Interactions;
-
+namespace Moby.Common;
 public record TriviaQuestion
 {
     public TriviaQuestionDifficulty Difficulty { get; }
@@ -42,16 +41,4 @@ public sealed record MultipleChoiceQuestion : TriviaQuestion
         CorrectAnswer = correctAnswer;
         IncorrectAnswers = incorrectAnswers;
     }
-}
-
-public enum TriviaQuestionDifficulty
-{
-    [ChoiceDisplay("🎲 Random")]
-    Random,
-    [ChoiceDisplay("📄 Easy")]
-    Easy,
-    [ChoiceDisplay("📙 Medium")]
-    Medium,
-    [ChoiceDisplay("📚 Hard")]
-    Hard
 }

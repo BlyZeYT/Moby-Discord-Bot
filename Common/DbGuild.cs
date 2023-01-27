@@ -1,6 +1,6 @@
 ﻿namespace Moby.Common;
 
-public sealed record DatabaseGuildInfo
+public sealed record DbGuild
 {
     public int Id { get; }
 
@@ -8,7 +8,7 @@ public sealed record DatabaseGuildInfo
 
     public bool IsRepeatOn { get; }
 
-    public DatabaseGuildInfo(int id, ulong guildId, bool isRepeatOn)
+    public DbGuild(int id, ulong guildId, bool isRepeatOn)
     {
         Id = id;
         GuildId = guildId;
@@ -17,5 +17,5 @@ public sealed record DatabaseGuildInfo
 
     public bool IsEmpty() => Id == -1 && GuildId == 0 && !IsRepeatOn;
 
-    public static DatabaseGuildInfo Empty() => new(-1, 0, false);
+    public static DbGuild Empty() => new(-1, 0, false);
 }

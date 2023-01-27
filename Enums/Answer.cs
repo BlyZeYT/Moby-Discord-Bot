@@ -1,4 +1,4 @@
-﻿namespace Moby.Common;
+﻿namespace Moby.Enums;
 
 using Discord.Interactions;
 

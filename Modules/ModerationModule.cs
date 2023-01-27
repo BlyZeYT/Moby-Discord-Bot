@@ -6,6 +6,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Common;
 using Services;
+using Enums;
 
 [Discord.Commands.Name("Moderation")]
 public sealed class ModerationModule : MobyModuleBase
