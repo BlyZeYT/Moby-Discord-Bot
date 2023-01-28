@@ -130,4 +130,28 @@ public sealed class OwnerModule : MobyModuleBase
             await FollowupAsync(embeds: chunk, ephemeral: true);
         }
     }
+
+    [SlashCommand("getscore", "Get score from a user")]
+    public async Task GetScoreAsync([Summary("userid", "Enter a user id")] [MinLength(10)] [MaxLength(30)] string userid)
+    {
+        if (Context.Channel.Id is not Moby.OwnerCommandsChannelId)
+        {
+            await RespondAsync("This is not the right channel", ephemeral: true);
+
+            return;
+        }
+
+        await DeferAsync(ephemeral: true);
+
+        var user = await _database.GetUserInfoAsync(Convert.ToUInt64(userid));
+
+        if (user.IsEmpty())
+        {
+            await FollowupAsync("Couldn't fetch a user with the Id: " + userid, ephemeral: true);
+
+            return;
+        }
+
+        await FollowupAsync($"The database user: {user.Id} has the score: {user.Score}", ephemeral: true);
+    }
 }

@@ -4,6 +4,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Common;
 using Services;
+using Discord;
 
 [RequireOwner]
 [Discord.Commands.Name(Moby.OnlyMobyGuildModule)]
@@ -224,8 +225,11 @@ public sealed class RuntimeModule : MobyModuleBase
         await FollowupAsync($"Deducted {score} from the user: {user.Id} on the database", ephemeral: true);
     }
 
-    [SlashCommand("getscore", "Get score from a user")]
-    public async Task GetScoreAsync([Summary("userid", "Enter a user id")] [MinLength(10)] [MaxLength(30)] string userid)
+    [SlashCommand("setstatus", "Set the activity of the bot")]
+    public async Task SetStatusAsync([Summary("activity", "The activity the bot should display")] string activity,
+        [Summary("type", "The type of the activity")] ActivityType type,
+        [Summary("url", "The url to a twitch stream")] string? url = null,
+        [Summary("status", "The status the bot should have")] UserStatus status = UserStatus.Online)
     {
         if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
         {
@@ -236,15 +240,35 @@ public sealed class RuntimeModule : MobyModuleBase
 
         await DeferAsync(ephemeral: true);
 
-        var user = await _database.GetUserInfoAsync(Convert.ToUInt64(userid));
+        await _client.SetStatusAsync(status);
+        await _client.SetGameAsync(activity, url, type);
 
-        if (user.IsEmpty())
+        await FollowupAsync("The status was set successfully", ephemeral: true);
+    }
+
+    [SlashCommand("leaveserver", "Leave a server manually")]
+    public async Task LeaveServerAsync([Summary("serverid", "Enter a server id")] [MinLength(10)] [MaxLength(30)] string serverid)
+    {
+        if (Context.Channel.Id is not Moby.RuntimeCommandsChannelId)
         {
-            await FollowupAsync("Couldn't fetch a user with the Id: " + userid, ephemeral: true);
+            await RespondAsync("This is not the right channel", ephemeral: true);
 
             return;
         }
 
-        await FollowupAsync($"The database user: {user.Id} has the score: {user.Score}", ephemeral: true);
+        await DeferAsync(ephemeral: true);
+
+        var guild = _client.GetGuild(Convert.ToUInt64(serverid));
+
+        if (guild is null)
+        {
+            await FollowupAsync("Couldn't fetch a server with the Id: " + serverid, ephemeral: true);
+
+            return;
+        }
+
+        await guild.LeaveAsync();
+
+        await FollowupAsync("Lefted the server successfully", ephemeral: true);
     }
 }
