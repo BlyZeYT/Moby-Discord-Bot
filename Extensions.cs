@@ -185,6 +185,27 @@ public static class Extensions
         return sequence.ElementAt(System.Random.Shared.Next(0, count));
     }
 
+    public static string GetModifiedText(this TextModification mod, string text)
+    {
+        return mod switch
+        {
+            TextModification.Italic => $"*{text}*",
+            TextModification.Bold => $"**{text}**",
+            TextModification.BoldItalic => $"***{text}***",
+            TextModification.Underline => $"__{text}__",
+            TextModification.UnderlineItalic => $"__*{text}*__",
+            TextModification.UnderlineBold => $"__**{text}**__",
+            TextModification.UnderlineBoldItalic => $"__***{text}***__",
+            TextModification.Strikethrough => $"~~{text}~~",
+            TextModification.Spoiler => $"||{text}||",
+            TextModification.SingleCode => $"`{text}`",
+            TextModification.MultiCode => $"```\n{text}\n```",
+            TextModification.SingleQuote => $"> {text}",
+            TextModification.MultiQuote => $">>> {text}",
+            _ => text
+        };
+    }
+
     public static string GetLanguageCode(this Language language)
     {
         return language switch

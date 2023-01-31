@@ -341,9 +341,12 @@ public sealed class GeneralModule : MobyModuleBase
     }
 
     [SlashCommand("modifytext", "Modifies the provided text")]
-    public async Task ModifyTextAsync()
+    public async Task ModifyTextAsync([Summary("text", "The text to modify")] [MinLength(1)] [MaxLength(5000)] string text,
+        [Summary("modification", "The modification to add to the text")] TextModification modification)
     {
-        await DeferAsync(ephemeral: true);
+        await DeferAsync();
+
+        await FollowupAsync(modification.GetModifiedText(text));
     }
 
     [Group("color", "Commands with colors")]

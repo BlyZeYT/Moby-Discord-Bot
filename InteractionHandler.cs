@@ -34,7 +34,7 @@ public sealed class InteractionHandler
         await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 
         _client.InteractionCreated += HandleInteractionAsync;
-        
+
         _client.SelectMenuExecuted += SelectMenuExecutedAsync;
         _client.ButtonExecuted += ButtonExecutedAsync;
         _client.ModalSubmitted += ModalSubmittedAsync;
