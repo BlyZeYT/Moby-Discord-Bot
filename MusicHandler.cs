@@ -44,7 +44,7 @@ public sealed class MusicHandler
 
     private async Task OnTrackStartAsync(TrackStartEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
     {
-        
+
     }
 
     private async Task OnTrackStuckAsync(TrackStuckEventArg<LavaPlayer<LavaTrack>, LavaTrack> arg)
