@@ -6,9 +6,10 @@ using Services;
 using System.Threading.Tasks;
 
 [RequireContext(ContextType.Guild)]
-[RequireBotPermission(ChannelPermission.ViewChannel)]
-[RequireBotPermission(ChannelPermission.ReadMessageHistory)]
-[RequireBotPermission(ChannelPermission.SendMessages)]
+[DefaultMemberPermissions(GuildPermission.ViewChannel | GuildPermission.SendMessages)]
+[RequireBotPermission(GuildPermission.ViewChannel)]
+[RequireBotPermission(GuildPermission.ReadMessageHistory)]
+[RequireBotPermission(GuildPermission.SendMessages)]
 public abstract class MobyModuleBase : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ConsoleLogger _console;

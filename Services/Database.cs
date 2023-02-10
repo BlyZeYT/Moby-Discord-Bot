@@ -12,10 +12,6 @@ public interface IDatabase
 
     public Task RemoveGuildAsync(ulong guildId);
 
-    public ValueTask<bool> GetRepeatAsync(ulong guildId);
-
-    public Task SetRepeatAsync(ulong guildId, bool repeat);
-
     public IAsyncEnumerable<string> GetPlaylistTracksAsync(int trackId);
 
     public ValueTask<int> GetPlaylistTrackIdAsync(ulong guildId, string name);
@@ -100,46 +96,6 @@ public sealed class Database : IDatabase
         catch (Exception ex)
         {
             await _logger.LogCriticalAsync(ex, $"Failed to remove Guild with Guild Id: {guildId} from all database tables");
-        }
-    }
-
-    public async ValueTask<bool> GetRepeatAsync(ulong guildId)
-    {
-        await ConnectAsync();
-
-        await _logger.LogDebugAsync($"Executes **{nameof(GetRepeatAsync)}** for Guild Id: {guildId}");
-
-        try
-        {
-            var repeat = await new MySqlCommand($"SELECT Guild_Repeat FROM guilds WHERE Guild_Id = {guildId}", _connection).ExecuteScalarAsync();
-
-            await _logger.LogDebugAsync($"Returned Repeat: {repeat} for Guild Id: {guildId}");
-
-            return Convert.ToBoolean(repeat);
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogCriticalAsync(ex, $"Failed to get Repeat for Guild Id: {guildId}");
-
-            return false;
-        }
-    }
-
-    public async Task SetRepeatAsync(ulong guildId, bool repeat)
-    {
-        await ConnectAsync();
-
-        await _logger.LogDebugAsync($"Executes **{nameof(SetRepeatAsync)}** for Guild Id: {guildId} and Repeat: {repeat}");
-
-        try
-        {
-            await new MySqlCommand($"UPDATE guilds SET Guild_Repeat = {repeat} WHERE Guild_Id = {guildId}", _connection).ExecuteNonQueryAsync();
-
-            await _logger.LogDebugAsync($"Updated Repeat for Guild Id: {guildId} to {repeat}");
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogCriticalAsync(ex, $"Failed to set Repeat for Guild Id: {guildId} to {repeat}");
         }
     }
 

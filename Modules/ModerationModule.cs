@@ -19,7 +19,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("purge", "Delete messages that are not older than 14 days")]
-    [RequireUserPermission(GuildPermission.ManageMessages)]
+    [DefaultMemberPermissions(GuildPermission.ManageMessages)]
     [RequireBotPermission(GuildPermission.ManageMessages)]
     public async Task PurgeAsync([Summary("amount", "Enter the amount of messages that should be purged")] [MinValue(1)] [MaxValue(100)] int amount)
     {
@@ -45,7 +45,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("unpin", "Unpin all messages in the mentioned channel")]
-    [RequireUserPermission(GuildPermission.ManageMessages)]
+    [DefaultMemberPermissions(GuildPermission.ManageMessages)]
     [RequireBotPermission(GuildPermission.ManageMessages)]
     public async Task UnpinAsync([Summary("channel", "Mention the channel where all messages should get unpinned")] ITextChannel channel)
     {
@@ -60,7 +60,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("invite", "Invite a user to the server")]
-    [RequireUserPermission(GuildPermission.CreateInstantInvite)]
+    [DefaultMemberPermissions(GuildPermission.CreateInstantInvite)]
     [RequireBotPermission(GuildPermission.CreateInstantInvite)]
     public async Task InviteAsync([Summary("userid", "Enter the id of the user that should get an invite")] [MinLength(10)] [MaxLength(30)] string userid,
         [Summary("message", "Enter the custom invitation message")] [MinLength(1)] [MaxLength(2500)] string? message = null,
@@ -105,7 +105,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("kick", "Kick a user from the server")]
-    [RequireUserPermission(GuildPermission.KickMembers)]
+    [DefaultMemberPermissions(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.KickMembers)]
     public async Task KickAsync([Summary("user", "Mention the user that should get kicked")] SocketGuildUser user,
         [Summary("reason", "Enter the reason why the user is kicked")] [MinLength(1)] [MaxLength(250)] string? reason = null,
@@ -138,7 +138,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("ban", "Ban a user from the server")]
-    [RequireUserPermission(GuildPermission.BanMembers)]
+    [DefaultMemberPermissions(GuildPermission.BanMembers)]
     [RequireBotPermission(GuildPermission.BanMembers)]
     public async Task BanAsync([Summary("user", "Mention the user that should get banned")] SocketGuildUser user,
         [Summary("reason", "Enter the reason why the user is banned")] [MinLength(1)] [MaxLength(250)] string? reason = null,
@@ -172,7 +172,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("baninfo", "Get information about a banned user")]
-    [RequireUserPermission(GuildPermission.BanMembers)]
+    [DefaultMemberPermissions(GuildPermission.BanMembers)]
     [RequireBotPermission(GuildPermission.BanMembers)]
     public async Task BanInfoAsync([Summary("userid", "Enter the id of the user you want information about")] [MinLength(10)] [MaxLength(30)] string userid)
     {
@@ -207,7 +207,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("unban", "Unban a user from the server")]
-    [RequireUserPermission(GuildPermission.BanMembers)]
+    [DefaultMemberPermissions(GuildPermission.BanMembers)]
     [RequireBotPermission(GuildPermission.BanMembers)] 
     public async Task PardonAsync([Summary("userid", "Enter the id of the user that should get unbanned")] [MinLength(10)] [MaxLength(30)] string userid)
     {
@@ -242,7 +242,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("mute", "Mute a user in a voice channel")]
-    [RequireUserPermission(GuildPermission.MuteMembers)]
+    [DefaultMemberPermissions(GuildPermission.MuteMembers)]
     [RequireBotPermission(GuildPermission.MuteMembers)]
     public async Task MuteAsync([Summary("user", "Mention the user that should get muted")] SocketGuildUser user,
         [Summary("reason", "Enter the reason why the user is muted")] [MinLength(1)] [MaxLength(250)] string? reason = null)
@@ -267,7 +267,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("deaf", "Deafen a user in a voice channel")]
-    [RequireUserPermission(GuildPermission.DeafenMembers)]
+    [DefaultMemberPermissions(GuildPermission.DeafenMembers)]
     [RequireBotPermission(GuildPermission.DeafenMembers)]
     public async Task DeafAsync([Summary("user", "Mention the user that should get deafened")] SocketGuildUser user,
         [Summary("reason", "Enter the reason why the user is deafened")] [MinLength(1)] [MaxLength(250)] string? reason = null)
@@ -292,7 +292,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("unmute", "Unmute a user in a voice channel")]
-    [RequireUserPermission(GuildPermission.MuteMembers)]
+    [DefaultMemberPermissions(GuildPermission.MuteMembers)]
     [RequireBotPermission(GuildPermission.MuteMembers)]
     public async Task UnmuteAsync([Summary("user", "Mention the user that should get unmuted")] SocketGuildUser user)
     {
@@ -316,7 +316,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("undeaf", "Undeafen a user in a voice channel")]
-    [RequireUserPermission(GuildPermission.DeafenMembers)]
+    [DefaultMemberPermissions(GuildPermission.DeafenMembers)]
     [RequireBotPermission(GuildPermission.DeafenMembers)]
     public async Task UndeafAsync([Summary("user", "Mention the user that should get undeafened")] SocketGuildUser user)
     {
@@ -340,7 +340,7 @@ public sealed class ModerationModule : MobyModuleBase
     }
 
     [SlashCommand("slowmode", "Change the slowmode settings for this channel")]
-    [RequireUserPermission(GuildPermission.ManageChannels)]
+    [DefaultMemberPermissions(GuildPermission.ManageChannels)]
     [RequireBotPermission(GuildPermission.ManageChannels)]
     public async Task SlowmodeAsync([Summary("interval", "Enter the interval for the slowmode, 0 to disable slowmode")] [MinValue(0)] [MaxValue(2880)] int interval)
     {
@@ -358,7 +358,7 @@ public sealed class ModerationModule : MobyModuleBase
         public RoleCommandGroup(ConsoleLogger console) : base(console) { }
 
         [SlashCommand("grant", "Grant the mentioned user a role")]
-        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task RoleGrantAsync([Summary("user", "Mention the user that should get the role")] SocketGuildUser user,
             [Summary("role", "Mention the role that the user should get")] SocketRole role)
@@ -392,7 +392,7 @@ public sealed class ModerationModule : MobyModuleBase
         }
 
         [SlashCommand("remove", "Remove a role from the mentioned user")]
-        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task RoleRemoveAsync([Summary("user", "Mention the user from whom the role should be removed")] SocketGuildUser user,
             [Summary("role", "Mention the role that should get removed from the user")] SocketRole role)
@@ -426,7 +426,7 @@ public sealed class ModerationModule : MobyModuleBase
         }
 
         [SlashCommand("info", "Get information about the mentioned role")]
-        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task RoleInfoAsync([Summary("role", "Mention the role you want information about")] SocketRole role)
         {
@@ -443,7 +443,7 @@ public sealed class ModerationModule : MobyModuleBase
         public ListGroupCommands(ConsoleLogger console) : base(console) { }
 
         [SlashCommand("bans", "Get a list of the currently banned users")]
-        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [DefaultMemberPermissions(GuildPermission.ManageGuild)]
         [RequireBotPermission(GuildPermission.ManageGuild)]
         public async Task ListBansAsync([Summary("amount", "The amount of bans that should be in the list")] [MinValue(1)] [MaxValue(500)] int amount = 100,
             [Summary("as-file", "Yes if you want to get the whole ban list as a text file")] Answer asfile = Answer.No)
@@ -478,7 +478,7 @@ public sealed class ModerationModule : MobyModuleBase
         }
 
         [SlashCommand("channels", "Get a list of all channels on this server")]
-        [RequireUserPermission(GuildPermission.ManageChannels)]
+        [DefaultMemberPermissions(GuildPermission.ManageChannels)]
         [RequireBotPermission(GuildPermission.ManageChannels)]
         public async Task ListChannelsAsync([Summary("as-file", "Yes if you want to get the whole channel list as a text file")] Answer asfile = Answer.No)
         {
@@ -496,7 +496,7 @@ public sealed class ModerationModule : MobyModuleBase
         }
 
         [SlashCommand("emotes", "Get a list of all emotes on this server")]
-        [RequireUserPermission(GuildPermission.ManageEmojisAndStickers)]
+        [DefaultMemberPermissions(GuildPermission.ManageEmojisAndStickers)]
         [RequireBotPermission(GuildPermission.ManageEmojisAndStickers)]
         public async Task ListEmotesAsync([Summary("as-file", "Yes if you want to get the whole emote list as a text file")] Answer asfile = Answer.No)
         {
@@ -514,7 +514,7 @@ public sealed class ModerationModule : MobyModuleBase
         }
 
         [SlashCommand("roles", "Get a list of all roles on this server")]
-        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [DefaultMemberPermissions(GuildPermission.ManageRoles)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task ListRolesAsync([Summary("as-file", "Yes if you want to get the whole role list as a text file")] Answer asfile = Answer.No)
         {
@@ -532,7 +532,7 @@ public sealed class ModerationModule : MobyModuleBase
         }
 
         [SlashCommand("audit-log", "Get a list of audit log entries on this server")]
-        [RequireUserPermission(GuildPermission.ViewAuditLog)]
+        [DefaultMemberPermissions(GuildPermission.ViewAuditLog)]
         [RequireBotPermission(GuildPermission.ViewAuditLog)]
         public async Task ListAuditLogAsync([Summary("amount", "The amount of audit log entries that should be in the list")] [MinValue(1)] [MaxValue(500)] int amount = 100,
             [Summary("user", "Mention the user to filter the audit log entries from")] IUser? user = null,
