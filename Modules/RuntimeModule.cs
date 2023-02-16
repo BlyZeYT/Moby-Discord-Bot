@@ -112,8 +112,6 @@ public sealed class RuntimeModule : MobyModuleBase
             return;
         }
 
-        await _database.SetRepeatAsync(guild.GuildId, false);
-
         await _database.RemoveAllPlaylistsAsync(guild.GuildId);
 
         await FollowupAsync($"The server: {guild.GuildId} was reset on the database", ephemeral: true);

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 [RequireBotPermission(GuildPermission.SendMessages)]
 public abstract class MobyModuleBase : InteractionModuleBase<SocketInteractionContext>
 {
-    private readonly ConsoleLogger _console;
+    protected readonly ConsoleLogger _console;
 
     public MobyModuleBase(ConsoleLogger console)
     {

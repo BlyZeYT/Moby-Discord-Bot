@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using DeepL;
 using Enums;
+using Victoria.Responses.Search;
 
 public static class Extensions
 {
@@ -323,4 +324,40 @@ public static class Extensions
             return null;
         }
     }
+
+    public static bool IsInvalidVoiceState(this IVoiceState? voiceState)
+        => voiceState?.VoiceChannel is null || voiceState.IsDeafened || voiceState.IsSelfDeafened;
+
+    public static string GetFormattedQuery(this MusicSource source, string query)
+    {
+        return source switch
+        {
+            MusicSource.Url => IsHttpOrHttpsUrl(query) ? query : "http://" + query,
+            MusicSource.Twitch => "https://www.twitch.tv/" + query,
+            _ => query
+        };
+    }
+
+    public static SearchType GetSearchType(this MusicSource source)
+    {
+        return source switch
+        {
+            MusicSource.YouTube => SearchType.YouTube,
+            MusicSource.YouTubeMusic => SearchType.YouTubeMusic,
+            MusicSource.Soundcloud => SearchType.SoundCloud,
+            _ => SearchType.Direct
+        };
+    }
+
+    public static string GetString(this MusicSource source)
+    {
+        return source switch
+        {
+            MusicSource.Url => "Link",
+            _ => source.ToString()
+        };
+    }
+
+    private static bool IsHttpOrHttpsUrl(string url)
+        => Uri.TryCreate(url, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
 }

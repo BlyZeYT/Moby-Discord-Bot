@@ -407,21 +407,25 @@ public sealed class Database : IDatabase
 
         await _logger.LogDebugAsync($"Executes **{nameof(AddScoreAsync)}** for User Id: {userId} and Score: {score}");
 
+        long userScore = 0;
         try
         {
             var id = Convert.ToInt32(await new MySqlCommand($"SELECT ID FROM users WHERE User_Id = {userId}", _connection).ExecuteScalarAsync());
 
             if (id < 1) await AddUserAsync(userId);
 
-            score = Convert.ToInt64(await new MySqlCommand($"SELECT Score FROM users WHERE User_Id = {userId}", _connection).ExecuteScalarAsync()) + score;
+            userScore = Convert.ToInt64(await new MySqlCommand($"SELECT Score FROM users WHERE User_Id = {userId}", _connection).ExecuteScalarAsync());
 
-            await new MySqlCommand($"UPDATE users SET Score = {score} WHERE User_Id = {userId}", _connection).ExecuteNonQueryAsync();
+            if (userScore > (long.MaxValue - score)) userScore = long.MaxValue;
+            else userScore += score;
 
-            await _logger.LogDebugAsync($"Updated score: {score} to user with User Id: {userId}");
+            await new MySqlCommand($"UPDATE users SET Score = {userScore} WHERE User_Id = {userId}", _connection).ExecuteNonQueryAsync();
+
+            await _logger.LogDebugAsync($"Updated score: {userScore} to user with User Id: {userId}");
         }
         catch (Exception ex)
         {
-            await _logger.LogCriticalAsync(ex, $"Failed to update score: {score} to user with User Id: {userId}");
+            await _logger.LogCriticalAsync(ex, $"Failed to update score: {userScore} to user with User Id: {userId}");
         }
     }
 

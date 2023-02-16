@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Victoria;
 using Victoria.Node;
+using Common;
 
 sealed class Program
 {
@@ -20,7 +21,7 @@ sealed class Program
     private IDatabase _database = null!;
     private IMobyLogger _logger = null!;
     private IHttpService _http = null!;
-    private LavaNode _lavaNode = null!;
+    private LavaNode<MobyPlayer, MobyTrack> _lavaNode = null!;
 
     static Task Main() => new Program().MainAsync();
 
@@ -48,7 +49,7 @@ sealed class Program
             .AddSingleton<IDatabase, Database>()
             .AddSingleton<IMobyLogger, MobyLogger>()
             .AddSingleton<IHttpService, HttpService>()
-            .AddLavaNode(x =>
+            .AddLavaNode<MobyPlayer, MobyTrack>(x =>
             {
                 x.SelfDeaf = true;
                 x.EnableResume = true;
@@ -71,7 +72,7 @@ sealed class Program
         _database = provider.GetRequiredService<IDatabase>();
         _logger = provider.GetRequiredService<IMobyLogger>();
         _http = provider.GetRequiredService<IHttpService>();
-        _lavaNode = provider.GetRequiredService<LavaNode>();
+        _lavaNode = provider.GetRequiredService<LavaNode<MobyPlayer, MobyTrack>>();
 
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
         await provider.GetRequiredService<MusicHandler>().InitializeAsync();
@@ -83,6 +84,8 @@ sealed class Program
 
         _client.JoinedGuild += JoinedGuildAsync;
         _client.LeftGuild += LeftGuildAsync;
+
+        _client.Disconnected += OnDisconnectedAsync;
 
         await _client.LoginAsync(TokenType.Bot, _config["token"]);
         await _client.StartAsync();
@@ -177,5 +180,12 @@ sealed class Program
         await _client.GetGuild(Convert.ToUInt64(_config["serverid"]))
             .GetTextChannel(Moby.InformationChannelId)
             .SendMessageAsync("**Lefted a server** 😢", embed: MobyUtil.GetServerInfoEmbed(guild));
+    }
+
+    private async Task OnDisconnectedAsync(Exception arg)
+    {
+        await _logger.LogInformationAsync("Disconnected!");
+
+        if (arg is not null) await _logger.LogCriticalAsync(arg, "Disconnection Error");
     }
 }

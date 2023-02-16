@@ -15,9 +15,9 @@ public sealed class MusicHandler
     private readonly IServiceProvider _provider;
     private readonly ConsoleLogger _console;
     private readonly IMobyLogger _logger;
-    private readonly LavaNode<LavaPlayer<MobyTrack>, MobyTrack> _lavaNode;
+    private readonly LavaNode<MobyPlayer, MobyTrack> _lavaNode;
 
-    public MusicHandler(DiscordSocketClient client, InteractionService service, IServiceProvider provider, ConsoleLogger console, IMobyLogger logger, LavaNode<LavaPlayer<MobyTrack>, MobyTrack> lavaNode)
+    public MusicHandler(DiscordSocketClient client, InteractionService service, IServiceProvider provider, ConsoleLogger console, IMobyLogger logger, LavaNode<MobyPlayer, MobyTrack> lavaNode)
     {
         _client = client;
         _service = service;
@@ -42,22 +42,22 @@ public sealed class MusicHandler
     private async Task OnStatsReceivedAsync(StatsEventArg stats)
         => await Stats.UpdateAsync(stats.Cpu.SystemLoad, stats.Memory.Allocated, stats.Frames.Sent, stats.Players, stats.Uptime);
 
-    private async Task OnTrackStartAsync(TrackStartEventArg<LavaPlayer<MobyTrack>, MobyTrack> arg)
+    private async Task OnTrackStartAsync(TrackStartEventArg<MobyPlayer, MobyTrack> arg)
     {
 
     }
 
-    private async Task OnTrackStuckAsync(TrackStuckEventArg<LavaPlayer<MobyTrack>, MobyTrack> arg)
+    private async Task OnTrackStuckAsync(TrackStuckEventArg<MobyPlayer, MobyTrack> arg)
     {
 
     }
 
-    private async Task OnTrackExceptionAsync(TrackExceptionEventArg<LavaPlayer<MobyTrack>, MobyTrack> arg)
+    private async Task OnTrackExceptionAsync(TrackExceptionEventArg<MobyPlayer, MobyTrack> arg)
     {
 
     }
 
-    private async Task OnTrackEndAsync(TrackEndEventArg<LavaPlayer<MobyTrack>, MobyTrack> arg)
+    private async Task OnTrackEndAsync(TrackEndEventArg<MobyPlayer, MobyTrack> arg)
     {
 
     }
