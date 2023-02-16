@@ -9,6 +9,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using Enums;
+using Victoria.Player;
+using Victoria;
 
 public static class MobyUtil
 {
@@ -1064,5 +1066,41 @@ public static class MobyUtil
             .WithTitle("**\\🌍 Translation**")
             .WithDescription($"```\n{result.Text}\n```\nTranslated {result.DetectedSourceLanguageCode.GetLanguage().GetFormattedString()} to {language.GetFormattedString()}")
             .Build();
+    }
+
+    public static Embed GetTrackEnqueuedEmbed(MobyTrack track)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("\\✅ Enqueued")
+            .WithDescription($"**[{track.Title}]({track.Url})**")
+            .Build();
+    }
+
+    public static Embed GetTracksEnqueuedEmbed(params MobyTrack[] tracks)
+    {
+        if (tracks.Length is 1) return GetTrackEnqueuedEmbed(tracks[0]);
+
+        var builder = new MobyEmbedBuilder()
+            .WithTitle("\\✅ Enqueued");
+
+        if (tracks.Length <= 10)
+        {
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < tracks.Length; i++)
+            {
+                sb.AppendLine($"**{i}**: [{tracks[i].Title}]({tracks[i].Url})");
+            }
+
+            sb.Length--;
+
+            builder.WithDescription(sb.ToString());
+        }
+        else
+        {
+            builder.WithDescription($"Enqueued **{tracks.Length}** tracks");
+        }
+
+        return builder.Build();
     }
 }
