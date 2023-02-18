@@ -50,6 +50,36 @@ public sealed class MusicModule : MobyModuleBase
         }
     }
 
+    [SlashCommand("leave", "The player leaves your channel")]
+    public async Task LeaveAsync()
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (!_lava.TryGetPlayer(Context.Guild, out var player))
+        {
+            await FollowupAsync("I'm not connected to any voice channel", ephemeral: true);
+            return;
+        }
+
+        var voiceChannel = ((IVoiceState)Context.User).VoiceChannel ?? player.VoiceChannel;
+        if (voiceChannel is null)
+        {
+            await FollowupAsync("I'm not sure which voice channel to disconnect from", ephemeral: true);
+            return;
+        }
+
+        try
+        {
+            await _lava.LeaveAsync(voiceChannel);
+            await FollowupAsync($"Lefted **{voiceChannel.Name}**");
+        }
+        catch (Exception ex)
+        {
+            await FollowupAsync($"Couldn't leave **{voiceChannel.Name}**", ephemeral: true);
+            _console.LogError("Couldn't left a voice channel on Guild: " + Context.Guild.Id, ex);
+        }
+    }
+
     [SlashCommand("play", "Play anything from anywhere")]
     public async Task PlayAsync([Summary("source", "The source of the music")] MusicSource source,
         [Summary("query", "A link or a search term")] [MinLength(1)] [MaxLength(250)] string query)
@@ -117,5 +147,34 @@ public sealed class MusicModule : MobyModuleBase
 
         player.Vueue.TryDequeue(out var lavaTrack);
         await player.PlayAsync(lavaTrack);
+    }
+
+    [SlashCommand("pause", "Pause the player")]
+    public async Task PauseAsync()
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (!_lava.TryGetPlayer(Context.Guild, out var player))
+        {
+            await FollowupAsync("I'm not connected to any voice channel", ephemeral: true);
+            return;
+        }
+
+        if (player.PlayerState is not PlayerState.Playing)
+        {
+            await FollowupAsync("I cannot pause when I'm not playing", ephemeral: true);
+            return;
+        }
+
+        try
+        {
+            await player.PauseAsync();
+            await FollowupAsync($"\\⏸️ Paused");
+        }
+        catch (Exception ex)
+        {
+            await FollowupAsync($"Couldn't pause **{player.Track.Title}**", ephemeral: true);
+            _console.LogError("Couldn't pause a track on Guild: " + Context.Guild.Id, ex);
+        }
     }
 }
