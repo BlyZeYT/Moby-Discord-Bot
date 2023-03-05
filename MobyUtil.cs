@@ -1068,17 +1068,17 @@ public static class MobyUtil
             .Build();
     }
 
-    public static Embed GetTrackEnqueuedEmbed(MobyTrack track)
+    public static Embed GetTrackEnqueuedEmbed(LavaTrack track, MusicSource source)
     {
         return new MobyEmbedBuilder()
             .WithTitle("\\✅ Enqueued")
-            .WithDescription($"**[{track.Title}]({track.Url})**")
+            .WithDescription(source is MusicSource.Local ? $"**{track.Title}**" : $"**[{track.Title}]({track.Url})**")
             .Build();
     }
 
-    public static Embed GetTracksEnqueuedEmbed(params MobyTrack[] tracks)
+    public static Embed GetTracksEnqueuedEmbed(MusicSource source, params LavaTrack[] tracks)
     {
-        if (tracks.Length is 1) return GetTrackEnqueuedEmbed(tracks[0]);
+        if (tracks.Length is 1) return GetTrackEnqueuedEmbed(tracks[0], source);
 
         var builder = new MobyEmbedBuilder()
             .WithTitle("\\✅ Enqueued");

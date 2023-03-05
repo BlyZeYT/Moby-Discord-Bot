@@ -1,6 +1,7 @@
 ﻿namespace Moby.Common;
 
 using Newtonsoft.Json;
+using System;
 
 [Serializable]
 public sealed record ColorQuizColor

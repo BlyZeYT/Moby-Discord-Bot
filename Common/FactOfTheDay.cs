@@ -1,5 +1,7 @@
 ﻿namespace Moby.Common;
 
+using System;
+
 public sealed class FactOfTheDay
 {
     private readonly DateTime _gotFactTime;

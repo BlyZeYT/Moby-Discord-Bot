@@ -5,6 +5,8 @@ using Discord;
 using Discord.Interactions;
 using Enums;
 using Services;
+using System;
+using System.Threading.Tasks;
 using Victoria.Node;
 using Victoria.Player;
 using Victoria.Responses.Search;
@@ -12,13 +14,14 @@ using Victoria.Responses.Search;
 [Discord.Commands.Name("Music")]
 public sealed class MusicModule : MobyModuleBase
 {
-    private readonly LavaNode<MobyPlayer, MobyTrack> _lava;
+    private readonly LavaNode<MobyPlayer, LavaTrack> _lava;
 
-    public MusicModule(LavaNode<MobyPlayer, MobyTrack> lava, ConsoleLogger logger) : base(logger)
+    public MusicModule(LavaNode<MobyPlayer, LavaTrack> lava, ConsoleLogger logger) : base(logger)
     {
         _lava = lava;
     }
 
+    [RequireRole("DJ")]
     [SlashCommand("join", "The player joins your channel")]
     public async Task JoinAsync()
     {
@@ -50,6 +53,7 @@ public sealed class MusicModule : MobyModuleBase
         }
     }
 
+    [RequireRole("DJ")]
     [SlashCommand("leave", "The player leaves your channel")]
     public async Task LeaveAsync()
     {
@@ -80,6 +84,7 @@ public sealed class MusicModule : MobyModuleBase
         }
     }
 
+    [RequireRole("DJ")]
     [SlashCommand("play", "Play anything from anywhere")]
     public async Task PlayAsync([Summary("source", "The source of the music")] MusicSource source,
         [Summary("query", "A link or a search term")] [MinLength(1)] [MaxLength(250)] string query)
@@ -130,17 +135,17 @@ public sealed class MusicModule : MobyModuleBase
 
         if (string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
         {
-            var track = await MobyTrack.LoadAsync((IGuildUser)Context.User, searchResponse.Tracks.First());
+            var track = searchResponse.Tracks.First();
 
             player.Vueue.Enqueue(track);
-            await FollowupAsync(embed: MobyUtil.GetTrackEnqueuedEmbed(track));
+            await FollowupAsync(embed: MobyUtil.GetTrackEnqueuedEmbed(track, source));
         }
         else
         {
-            var tracks = MobyTrack.LoadAsync((IGuildUser)Context.User, searchResponse.Tracks).ToEnumerable();
+            var tracks = searchResponse.Tracks;
 
             player.Vueue.Enqueue(tracks);
-            await FollowupAsync(embed: MobyUtil.GetTracksEnqueuedEmbed(tracks.ToArray()));
+            await FollowupAsync(embed: MobyUtil.GetTracksEnqueuedEmbed(source, tracks.ToArray()));
         }
 
         if (player.PlayerState is PlayerState.Playing or PlayerState.Paused) return;
@@ -149,6 +154,7 @@ public sealed class MusicModule : MobyModuleBase
         await player.PlayAsync(lavaTrack);
     }
 
+    [RequireRole("DJ")]
     [SlashCommand("pause", "Pause the player")]
     public async Task PauseAsync()
     {
@@ -175,6 +181,36 @@ public sealed class MusicModule : MobyModuleBase
         {
             await FollowupAsync($"Couldn't pause **{player.Track.Title}**", ephemeral: true);
             _console.LogError("Couldn't pause a track on Guild: " + Context.Guild.Id, ex);
+        }
+    }
+
+    [RequireRole("DJ")]
+    [SlashCommand("resume", "Resume the player")]
+    public async Task ResumeAsync()
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (!_lava.TryGetPlayer(Context.Guild, out var player))
+        {
+            await FollowupAsync("I'm not connected to any voice channel", ephemeral: true);
+            return;
+        }
+
+        if (player.PlayerState is not PlayerState.Paused)
+        {
+            await FollowupAsync("I cannot resume when I'm not paused", ephemeral: true);
+            return;
+        }
+
+        try
+        {
+            await player.ResumeAsync();
+            await FollowupAsync($"\\▶️ Resumed");
+        }
+        catch (Exception ex)
+        {
+            await FollowupAsync($"Couldn't resume **{player.Track.Title}**", ephemeral: true);
+            _console.LogError("Couldn't resume a track on Guild: " + Context.Guild.Id, ex);
         }
     }
 }

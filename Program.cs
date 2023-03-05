@@ -12,6 +12,7 @@ using System;
 using Victoria;
 using Victoria.Node;
 using Common;
+using Victoria.Player;
 
 sealed class Program
 {
@@ -21,7 +22,7 @@ sealed class Program
     private IDatabase _database = null!;
     private IMobyLogger _logger = null!;
     private IHttpService _http = null!;
-    private LavaNode<MobyPlayer, MobyTrack> _lavaNode = null!;
+    private LavaNode<MobyPlayer, LavaTrack> _lavaNode = null!;
 
     static Task Main() => new Program().MainAsync();
 
@@ -49,7 +50,7 @@ sealed class Program
             .AddSingleton<IDatabase, Database>()
             .AddSingleton<IMobyLogger, MobyLogger>()
             .AddSingleton<IHttpService, HttpService>()
-            .AddLavaNode<MobyPlayer, MobyTrack>(x =>
+            .AddLavaNode<MobyPlayer, LavaTrack>(x =>
             {
                 x.SelfDeaf = true;
                 x.EnableResume = true;
@@ -72,7 +73,7 @@ sealed class Program
         _database = provider.GetRequiredService<IDatabase>();
         _logger = provider.GetRequiredService<IMobyLogger>();
         _http = provider.GetRequiredService<IHttpService>();
-        _lavaNode = provider.GetRequiredService<LavaNode<MobyPlayer, MobyTrack>>();
+        _lavaNode = provider.GetRequiredService<LavaNode<MobyPlayer, LavaTrack>>();
 
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
         await provider.GetRequiredService<MusicHandler>().InitializeAsync();

@@ -4,7 +4,7 @@ using Discord;
 using Victoria.Player;
 using Victoria.WebSocket;
 
-public sealed class MobyPlayer : LavaPlayer<MobyTrack>
+public sealed class MobyPlayer : LavaPlayer<LavaTrack>
 {
     public bool IsRepeating { get; private set; }
 

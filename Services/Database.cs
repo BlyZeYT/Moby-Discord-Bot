@@ -513,7 +513,7 @@ public sealed class Database : IDatabase
         {
             await _logger.LogCriticalAsync(ex, "Failed to connect to database");
 
-            await _connection.CloseAsync();
+            if (_connection.State is not ConnectionState.Closed) await _connection.CloseAsync();
         }
     }
 }
