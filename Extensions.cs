@@ -9,6 +9,9 @@ using System.Text;
 using DeepL;
 using Enums;
 using Victoria.Responses.Search;
+using Victoria.Player;
+using Victoria;
+using System;
 
 public static class Extensions
 {
@@ -355,6 +358,23 @@ public static class Extensions
         {
             MusicSource.Url => "Link",
             _ => source.ToString()
+        };
+    }
+
+    public static async ValueTask<string> GetArtworkOrDefault(this LavaTrack track)
+    {
+        var url = await track.FetchArtworkAsync();
+
+        return string.IsNullOrWhiteSpace(url) ? Moby.ImageNotFound : url;
+    }
+
+    public static string GetFormattedDuration(this LavaTrack track)
+    {
+        return track.Duration.TotalSeconds switch
+        {
+            var seconds when seconds < 60 => $"{track.Duration.Seconds}s",
+            var seconds when seconds < 3600 => $"{track.Duration.Minutes}:{track.Duration.Seconds}m",
+            _ => $"{track.Duration.Hours}:{track.Duration.Minutes}:{track.Duration.Seconds}h"
         };
     }
 

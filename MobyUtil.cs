@@ -1103,4 +1103,15 @@ public static class MobyUtil
 
         return builder.Build();
     }
+
+    public static Embed GetTrackStartedEmbed(LavaTrack track, string artwork)
+    {
+        return new MobyEmbedBuilder()
+            .WithTitle("\\🎶 Now playing")
+            .WithThumbnailUrl(artwork)
+            .WithDescription(track.IsStream
+            ? $"**{track.Title}**\nby {track.Author}, \\🔴 LIVE\n\\🌐 [LINK]({track.Url})"
+            : $"**{track.Title}**\nby {track.Author}, {track.GetFormattedDuration()}\n\\🌐 [LINK]({track.Url})")
+            .Build();
+    }
 }

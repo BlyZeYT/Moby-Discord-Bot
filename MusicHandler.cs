@@ -44,7 +44,12 @@ public sealed class MusicHandler
 
     private async Task OnTrackStartAsync(TrackStartEventArg<MobyPlayer, LavaTrack> arg)
     {
+        if (arg.Player.IsRepeating)
+        {
 
+        }
+
+        await arg.Player.TextChannel.SendMessageAsync(embed: MobyUtil.GetTrackStartedEmbed(arg.Track, await arg.Track.GetArtworkOrDefault()));
     }
 
     private async Task OnTrackStuckAsync(TrackStuckEventArg<MobyPlayer, LavaTrack> arg)

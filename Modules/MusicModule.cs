@@ -168,7 +168,7 @@ public sealed class MusicModule : MobyModuleBase
 
         if (player.PlayerState is not PlayerState.Playing)
         {
-            await FollowupAsync("I cannot pause when I'm not playing", ephemeral: true);
+            await FollowupAsync("I can't pause when I'm not playing", ephemeral: true);
             return;
         }
 
@@ -198,7 +198,7 @@ public sealed class MusicModule : MobyModuleBase
 
         if (player.PlayerState is not PlayerState.Paused)
         {
-            await FollowupAsync("I cannot resume when I'm not paused", ephemeral: true);
+            await FollowupAsync("I can't resume when I'm not paused", ephemeral: true);
             return;
         }
 
@@ -211,6 +211,64 @@ public sealed class MusicModule : MobyModuleBase
         {
             await FollowupAsync($"Couldn't resume **{player.Track.Title}**", ephemeral: true);
             _console.LogError("Couldn't resume a track on Guild: " + Context.Guild.Id, ex);
+        }
+    }
+
+    [RequireRole("DJ")]
+    [SlashCommand("stop", "Stop the player")]
+    public async Task StopAsync()
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (!_lava.TryGetPlayer(Context.Guild, out var player))
+        {
+            await FollowupAsync("I'm not connected to any voice channel", ephemeral: true);
+            return;
+        }
+
+        if (player.PlayerState is PlayerState.Stopped)
+        {
+            await FollowupAsync("I can't stop when I'm already stopped", ephemeral: true);
+            return;
+        }
+
+        try
+        {
+            await player.StopAsync();
+        }
+        catch (Exception ex)
+        {
+            await FollowupAsync($"Couldn't stop **{player.Track.Title}**", ephemeral: true);
+            _console.LogError("Couldn't stop a track on Guild: " + Context.Guild.Id, ex);
+        }
+    }
+
+    [RequireRole("DJ")]
+    [SlashCommand("skip", "Skip the currently playing track")]
+    public async Task SkipAsync()
+    {
+        await DeferAsync(ephemeral: true);
+
+        if (!_lava.TryGetPlayer(Context.Guild, out var player))
+        {
+            await FollowupAsync("I'm not connected to any voice channel", ephemeral: true);
+            return;
+        }
+
+        if (player.PlayerState is not PlayerState.Playing)
+        {
+            await FollowupAsync("I can't skip when I'm not playing", ephemeral: true);
+            return;
+        }
+
+        try
+        {
+            await player.SkipAsync();
+        }
+        catch (Exception ex)
+        {
+            await FollowupAsync($"Couldn't stop **{player.Track.Title}**", ephemeral: true);
+            _console.LogError("Couldn't stop a track on Guild: " + Context.Guild.Id, ex);
         }
     }
 }
